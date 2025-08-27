@@ -66,6 +66,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     [key: string]: number;
   }>({});
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [itemsError, setItemsError] = useState<string>("");
 
   // Autocomplete state
   const [nameSuggestions, setNameSuggestions] = useState<Contact[]>([]);
@@ -147,7 +148,27 @@ const ContactModal: React.FC<ContactModalProps> = ({
     }
     setLinkedinUrlError("");
     setSelectedExistingContact(contact ?? null);
+    setItemsError("");
   }, [contact]);
+
+  // Clear items error when a new selection is made or availability changes
+  useEffect(() => {
+    if (!selectedExistingContact) {
+      setItemsError("");
+      return;
+    }
+    const previouslySent = {
+      magicCards: !!selectedExistingContact.magicCards,
+      sfsBook: !!selectedExistingContact.sfsBook,
+      goldenRecord: !!selectedExistingContact.goldenRecord,
+    };
+    const newSelections = [
+      formData.magicCards && !previouslySent.magicCards,
+      formData.sfsBook && !previouslySent.sfsBook,
+      formData.goldenRecord && !previouslySent.goldenRecord,
+    ].some(Boolean);
+    if (newSelections) setItemsError("");
+  }, [formData.magicCards, formData.sfsBook, formData.goldenRecord, selectedExistingContact]);
 
   // Debounced search for name suggestions
   useEffect(() => {
@@ -424,6 +445,24 @@ const ContactModal: React.FC<ContactModalProps> = ({
     // Don't submit if there's a LinkedIn URL error
     if (linkedinUrlError) {
       return;
+    }
+
+    // Require at least one new item selection if using an existing contact
+    if (selectedExistingContact) {
+      const previouslySent = {
+        magicCards: !!selectedExistingContact.magicCards,
+        sfsBook: !!selectedExistingContact.sfsBook,
+        goldenRecord: !!selectedExistingContact.goldenRecord,
+      };
+      const anyNew = (
+        (formData.magicCards && !previouslySent.magicCards) ||
+        (formData.sfsBook && !previouslySent.sfsBook) ||
+        (formData.goldenRecord && !previouslySent.goldenRecord)
+      );
+      if (!anyNew) {
+        setItemsError("Please select at least one item that has not been previously sent.");
+        return;
+      }
     }
 
     // Normalize the LinkedIn URL before saving
@@ -723,6 +762,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
                         <span className="text-xs text-slate-500">No items available to send. All have been sent previously.</span>
                       )}
                     </div>
+
+                    {itemsError && (
+                      <div className="text-xs text-red-600 mt-1">{itemsError}</div>
+                    )}
 
                     {alreadySentItems.length > 0 && (
                       <div className="mt-2 text-xs border border-slate-200 bg-slate-50 rounded-md px-3 py-2 text-slate-700">
