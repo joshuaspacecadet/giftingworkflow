@@ -287,10 +287,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
                       <Info
                         className="h-3.5 w-3.5 text-slate-400 cursor-help"
                         tabIndex={0}
-                        aria-label="Help us make the Magic Card copy extra special by adding details."
+                        aria-label="Add notes about the recipient to help us tailor the copy on their Magic Card."
                       />
                       <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 transform z-50 hidden group-hover:block group-focus-within:block w-[120px] whitespace-normal break-words text-left rounded-md bg-slate-900/95 text-white text-[11px] leading-snug px-2.5 py-1.5 shadow-md">
-                        Help us make the Magic Card copy extra special by adding details.
+                        Add notes about the recipient to help us tailor the copy on their Magic Card.
                       </span>
                     </span>
                   </div>

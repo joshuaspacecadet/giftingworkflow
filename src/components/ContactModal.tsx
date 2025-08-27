@@ -940,10 +940,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   <Info
                     className="h-4 w-4 text-slate-400 cursor-help"
                     tabIndex={0}
-                    aria-label="Help us make the Magic Card copy extra special by adding details."
+                    aria-label="Add notes about the recipient to help us tailor the copy on their Magic Card."
                   />
                   <span className="absolute top-full mt-1 left-0 z-20 hidden group-hover:block group-focus-within:block w-64 whitespace-normal break-words text-left rounded bg-slate-900 text-white text-xs px-2 py-1 shadow-lg">
-                    Help us make the Magic Card copy extra special by adding details.
+                    Add notes about the recipient to help us tailor the copy on their Magic Card.
                   </span>
                 </span>
               </label>
