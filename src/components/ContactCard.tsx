@@ -185,40 +185,61 @@ const ContactCard: React.FC<ContactCardProps> = ({
         {/* Two-column layout: left items, right address */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="text-[11px] space-y-1 md:col-span-1">
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={!!contact.magicCards}
-                onChange={async () => {
-                  await onUpdate(contact.id, { magicCards: !contact.magicCards });
-                }}
-                disabled={isStageLocked}
-              />
-              <span>Magic Cards</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={!!contact.sfsBook}
-                onChange={async () => {
-                  await onUpdate(contact.id, { sfsBook: !contact.sfsBook });
-                }}
-                disabled={isStageLocked}
-              />
-              <span>SFS Book</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={!!contact.goldenRecord}
-                onChange={async () => {
-                  await onUpdate(contact.id, { goldenRecord: !contact.goldenRecord });
-                }}
-                disabled={isStageLocked}
-              />
-              <span>Golden Record</span>
-            </label>
-                </div>
+            {(() => {
+              const previouslySent = {
+                magicCards: !!contact.magicCards,
+                sfsBook: !!contact.sfsBook,
+                goldenRecord: !!contact.goldenRecord,
+              };
+              const availableItems = [
+                { key: 'magicCards' as const, label: 'Magic Cards' },
+                { key: 'sfsBook' as const, label: 'SFS Book' },
+                { key: 'goldenRecord' as const, label: 'Golden Record' },
+              ].filter((i) => !previouslySent[i.key]);
+              const alreadySentItems = [
+                { key: 'magicCards' as const, label: 'Magic Cards', sent: previouslySent.magicCards },
+                { key: 'sfsBook' as const, label: 'SFS Book', sent: previouslySent.sfsBook },
+                { key: 'goldenRecord' as const, label: 'Golden Record', sent: previouslySent.goldenRecord },
+              ].filter((i) => i.sent);
+
+              return (
+                <>
+                  <div className="flex flex-col gap-1">
+                    {availableItems.length > 0 ? (
+                      availableItems.map((i) => (
+                        <label key={i.key} className="inline-flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={!!(contact as any)[i.key]}
+                            onChange={async (e) => {
+                              await onUpdate(contact.id, { [i.key]: e.target.checked } as any);
+                            }}
+                            disabled={isStageLocked}
+                          />
+                          <span>{i.label}</span>
+                        </label>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-slate-500">No items available to send.</span>
+                    )}
+                  </div>
+
+                  {alreadySentItems.length > 0 && (
+                    <div className="mt-2">
+                      <div className="text-[11px] font-medium text-slate-700 mb-1">Already sent</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {alreadySentItems.map((i) => (
+                          <span key={i.key} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                            <Check className="h-3 w-3 text-green-600" /> {i.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
 
           {/* Always-visible contact details (address + confirm URL) */}
           <div className="space-y-1.5 text-sm md:col-span-2">
