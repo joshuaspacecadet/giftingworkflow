@@ -10,7 +10,8 @@ interface ContactCardProps {
   onDelete: (contactId: string) => void;
   onUpdate: (contactId: string, updates: Partial<Contact>) => void | Promise<void>;
   isStageLocked?: boolean;
-  previouslySent?: { magicCards: boolean; sfsBook: boolean; goldenRecord: boolean };
+  previouslySent?: { magicCards: boolean; sfsBook: boolean; goldenRecord: boolean }; // deprecated
+  currentProjectId?: string;
 }
 
 const ContactCard: React.FC<ContactCardProps> = ({ 
@@ -18,7 +19,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
   onEdit, 
   onUpdate,
   isStageLocked = false,
-  previouslySent
+  previouslySent,
+  currentProjectId
 }) => {
   const [showDetails] = useState(true);
   const [copiedConfirmUrl, setCopiedConfirmUrl] = useState(false);
@@ -39,7 +41,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [approveError, setApproveError] = useState<string>("");
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [notesInput, setNotesInput] = useState<string>("");
-  const isMagicCards = !!contact.magicCards;
+  const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
 
   console.log("Debug: ContactCard received contact:", contact);
 
@@ -188,20 +190,26 @@ const ContactCard: React.FC<ContactCardProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="text-[11px] space-y-1 md:col-span-1">
             {(() => {
-              const baseline = previouslySent ?? {
-                magicCards: !!contact.magicCards,
-                sfsBook: !!contact.sfsBook,
-                goldenRecord: !!contact.goldenRecord,
+              const linked = {
+                magicCards: contact.magicCardsProjects || [],
+                sfsBook: contact.sfsBookProjects || [],
+                goldenRecord: contact.goldenRecordProjects || [],
+              };
+              const thisProjectId = currentProjectId || '';
+              const available = {
+                magicCards: linked.magicCards.length === 0,
+                sfsBook: linked.sfsBook.length === 0,
+                goldenRecord: linked.goldenRecord.length === 0,
               };
               const availableItems = [
                 { key: 'magicCards' as const, label: 'Magic Cards' },
                 { key: 'sfsBook' as const, label: 'SFS Book' },
                 { key: 'goldenRecord' as const, label: 'Golden Record' },
-              ].filter((i) => !baseline[i.key]);
+              ].filter((i) => available[i.key]);
               const alreadySentItems = [
-                { key: 'magicCards' as const, label: 'Magic Cards', sent: baseline.magicCards },
-                { key: 'sfsBook' as const, label: 'SFS Book', sent: baseline.sfsBook },
-                { key: 'goldenRecord' as const, label: 'Golden Record', sent: baseline.goldenRecord },
+                { key: 'magicCards' as const, label: 'Magic Cards', sent: linked.magicCards.some(id => id !== thisProjectId) },
+                { key: 'sfsBook' as const, label: 'SFS Book', sent: linked.sfsBook.some(id => id !== thisProjectId) },
+                { key: 'goldenRecord' as const, label: 'Golden Record', sent: linked.goldenRecord.some(id => id !== thisProjectId) },
               ].filter((i) => i.sent);
 
               return (
@@ -212,11 +220,15 @@ const ContactCard: React.FC<ContactCardProps> = ({
                         <label key={i.key} className="inline-flex items-center gap-2">
                           <input
                             type="checkbox"
-                            checked={!!(contact as any)[i.key]}
+                            checked={(contact as any)[`${i.key}Projects`]?.includes(thisProjectId) || false}
                             onChange={async (e) => {
-                              await onUpdate(contact.id, { [i.key]: e.target.checked } as any);
+                              const currentArr: string[] = (contact as any)[`${i.key}Projects`] || [];
+                              const next = e.target.checked
+                                ? Array.from(new Set([...currentArr, thisProjectId])).filter(Boolean)
+                                : currentArr.filter((id) => id !== thisProjectId);
+                              await onUpdate(contact.id, { [`${i.key}Projects`]: next } as any);
                             }}
-                            disabled={isStageLocked}
+                            disabled={isStageLocked || !thisProjectId}
                           />
                           <span>{i.label}</span>
                         </label>

@@ -133,7 +133,7 @@ const ProjectFunnelPage: React.FC = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   // Capture the baseline of items that were already sent BEFORE this project session
-  const initialItemsSentRef = useRef<Record<string, { magicCards: boolean; sfsBook: boolean; goldenRecord: boolean }>>({});
+  // No longer need baseline booleans; we will rely on per-item linked projects
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -189,16 +189,6 @@ const ProjectFunnelPage: React.FC = () => {
         const linkedContacts = await AirtableService.getContactsByIds(
           projectData.linkedContacts
         );
-        // Initialize baseline "previously sent" map once per contact id
-        linkedContacts.forEach((c) => {
-          if (!initialItemsSentRef.current[c.id]) {
-            initialItemsSentRef.current[c.id] = {
-              magicCards: !!c.magicCards,
-              sfsBook: !!c.sfsBook,
-              goldenRecord: !!c.goldenRecord,
-            };
-          }
-        });
         setContacts(linkedContacts);
       } else {
         setContacts([]);
@@ -233,7 +223,7 @@ const ProjectFunnelPage: React.FC = () => {
       // skip Stage 5 and advance directly to Stage 6 (Handoff)
       if (project.stage === "Design Round 1") {
         const anyRejectedInRound1 = contacts.some(
-          (c) => c.contactReview === 'Approve' && !!c.magicCards && !!c.rejectRound1
+          (c) => c.contactReview === 'Approve' && (c.magicCardsProjects || []).includes(project.id) && !!c.rejectRound1
         );
         if (!anyRejectedInRound1) {
           nextStage = "Handoff";
@@ -685,13 +675,13 @@ const ProjectFunnelPage: React.FC = () => {
       : contacts.filter((contact) => contact.contactAddedBy === filterCreator);
     // Only include contacts that are approved and have Magic Cards selected
     return byCreator.filter(
-      (c) => c.contactReview === 'Approve' && !!c.magicCards
+      (c) => c.contactReview === 'Approve' && (c.magicCardsProjects || []).includes(project!.id)
     );
   };
 
   // Helper: contacts eligible for copy/design brief (approved + Magic Cards)
   const getApprovedMagicContacts = () =>
-    contacts.filter((c) => c.contactReview === 'Approve' && !!c.magicCards);
+    contacts.filter((c) => c.contactReview === 'Approve' && (c.magicCardsProjects || []).includes(project!.id));
 
   // Stage 1: status counts (respect creator filter if selected)
   const statusCounts = useMemo(() => {
@@ -753,9 +743,9 @@ const ProjectFunnelPage: React.FC = () => {
       escapeCsv(c.postCode),
       escapeCsv(c.countryCode),
       escapeCsv(c.linkedinUrl),
-      escapeCsv(c.magicCards ? "1" : ""),
-      escapeCsv(c.sfsBook ? "1" : ""),
-      escapeCsv(c.goldenRecord ? "1" : ""),
+      escapeCsv((c.magicCardsProjects || []).includes(project!.id) ? "1" : ""),
+      escapeCsv((c.sfsBookProjects || []).includes(project!.id) ? "1" : ""),
+      escapeCsv((c.goldenRecordProjects || []).includes(project!.id) ? "1" : ""),
     ].join(","));
     const csv = [headerLine, ...rows].join("\r\n");
     return `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
@@ -936,7 +926,7 @@ const ProjectFunnelPage: React.FC = () => {
                       }
                     }}
                     isStageLocked={isStageCompleted("Contacts")}
-                    previouslySent={initialItemsSentRef.current[contact.id]}
+                    currentProjectId={project.id}
                   />
                 ))}
               </div>
@@ -1405,6 +1395,7 @@ const ProjectFunnelPage: React.FC = () => {
         contact={editingContact}
         isLoading={isSavingContact}
         availableCreators={PREDEFINED_CONTACT_CREATORS}
+        currentProjectId={project.id}
       />
     </div>
   );

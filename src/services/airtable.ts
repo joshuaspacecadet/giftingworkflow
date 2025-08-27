@@ -56,9 +56,9 @@ const transformAirtableContact = (record: any): Contact => {
     confirmAddressUrl: fields["Confirm Address URL"] || "",
     additionalContactContext: fields["Additional Contact Context"] || "",
     contactAddedBy: fields["Contact Added By"] || "", // ADD THIS LINE
-    magicCards: fields["Magic Cards"] ?? false,
-    sfsBook: fields["SFS Book"] || false,
-    goldenRecord: fields["Golden Record"] || false,
+    magicCardsProjects: (fields["Magic Cards"] || []) as string[],
+    sfsBookProjects: (fields["SFS Book"] || []) as string[],
+    goldenRecordProjects: (fields["Golden Record"] || []) as string[],
     copyTitle1: fields["Copy Title 1"] || "",
     copyTitle2: fields["Copy Title 2"] || "",
     copyTitle3: fields["Copy Title 3"] || "",
@@ -333,12 +333,12 @@ export class AirtableService {
           contactData.additionalContactContext;
       if (contactData.contactAddedBy && contactData.contactAddedBy !== "")
         createFields["Contact Added By"] = contactData.contactAddedBy;
-      if (contactData.magicCards !== undefined)
-        createFields["Magic Cards"] = contactData.magicCards;
-      if (contactData.sfsBook !== undefined)
-        createFields["SFS Book"] = contactData.sfsBook;
-      if (contactData.goldenRecord !== undefined)
-        createFields["Golden Record"] = contactData.goldenRecord;
+      if ((contactData as any).magicCardsProjects !== undefined)
+        createFields["Magic Cards"] = (contactData as any).magicCardsProjects;
+      if ((contactData as any).sfsBookProjects !== undefined)
+        createFields["SFS Book"] = (contactData as any).sfsBookProjects;
+      if ((contactData as any).goldenRecordProjects !== undefined)
+        createFields["Golden Record"] = (contactData as any).goldenRecordProjects;
       if (contactData.copyTitle1)
         createFields["Copy Title 1"] = contactData.copyTitle1;
       if (contactData.copyTitle2)
@@ -411,12 +411,12 @@ export class AirtableService {
           updates.additionalContactContext;
       if (updates.contactAddedBy !== undefined && updates.contactAddedBy !== "")
         updateFields["Contact Added By"] = updates.contactAddedBy;
-      if (updates.magicCards !== undefined)
-        updateFields["Magic Cards"] = updates.magicCards;
-      if (updates.sfsBook !== undefined)
-        updateFields["SFS Book"] = updates.sfsBook;
-      if (updates.goldenRecord !== undefined)
-        updateFields["Golden Record"] = updates.goldenRecord;
+      if ((updates as any).magicCardsProjects !== undefined)
+        updateFields["Magic Cards"] = (updates as any).magicCardsProjects;
+      if ((updates as any).sfsBookProjects !== undefined)
+        updateFields["SFS Book"] = (updates as any).sfsBookProjects;
+      if ((updates as any).goldenRecordProjects !== undefined)
+        updateFields["Golden Record"] = (updates as any).goldenRecordProjects;
       if (updates.copyTitle1 !== undefined)
         updateFields["Copy Title 1"] = updates.copyTitle1;
       if (updates.copyTitle2 !== undefined)

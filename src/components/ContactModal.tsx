@@ -22,6 +22,7 @@ interface ContactModalProps {
   contact?: Contact;
   isLoading?: boolean;
   availableCreators: string[];
+  currentProjectId?: string;
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({
@@ -31,6 +32,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   contact,
   isLoading = false,
   availableCreators,
+  currentProjectId,
 }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -96,9 +98,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
         linkedinUrl: contact.linkedinUrl || "",
         additionalContactContext: contact.additionalContactContext || "",
         contactAddedBy: contact.contactAddedBy || "",
-        magicCards: contact.magicCards ?? false,
-        sfsBook: !!contact.sfsBook,
-        goldenRecord: !!contact.goldenRecord,
+        magicCards: (contact.magicCardsProjects || []).includes(currentProjectId || ""),
+        sfsBook: (contact.sfsBookProjects || []).includes(currentProjectId || ""),
+        goldenRecord: (contact.goldenRecordProjects || []).includes(currentProjectId || ""),
       });
 
       // Convert AirtableAttachment format to internal format
@@ -158,9 +160,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
       return;
     }
     const previouslySent = {
-      magicCards: !!selectedExistingContact.magicCards,
-      sfsBook: !!selectedExistingContact.sfsBook,
-      goldenRecord: !!selectedExistingContact.goldenRecord,
+      magicCards: (selectedExistingContact.magicCardsProjects || []).some((id) => id !== (currentProjectId || "")),
+      sfsBook: (selectedExistingContact.sfsBookProjects || []).some((id) => id !== (currentProjectId || "")),
+      goldenRecord: (selectedExistingContact.goldenRecordProjects || []).some((id) => id !== (currentProjectId || "")),
     };
     const newSelections = [
       formData.magicCards && !previouslySent.magicCards,
@@ -168,7 +170,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
       formData.goldenRecord && !previouslySent.goldenRecord,
     ].some(Boolean);
     if (newSelections) setItemsError("");
-  }, [formData.magicCards, formData.sfsBook, formData.goldenRecord, selectedExistingContact]);
+  }, [formData.magicCards, formData.sfsBook, formData.goldenRecord, selectedExistingContact, currentProjectId]);
 
   // Debounced search for name suggestions
   useEffect(() => {
@@ -499,6 +501,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
       contactData.companyLogo = airtableCompanyLogos;
     }
 
+    // Convert selected items to per-project links
+    const projectId = currentProjectId || "";
+    if (projectId) {
+      if (formData.magicCards) (contactData as any).magicCardsProjects = [projectId];
+      if (formData.sfsBook) (contactData as any).sfsBookProjects = [projectId];
+      if (formData.goldenRecord) (contactData as any).goldenRecordProjects = [projectId];
+    }
+
     // Save/update contact with all data including files
     console.log("Submitting contactData:", contactData);
     await onSave(contactData as Partial<Contact>);
@@ -605,9 +615,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
                                 linkedinUrl: c.linkedinUrl || "",
                                 additionalContactContext: c.additionalContactContext || "",
                                 contactAddedBy: c.contactAddedBy || "",
-                                magicCards: !!c.magicCards,
-                                sfsBook: !!c.sfsBook,
-                                goldenRecord: !!c.goldenRecord,
+                                magicCards: (c.magicCardsProjects || []).includes(currentProjectId || ""),
+                                sfsBook: (c.sfsBookProjects || []).includes(currentProjectId || ""),
+                                goldenRecord: (c.goldenRecordProjects || []).includes(currentProjectId || ""),
                               });
                               // Populate previews for images
                               const convertedHeadshots = (c.headshot || []).map((a) => ({
@@ -729,9 +739,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
               <h4 className="text-sm font-medium text-slate-900">Items</h4>
               {(() => {
                 const previouslySent = {
-                  magicCards: !!selectedExistingContact?.magicCards,
-                  sfsBook: !!selectedExistingContact?.sfsBook,
-                  goldenRecord: !!selectedExistingContact?.goldenRecord,
+                  magicCards: (selectedExistingContact?.magicCardsProjects || []).some((id) => id !== (currentProjectId || "")),
+                  sfsBook: (selectedExistingContact?.sfsBookProjects || []).some((id) => id !== (currentProjectId || "")),
+                  goldenRecord: (selectedExistingContact?.goldenRecordProjects || []).some((id) => id !== (currentProjectId || "")),
                 };
                 const availableItems = [
                   { key: "magicCards" as const, label: "Magic Cards" },

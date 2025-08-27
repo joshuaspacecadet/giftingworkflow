@@ -31,6 +31,11 @@ export interface Contact {
   confirmAddressUrl?: string;
   additionalContactContext?: string;
   contactAddedBy?: string; // New field for who added the contact
+  // Linked projects for each item (Airtable "Link to Projects" fields)
+  magicCardsProjects?: string[];
+  sfsBookProjects?: string[];
+  goldenRecordProjects?: string[];
+  // Legacy booleans kept optional for backward compatibility (should not be used going forward)
   magicCards?: boolean;
   sfsBook?: boolean;
   goldenRecord?: boolean;
