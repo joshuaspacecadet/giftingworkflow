@@ -714,6 +714,22 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   <span>Golden Record</span>
                 </label>
               </div>
+              {selectedExistingContact && (selectedExistingContact.magicCards || selectedExistingContact.sfsBook || selectedExistingContact.goldenRecord) && (
+                <div className="mt-2 text-xs border border-slate-200 bg-slate-50 rounded-md px-3 py-2 text-slate-700">
+                  <div className="font-medium mb-1">Previously sent for this recipient</div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedExistingContact.magicCards && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200">Magic Cards</span>
+                    )}
+                    {selectedExistingContact.sfsBook && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">SFS Book</span>
+                    )}
+                    {selectedExistingContact.goldenRecord && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">Golden Record</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
