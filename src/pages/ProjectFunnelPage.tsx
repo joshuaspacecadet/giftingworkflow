@@ -436,6 +436,28 @@ const ProjectFunnelPage: React.FC = () => {
             return updated;
           });
           setEditingContact(savedContact);
+
+          // Ensure selected existing contact is linked to the project
+          const alreadyLinked = (project.linkedContacts || []).includes(targetContactId);
+          if (!alreadyLinked) {
+            const linkSuccess = await AirtableService.linkContactToProject(
+              project.id,
+              targetContactId
+            );
+            if (linkSuccess) {
+              setProject((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      linkedContacts: [
+                        ...(prev.linkedContacts || []),
+                        targetContactId,
+                      ],
+                    }
+                  : prev
+              );
+            }
+          }
         }
       } else {
         // Create new contact
