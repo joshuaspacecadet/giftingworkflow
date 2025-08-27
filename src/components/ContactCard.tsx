@@ -10,13 +10,15 @@ interface ContactCardProps {
   onDelete: (contactId: string) => void;
   onUpdate: (contactId: string, updates: Partial<Contact>) => void | Promise<void>;
   isStageLocked?: boolean;
+  previouslySent?: { magicCards: boolean; sfsBook: boolean; goldenRecord: boolean };
 }
 
 const ContactCard: React.FC<ContactCardProps> = ({ 
   contact, 
   onEdit, 
   onUpdate,
-  isStageLocked = false 
+  isStageLocked = false,
+  previouslySent
 }) => {
   const [showDetails] = useState(true);
   const [copiedConfirmUrl, setCopiedConfirmUrl] = useState(false);
@@ -186,7 +188,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="text-[11px] space-y-1 md:col-span-1">
             {(() => {
-              const previouslySent = {
+              const baseline = previouslySent ?? {
                 magicCards: !!contact.magicCards,
                 sfsBook: !!contact.sfsBook,
                 goldenRecord: !!contact.goldenRecord,
@@ -195,11 +197,11 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 { key: 'magicCards' as const, label: 'Magic Cards' },
                 { key: 'sfsBook' as const, label: 'SFS Book' },
                 { key: 'goldenRecord' as const, label: 'Golden Record' },
-              ].filter((i) => !previouslySent[i.key]);
+              ].filter((i) => !baseline[i.key]);
               const alreadySentItems = [
-                { key: 'magicCards' as const, label: 'Magic Cards', sent: previouslySent.magicCards },
-                { key: 'sfsBook' as const, label: 'SFS Book', sent: previouslySent.sfsBook },
-                { key: 'goldenRecord' as const, label: 'Golden Record', sent: previouslySent.goldenRecord },
+                { key: 'magicCards' as const, label: 'Magic Cards', sent: baseline.magicCards },
+                { key: 'sfsBook' as const, label: 'SFS Book', sent: baseline.sfsBook },
+                { key: 'goldenRecord' as const, label: 'Golden Record', sent: baseline.goldenRecord },
               ].filter((i) => i.sent);
 
               return (

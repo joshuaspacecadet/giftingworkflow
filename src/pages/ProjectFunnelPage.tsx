@@ -132,6 +132,8 @@ const ProjectFunnelPage: React.FC = () => {
   // Project and contacts state
   const [project, setProject] = useState<Project | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  // Capture the baseline of items that were already sent BEFORE this project session
+  const initialItemsSentRef = useRef<Record<string, { magicCards: boolean; sfsBook: boolean; goldenRecord: boolean }>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -187,6 +189,16 @@ const ProjectFunnelPage: React.FC = () => {
         const linkedContacts = await AirtableService.getContactsByIds(
           projectData.linkedContacts
         );
+        // Initialize baseline "previously sent" map once per contact id
+        linkedContacts.forEach((c) => {
+          if (!initialItemsSentRef.current[c.id]) {
+            initialItemsSentRef.current[c.id] = {
+              magicCards: !!c.magicCards,
+              sfsBook: !!c.sfsBook,
+              goldenRecord: !!c.goldenRecord,
+            };
+          }
+        });
         setContacts(linkedContacts);
       } else {
         setContacts([]);
@@ -924,6 +936,7 @@ const ProjectFunnelPage: React.FC = () => {
                       }
                     }}
                     isStageLocked={isStageCompleted("Contacts")}
+                    previouslySent={initialItemsSentRef.current[contact.id]}
                   />
                 ))}
               </div>
