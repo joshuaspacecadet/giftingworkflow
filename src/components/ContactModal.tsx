@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Loader2, Upload, Trash2, AlertCircle, Info } from "lucide-react";
 import { Contact } from "../types";
 import { normalizeUrl, isValidUrl } from "../utils/urlHelpers";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload";
+import { AirtableService } from "../services/airtable";
 
 // Type for Airtable contact data (different from our Contact type)
 type AirtableContactData = Omit<
@@ -65,6 +66,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
     [key: string]: number;
   }>({});
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Autocomplete state
+  const [nameSuggestions, setNameSuggestions] = useState<Contact[]>([]);
+  const [isSearchingNames, setIsSearchingNames] = useState(false);
+  const [selectedExistingContact, setSelectedExistingContact] = useState<Contact | null>(null);
+  const [showNameSuggestions, setShowNameSuggestions] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
 
@@ -138,7 +146,36 @@ const ContactModal: React.FC<ContactModalProps> = ({
       setCompanyLogos([]);
     }
     setLinkedinUrlError("");
+    setSelectedExistingContact(contact ?? null);
   }, [contact]);
+
+  // Debounced search for name suggestions
+  useEffect(() => {
+    const controller = new AbortController();
+    const q = (formData.name || "").trim();
+    if (!isOpen) return;
+    if (q.length < 2) {
+      setNameSuggestions([]);
+      setShowNameSuggestions(false);
+      return;
+    }
+    setIsSearchingNames(true);
+    const handle = setTimeout(async () => {
+      try {
+        const results = await AirtableService.searchContactsByName(q, 8);
+        setNameSuggestions(results);
+        setShowNameSuggestions(true);
+      } catch (e) {
+        console.error("Name search failed", e);
+      } finally {
+        setIsSearchingNames(false);
+      }
+    }, 250);
+    return () => {
+      clearTimeout(handle);
+      controller.abort();
+    };
+  }, [formData.name, isOpen]);
 
   // Disable background scroll when modal is open
   useEffect(() => {
@@ -400,6 +437,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
       linkedinUrl: normalizedLinkedInUrl,
     };
 
+    // If an existing contact was selected via autocomplete, include its id so the caller updates it
+    if (selectedExistingContact) {
+      (contactData as any).id = selectedExistingContact.id;
+    }
+
     // If we have files to upload, handle them first
     if (headshots.length > 0 || companyLogos.length > 0) {
       // Convert our simplified file format to Airtable attachment format (url + filename only)
@@ -469,16 +511,101 @@ const ContactModal: React.FC<ContactModalProps> = ({
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Full Name *
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter full name"
-                />
+                <div className="relative">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      setSelectedExistingContact(null);
+                    }}
+                    onFocus={() => {
+                      if (nameSuggestions.length > 0) setShowNameSuggestions(true);
+                    }}
+                    onBlur={() => {
+                      // Delay to allow click on suggestion
+                      setTimeout(() => setShowNameSuggestions(false), 150);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter full name"
+                    aria-autocomplete="list"
+                    aria-expanded={showNameSuggestions}
+                    aria-controls="name-suggestions-list"
+                  />
+                  {showNameSuggestions && (
+                    <div
+                      id="name-suggestions-list"
+                      className="absolute z-30 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto"
+                      role="listbox"
+                    >
+                      {isSearchingNames ? (
+                        <div className="px-3 py-2 text-sm text-slate-500">Searching…</div>
+                      ) : nameSuggestions.length > 0 ? (
+                        nameSuggestions.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              // Prefill all fields from selected contact
+                              setSelectedExistingContact(c);
+                              setFormData({
+                                name: c.name || "",
+                                company: c.company || "",
+                                email: c.email || "",
+                                phone: c.phone || "",
+                                streetLine1: c.streetLine1 || "",
+                                streetLine2: c.streetLine2 || "",
+                                city: c.city || "",
+                                state: c.state || "",
+                                postCode: c.postCode || "",
+                                countryCode: c.countryCode || "",
+                                linkedinUrl: c.linkedinUrl || "",
+                                additionalContactContext: c.additionalContactContext || "",
+                                contactAddedBy: c.contactAddedBy || "",
+                                magicCards: !!c.magicCards,
+                                sfsBook: !!c.sfsBook,
+                                goldenRecord: !!c.goldenRecord,
+                              });
+                              // Populate previews for images
+                              const convertedHeadshots = (c.headshot || []).map((a) => ({
+                                url: a.url,
+                                filename: a.filename,
+                                type: a.type,
+                                size: a.size,
+                              }));
+                              const convertedCompanyLogos = (c.companyLogo || []).map((a) => ({
+                                url: a.url,
+                                filename: a.filename,
+                                type: a.type,
+                                size: a.size,
+                              }));
+                              setHeadshots(convertedHeadshots);
+                              setCompanyLogos(convertedCompanyLogos);
+                              setShowNameSuggestions(false);
+                              // Move focus out to collapse dropdown
+                              nameInputRef.current?.blur();
+                            }}
+                            role="option"
+                            aria-selected={selectedExistingContact?.id === c.id}
+                          >
+                            <div className="font-medium text-slate-800">{c.name}</div>
+                            <div className="text-xs text-slate-500 truncate">
+                              {[c.company, c.email, c.city].filter(Boolean).join(" • ")}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-2 text-sm text-slate-500">
+                          No matches. Continue typing to add a new recipient.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>

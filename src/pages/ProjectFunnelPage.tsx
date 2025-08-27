@@ -419,18 +419,18 @@ const ProjectFunnelPage: React.FC = () => {
     try {
       let savedContact: Contact | null = null;
 
-      if (editingContact) {
+      // If the modal selected an existing contact (by id), update that record instead of creating new
+      const targetContactId = (contactData as any).id || editingContact?.id;
+
+      if (targetContactId) {
         // Update existing contact
-        console.log("Updating existing contact:", editingContact.id);
-        savedContact = await AirtableService.updateContact(
-          editingContact.id,
-          contactData
-        );
+        console.log("Updating existing contact:", targetContactId);
+        savedContact = await AirtableService.updateContact(targetContactId, contactData);
         if (savedContact) {
           console.log("Contact updated successfully:", savedContact);
           setContacts((prev) => {
             const updated = prev.map((c) =>
-              c.id === editingContact.id ? savedContact! : c
+              c.id === targetContactId ? savedContact! : c
             );
             console.log("[DEBUG] Updated contacts after edit:", updated);
             return updated;
