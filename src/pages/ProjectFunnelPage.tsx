@@ -862,7 +862,6 @@ const ProjectFunnelPage: React.FC = () => {
                 <div className="hidden sm:flex items-center flex-wrap gap-2 ml-2">
                   <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-green-50 text-green-700 border-green-200">Approved: {statusCounts.approve}</span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200">Send Later: {statusCounts.sendLater}</span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-red-50 text-red-700 border-red-200">Removed: {statusCounts.remove}</span>
                 </div>
               </div>
               {/* Status counts (mobile) */}
@@ -870,7 +869,6 @@ const ProjectFunnelPage: React.FC = () => {
                 <div className="flex items-center flex-wrap gap-2">
                   <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-green-50 text-green-700 border-green-200">Approved: {statusCounts.approve}</span>
                   <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200">Send Later: {statusCounts.sendLater}</span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-red-50 text-red-700 border-red-200">Removed: {statusCounts.remove}</span>
                 </div>
               </div>
 
