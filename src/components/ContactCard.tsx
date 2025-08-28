@@ -452,10 +452,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
             <p className="text-xs text-slate-600 mb-4">To print a Magic Card, we need the recipient’s address, company, headshot, and company logo.</p>
 
             {/* Items section (only when none selected in this project) */}
-            {!(modalMagic || modalSfs || modalGr) && (
-              <div className="mb-4 p-3 rounded border border-red-200 bg-red-50">
-                <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
-                <div className="flex flex-col gap-2 text-sm">
+            {/* Items section (always visible in modal) */}
+            <div className={`mb-4 p-3 rounded border ${!(modalMagic || modalSfs || modalGr) ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`}>
+              <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
+              <div className="flex flex-col gap-2 text-sm">
                   {(() => {
                     const linked = {
                       magicCards: contact.magicCardsProjects || [],
@@ -497,13 +497,14 @@ const ContactCard: React.FC<ContactCardProps> = ({
                         {row({ label: 'Magic Cards', selected: modalMagic, setSelected: setModalMagic, arr: linked.magicCards })}
                         {row({ label: 'SFS Book', selected: modalSfs, setSelected: setModalSfs, arr: linked.sfsBook })}
                         {row({ label: 'Golden Record', selected: modalGr, setSelected: setModalGr, arr: linked.goldenRecord })}
-                        <div className="text-xs text-red-700 mt-1">Select at least one item to send for this project.</div>
+                        {!(modalMagic || modalSfs || modalGr) && (
+                          <div className="text-xs text-red-700 mt-1">Select at least one item to send for this project.</div>
+                        )}
                       </>
                     );
                   })()}
-                </div>
               </div>
-            )}
+            </div>
 
             {/* Address section (only when missing) */}
             {!contact.streetLine1 && (
