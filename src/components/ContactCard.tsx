@@ -455,7 +455,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
             {!(modalMagic || modalSfs || modalGr) && (
               <div className="mb-4 p-3 rounded border border-red-200 bg-red-50">
                 <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
-                <div className="space-y-2 text-sm">
+                <div className="flex flex-col gap-2 text-sm">
                   {(() => {
                     const linked = {
                       magicCards: contact.magicCardsProjects || [],
@@ -463,36 +463,40 @@ const ContactCard: React.FC<ContactCardProps> = ({
                       goldenRecord: contact.goldenRecordProjects || [],
                     };
                     const pid = currentProjectId || '';
-                    const canToggle = (arr: string[], selectedHere: boolean) => selectedHere || arr.length === 0;
+                    const row = (
+                      args: {
+                        label: string;
+                        selected: boolean;
+                        setSelected: (v: boolean) => void;
+                        arr: string[];
+                      }
+                    ) => {
+                      const { label, selected, setSelected, arr } = args;
+                      const selectedHere = arr.includes(pid);
+                      const neverSent = arr.length === 0;
+                      const disabled = !(selectedHere || neverSent);
+                      const hint = arr.length > 0 && !selectedHere ? ' (already sent in another project)' : '';
+                      return (
+                        <label className={`inline-flex items-center gap-2 ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4"
+                            checked={selected}
+                            onChange={(e) => !disabled && setSelected(e.target.checked)}
+                            disabled={disabled}
+                          />
+                          <span>
+                            {label}
+                            {hint && <span className="ml-1 text-[11px] text-slate-500">{hint}</span>}
+                          </span>
+                        </label>
+                      );
+                    };
                     return (
                       <>
-                        <label className={`inline-flex items-center gap-2 ${!canToggle(linked.magicCards, modalMagic) ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                          <input
-                            type="checkbox"
-                            checked={modalMagic}
-                            onChange={(e) => canToggle(linked.magicCards, modalMagic) && setModalMagic(e.target.checked)}
-                          />
-                          <span>Magic Cards</span>
-                          {linked.magicCards.length > 0 && !linked.magicCards.includes(pid) && (<span className="text-[11px] text-slate-500">(already sent in another project)</span>)}
-                        </label>
-                        <label className={`inline-flex items-center gap-2 ${!canToggle(linked.sfsBook, modalSfs) ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                          <input
-                            type="checkbox"
-                            checked={modalSfs}
-                            onChange={(e) => canToggle(linked.sfsBook, modalSfs) && setModalSfs(e.target.checked)}
-                          />
-                          <span>SFS Book</span>
-                          {linked.sfsBook.length > 0 && !linked.sfsBook.includes(pid) && (<span className="text-[11px] text-slate-500">(already sent in another project)</span>)}
-                        </label>
-                        <label className={`inline-flex items-center gap-2 ${!canToggle(linked.goldenRecord, modalGr) ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                          <input
-                            type="checkbox"
-                            checked={modalGr}
-                            onChange={(e) => canToggle(linked.goldenRecord, modalGr) && setModalGr(e.target.checked)}
-                          />
-                          <span>Golden Record</span>
-                          {linked.goldenRecord.length > 0 && !linked.goldenRecord.includes(pid) && (<span className="text-[11px] text-slate-500">(already sent in another project)</span>)}
-                        </label>
+                        {row({ label: 'Magic Cards', selected: modalMagic, setSelected: setModalMagic, arr: linked.magicCards })}
+                        {row({ label: 'SFS Book', selected: modalSfs, setSelected: setModalSfs, arr: linked.sfsBook })}
+                        {row({ label: 'Golden Record', selected: modalGr, setSelected: setModalGr, arr: linked.goldenRecord })}
                         <div className="text-xs text-red-700 mt-1">Select at least one item to send for this project.</div>
                       </>
                     );
