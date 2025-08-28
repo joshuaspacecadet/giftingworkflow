@@ -39,6 +39,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [dragOverTarget, setDragOverTarget] = useState<null | 'headshot' | 'logo'>(null);
   const [approveError, setApproveError] = useState<string>("");
+  const [modalMagic, setModalMagic] = useState<boolean>(false);
+  const [modalSfs, setModalSfs] = useState<boolean>(false);
+  const [modalGr, setModalGr] = useState<boolean>(false);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [notesInput, setNotesInput] = useState<string>("");
   const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
@@ -349,11 +352,19 @@ const ContactCard: React.FC<ContactCardProps> = ({
           onClick={() => {
             if (isStageLocked) return;
             // If Magic Cards is selected, enforce required assets
-            // Prevent Approve if no items selected for this project
+            // Prepare modal item state each time Approve is clicked
+            setModalMagic(isMagicCards);
+            setModalSfs(isSfsBook);
+            setModalGr(isGoldenRecord);
+
+            // Prevent Approve if no items selected for this project → open modal to select
             const anyItemSelected = isMagicCards || isSfsBook || isGoldenRecord;
             if (!anyItemSelected) {
-              // Show a brief inline error and block approve
-              setApproveError('Select at least one item for this project before approving.');
+              setCompanyInput(contact.company || "");
+              setApproveError("");
+              setHeadshotNew([]);
+              setLogoNew([]);
+              setIsApproveModalOpen(true);
               return;
             }
 
@@ -439,6 +450,56 @@ const ContactCard: React.FC<ContactCardProps> = ({
               <button onClick={() => setIsApproveModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
             </div>
             <p className="text-xs text-slate-600 mb-4">To print a Magic Card, we need the recipient’s address, company, headshot, and company logo.</p>
+
+            {/* Items section (only when none selected in this project) */}
+            {!(modalMagic || modalSfs || modalGr) && (
+              <div className="mb-4 p-3 rounded border border-red-200 bg-red-50">
+                <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
+                <div className="space-y-2 text-sm">
+                  {(() => {
+                    const linked = {
+                      magicCards: contact.magicCardsProjects || [],
+                      sfsBook: contact.sfsBookProjects || [],
+                      goldenRecord: contact.goldenRecordProjects || [],
+                    };
+                    const pid = currentProjectId || '';
+                    const canToggle = (arr: string[], selectedHere: boolean) => selectedHere || arr.length === 0;
+                    return (
+                      <>
+                        <label className={`inline-flex items-center gap-2 ${!canToggle(linked.magicCards, modalMagic) ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={modalMagic}
+                            onChange={(e) => canToggle(linked.magicCards, modalMagic) && setModalMagic(e.target.checked)}
+                          />
+                          <span>Magic Cards</span>
+                          {linked.magicCards.length > 0 && !linked.magicCards.includes(pid) && (<span className="text-[11px] text-slate-500">(already sent in another project)</span>)}
+                        </label>
+                        <label className={`inline-flex items-center gap-2 ${!canToggle(linked.sfsBook, modalSfs) ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={modalSfs}
+                            onChange={(e) => canToggle(linked.sfsBook, modalSfs) && setModalSfs(e.target.checked)}
+                          />
+                          <span>SFS Book</span>
+                          {linked.sfsBook.length > 0 && !linked.sfsBook.includes(pid) && (<span className="text-[11px] text-slate-500">(already sent in another project)</span>)}
+                        </label>
+                        <label className={`inline-flex items-center gap-2 ${!canToggle(linked.goldenRecord, modalGr) ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={modalGr}
+                            onChange={(e) => canToggle(linked.goldenRecord, modalGr) && setModalGr(e.target.checked)}
+                          />
+                          <span>Golden Record</span>
+                          {linked.goldenRecord.length > 0 && !linked.goldenRecord.includes(pid) && (<span className="text-[11px] text-slate-500">(already sent in another project)</span>)}
+                        </label>
+                        <div className="text-xs text-red-700 mt-1">Select at least one item to send for this project.</div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
 
             {/* Address section (only when missing) */}
             {!contact.streetLine1 && (
@@ -543,7 +604,15 @@ const ContactCard: React.FC<ContactCardProps> = ({
               <button
                 onClick={async () => {
                   // Save progress without approving
+                  const pid = currentProjectId || '';
                   const updates: Partial<Contact> = { company: companyInput } as Partial<Contact>;
+                  // Persist item selections for this project
+                  const mcArr = (contact.magicCardsProjects || []);
+                  const sfsArr = (contact.sfsBookProjects || []);
+                  const grArr = (contact.goldenRecordProjects || []);
+                  (updates as any).magicCardsProjects = modalMagic ? Array.from(new Set([...mcArr, pid])).filter(Boolean) : mcArr.filter(id => id !== pid);
+                  (updates as any).sfsBookProjects = modalSfs ? Array.from(new Set([...sfsArr, pid])).filter(Boolean) : sfsArr.filter(id => id !== pid);
+                  (updates as any).goldenRecordProjects = modalGr ? Array.from(new Set([...grArr, pid])).filter(Boolean) : grArr.filter(id => id !== pid);
                   if (headshotNew.length > 0) {
                     (updates as any).headshot = [
                       ...(contact.headshot || []),
@@ -559,7 +628,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
                   if (
                     updates.company !== contact.company ||
                     (updates as any).headshot ||
-                    (updates as any).companyLogo
+                    (updates as any).companyLogo ||
+                    (updates as any).magicCardsProjects ||
+                    (updates as any).sfsBookProjects ||
+                    (updates as any).goldenRecordProjects
                   ) {
                     await onUpdate(contact.id, updates);
                     setHeadshotNew([]);
@@ -573,6 +645,12 @@ const ContactCard: React.FC<ContactCardProps> = ({
               <button
                 onClick={async () => {
                   // Validate
+                  const pid = currentProjectId || '';
+                  const anySelected = modalMagic || modalSfs || modalGr;
+                  if (!anySelected) {
+                    setApproveError('Select at least one item for this project before approving.');
+                    return;
+                  }
                   const hasAddress = !!contact.streetLine1;
                   const effectiveCompany = (contact.company && contact.company.trim().length>0)
                     ? contact.company
@@ -581,12 +659,24 @@ const ContactCard: React.FC<ContactCardProps> = ({
                   const hasCompany = !!effectiveCompany;
                   const hasHeadshot = (contact.headshot && contact.headshot.length>0) || headshotNew.length>0;
                   const hasLogo = (contact.companyLogo && contact.companyLogo.length>0) || logoNew.length>0;
-                  if (!hasAddress || !hasCompany || !hasHeadshot || (!isIndividual && !hasLogo)) {
-                    setApproveError('All items are required to approve for Magic Cards.');
+                  if (modalMagic) {
+                    if (!hasAddress || !hasCompany || !hasHeadshot || (!isIndividual && !hasLogo)) {
+                      setApproveError('All items are required to approve for Magic Cards.');
+                      return;
+                    }
+                  } else if ((modalSfs || modalGr) && !hasAddress) {
+                    setIsAddressRequiredModalOpen(true);
                     return;
                   }
                   // Save uploads/changes then approve
                   const updates: Partial<Contact> = { company: companyInput } as Partial<Contact>;
+                  // Persist item selections for this project
+                  const mcArr = (contact.magicCardsProjects || []);
+                  const sfsArr = (contact.sfsBookProjects || []);
+                  const grArr = (contact.goldenRecordProjects || []);
+                  (updates as any).magicCardsProjects = modalMagic ? Array.from(new Set([...mcArr, pid])).filter(Boolean) : mcArr.filter(id => id !== pid);
+                  (updates as any).sfsBookProjects = modalSfs ? Array.from(new Set([...sfsArr, pid])).filter(Boolean) : sfsArr.filter(id => id !== pid);
+                  (updates as any).goldenRecordProjects = modalGr ? Array.from(new Set([...grArr, pid])).filter(Boolean) : grArr.filter(id => id !== pid);
                   if (headshotNew.length>0) {
                     (updates as any).headshot = [...(contact.headshot||[]), ...headshotNew] as any;
                   }
