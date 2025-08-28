@@ -257,10 +257,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
 
                   {alreadySentItems.length > 0 && (
                     <div className="mt-2">
-                      <div className="text-[11px] font-medium text-slate-700 mb-1">Already sent</div>
+                      <div className="text-[10px] font-medium text-slate-700 mb-1">Already sent</div>
                       <div className="flex flex-wrap gap-1.5">
                         {alreadySentItems.map((i) => (
-                          <span key={i.key} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                          <span key={i.key} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px]">
                             <Check className="h-3 w-3 text-green-600" /> {i.label}
                           </span>
                         ))}
