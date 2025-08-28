@@ -47,6 +47,13 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
   const isSfsBook = (contact.sfsBookProjects || []).includes(currentProjectId || '');
   const isGoldenRecord = (contact.goldenRecordProjects || []).includes(currentProjectId || '');
+  // Effective requirement states used in modal styling
+  const effectiveCompany = (contact.company && contact.company.trim().length>0) ? contact.company : companyInput;
+  const isIndividual = (effectiveCompany || '').trim().toLowerCase() === 'individual (no company)';
+  const hasAddress = !!contact.streetLine1;
+  const hasCompanyEff = !!(effectiveCompany && effectiveCompany.trim().length>0);
+  const hasHeadshotEff = (contact.headshot && contact.headshot.length>0) || headshotNew.length>0;
+  const hasLogoEff = (contact.companyLogo && contact.companyLogo.length>0) || logoNew.length>0;
 
   console.log("Debug: ContactCard received contact:", contact);
 
@@ -506,9 +513,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
               </div>
             </div>
 
-            {/* Address section (only when missing) */}
+            {/* Address section (only when missing in data; cannot be filled here) */}
             {!contact.streetLine1 && (
-            <div className={`mb-4 p-3 rounded border ${!contact.streetLine1 ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}`}>
+            <div className={`mb-4 p-3 rounded border ${hasAddress ? 'border-slate-200 bg-slate-50' : 'border-red-200 bg-red-50'}`}>
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-slate-900">Address</div>
                 {!contact.streetLine1 && contact.confirmAddressUrl && (
@@ -528,9 +535,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </div>
             )}
 
-            {/* Company section (only when missing) */}
+            {/* Company section - style turns neutral when input provided */}
             {!(contact.company && contact.company.trim().length>0) && (
-            <div className={`mb-4 p-3 rounded border border-red-200 bg-red-50`}>
+            <div className={`mb-4 p-3 rounded border ${hasCompanyEff ? 'border-slate-200 bg-slate-50' : 'border-red-200 bg-red-50'}`}>
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm font-medium text-slate-900">Company</div>
                 <button
@@ -551,9 +558,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </div>
             )}
 
-            {/* Headshot section (only when missing) */}
+            {/* Headshot section - neutral when a headshot is added in-session */}
             {!(contact.headshot && contact.headshot.length>0) && (
-            <div className={`mb-4 p-3 rounded border border-red-200 bg-red-50`}>
+            <div className={`mb-4 p-3 rounded border ${hasHeadshotEff ? 'border-slate-200 bg-slate-50' : 'border-red-200 bg-red-50'}`}>
               <div className="text-sm font-medium text-slate-900 mb-2">Headshot</div>
               <p className="text-xs text-slate-600 mb-2">Please add one or more photos. Adding a few gives the designer more options to generate a strong image for the card.</p>
               <div
@@ -574,15 +581,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </div>
             )}
 
-            {/* Company logo section (only when missing and company is not Individual (No Company)) */}
-            {(() => {
-              const effectiveCompany = (contact.company && contact.company.trim().length>0)
-                ? contact.company
-                : companyInput;
-              const isIndividual = (effectiveCompany || "").trim().toLowerCase() === 'individual (no company)';
-              return !isIndividual && !(contact.companyLogo && contact.companyLogo.length>0);
-            })() && (
-            <div className={`mb-4 p-3 rounded border border-red-200 bg-red-50`}>
+            {/* Company logo section - neutral once a logo is added; hidden if Individual (No Company) */}
+            {(!isIndividual) && !(contact.companyLogo && contact.companyLogo.length>0) && (
+            <div className={`mb-4 p-3 rounded border ${hasLogoEff ? 'border-slate-200 bg-slate-50' : 'border-red-200 bg-red-50'}`}>
               <div className="text-sm font-medium text-slate-900 mb-2">Company Logo</div>
               <p className="text-xs text-slate-600 mb-2">Please add one or more logo images. Make sure the logo matches the company name.</p>
               <div
