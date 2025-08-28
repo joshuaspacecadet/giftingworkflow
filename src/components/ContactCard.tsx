@@ -47,6 +47,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const [notesInput, setNotesInput] = useState<string>("");
+  const [approveSaveStatus, setApproveSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [showItemsSelector, setShowItemsSelector] = useState<boolean>(false);
   const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
   const isSfsBook = (contact.sfsBookProjects || []).includes(currentProjectId || '');
@@ -613,6 +614,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
               <button
                 onClick={async () => {
                   // Save progress without approving
+                  setApproveSaveStatus('saving');
                   const pid = currentProjectId || '';
                   const updates: Partial<Contact> = { company: companyInput } as Partial<Contact>;
                   // Persist item selections for this project
@@ -642,14 +644,21 @@ const ContactCard: React.FC<ContactCardProps> = ({
                     (updates as any).sfsBookProjects ||
                     (updates as any).goldenRecordProjects
                   ) {
-                    await onUpdate(contact.id, updates);
-                    setHeadshotNew([]);
-                    setLogoNew([]);
+                    try {
+                      await onUpdate(contact.id, updates);
+                      setHeadshotNew([]);
+                      setLogoNew([]);
+                      setApproveSaveStatus('success');
+                      setTimeout(() => setApproveSaveStatus('idle'), 2000);
+                    } catch (e) {
+                      setApproveSaveStatus('error');
+                      setTimeout(() => setApproveSaveStatus('idle'), 2000);
+                    }
                   }
                 }}
                 className="px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-700 hover:bg-slate-50"
               >
-                Save
+                {approveSaveStatus === 'saving' ? 'Saving…' : approveSaveStatus === 'success' ? 'Saved!' : approveSaveStatus === 'error' ? 'Save failed' : 'Save'}
               </button>
               <button
                 onClick={async () => {
