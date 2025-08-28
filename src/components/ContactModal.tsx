@@ -488,6 +488,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
     // If an existing contact was selected via autocomplete, include its id so the caller updates it
     if (selectedExistingContact) {
       (contactData as any).id = selectedExistingContact.id;
+      // Clear any prior review status so it doesn't carry into this project
+      (contactData as any).contactReview = null;
+      (contactData as any).contactReviewFeedback = "";
     }
 
     // If we have files to upload, handle them first
