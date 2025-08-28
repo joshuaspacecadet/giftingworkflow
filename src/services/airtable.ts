@@ -425,13 +425,23 @@ export class AirtableService {
         updateFields["SFS Book"] = (updates as any).sfsBookProjects;
       if ((updates as any).goldenRecordProjects !== undefined)
         updateFields["Golden Record"] = (updates as any).goldenRecordProjects;
-      // Also ensure the generic Projects link includes any of the above selections
+      // Also ensure the generic Projects link includes any of the above selections,
+      // without erasing other existing project links.
       {
         const projectIds = new Set<string>();
         if ((updates as any).magicCardsProjects) (updates as any).magicCardsProjects.forEach((id: string) => projectIds.add(id));
         if ((updates as any).sfsBookProjects) (updates as any).sfsBookProjects.forEach((id: string) => projectIds.add(id));
         if ((updates as any).goldenRecordProjects) (updates as any).goldenRecordProjects.forEach((id: string) => projectIds.add(id));
-        if (projectIds.size > 0) updateFields["Projects"] = Array.from(projectIds);
+        if (projectIds.size > 0) {
+          try {
+            const existing = await base!(airtableConfig.tables.contacts).find(id);
+            const existingProjects: string[] = (existing.fields["Projects"] || []) as string[];
+            existingProjects.forEach((pid) => projectIds.add(pid));
+          } catch (e) {
+            console.warn("Could not load existing contact to merge Projects; proceeding with provided ids only", e);
+          }
+          updateFields["Projects"] = Array.from(projectIds);
+        }
       }
       if (updates.copyTitle1 !== undefined)
         updateFields["Copy Title 1"] = updates.copyTitle1;
