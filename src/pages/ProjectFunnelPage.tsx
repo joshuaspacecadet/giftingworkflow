@@ -928,12 +928,26 @@ const ProjectFunnelPage: React.FC = () => {
                     isStageLocked={isStageCompleted("Contacts")}
                     currentProjectId={project.id}
                     onRemoveFromProject={async (contactId) => {
-                      // Unlink contact from this project and clear per-project item links
+                      // Also remove current project from any item link arrays on the contact
+                      try {
+                        const mc = (contact.magicCardsProjects || []).filter((id) => id !== project.id);
+                        const sfs = (contact.sfsBookProjects || []).filter((id) => id !== project.id);
+                        const gr = (contact.goldenRecordProjects || []).filter((id) => id !== project.id);
+                        await AirtableService.updateContact(contactId, {
+                          magicCardsProjects: mc as any,
+                          sfsBookProjects: sfs as any,
+                          goldenRecordProjects: gr as any,
+                        });
+                      } catch (e) {
+                        console.error('Failed to clear item links for contact', e);
+                      }
+                      // Unlink contact from this project
                       try {
                         await AirtableService.unlinkContactFromProject(project.id, contactId);
                       } catch (e) {
                         console.error('Unlink contact from project failed', e);
                       }
+                      // Remove from local list
                       setContacts((prev) => prev.filter((c) => c.id !== contactId));
                     }}
                   />
