@@ -455,59 +455,59 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </div>
             <p className="text-xs text-slate-600 mb-4">To print a Magic Card, we need the recipient’s address, company, headshot, and company logo.</p>
 
-            {/* Items section (only when none selected in this project) */}
-            {!(modalMagic || modalSfs || modalGr) && (
-              <div className={`mb-4 p-3 rounded border border-red-200 bg-red-50`}>
-                <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
-                <div className="flex flex-col gap-2 text-sm">
-                    {(() => {
-                      const linked = {
-                        magicCards: contact.magicCardsProjects || [],
-                        sfsBook: contact.sfsBookProjects || [],
-                        goldenRecord: contact.goldenRecordProjects || [],
-                      };
-                      const pid = currentProjectId || '';
-                      const row = (
-                        args: {
-                          label: string;
-                          selected: boolean;
-                          setSelected: (v: boolean) => void;
-                          arr: string[];
-                        }
-                      ) => {
-                        const { label, selected, setSelected, arr } = args;
-                        const selectedHere = arr.includes(pid);
-                        const neverSent = arr.length === 0;
-                        const disabled = !(selectedHere || neverSent);
-                        const hint = arr.length > 0 && !selectedHere ? ' (already sent in another project)' : '';
-                        return (
-                          <label className={`inline-flex items-center gap-2 ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4"
-                              checked={selected}
-                              onChange={(e) => !disabled && setSelected(e.target.checked)}
-                              disabled={disabled}
-                            />
-                            <span>
-                              {label}
-                              {hint && <span className="ml-1 text-[11px] text-slate-500">{hint}</span>}
-                            </span>
-                          </label>
-                        );
-                      };
+            {/* Items section (always visible; red if none selected, neutral otherwise) */}
+            <div className={`mb-4 p-3 rounded border ${!(modalMagic || modalSfs || modalGr) ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`}>
+              <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
+              <div className="flex flex-col gap-2 text-sm">
+                  {(() => {
+                    const linked = {
+                      magicCards: contact.magicCardsProjects || [],
+                      sfsBook: contact.sfsBookProjects || [],
+                      goldenRecord: contact.goldenRecordProjects || [],
+                    };
+                    const pid = currentProjectId || '';
+                    const row = (
+                      args: {
+                        label: string;
+                        selected: boolean;
+                        setSelected: (v: boolean) => void;
+                        arr: string[];
+                      }
+                    ) => {
+                      const { label, selected, setSelected, arr } = args;
+                      const selectedHere = arr.includes(pid);
+                      const neverSent = arr.length === 0;
+                      const disabled = !(selectedHere || neverSent);
+                      const hint = arr.length > 0 && !selectedHere ? ' (already sent in another project)' : '';
                       return (
-                        <>
-                          {row({ label: 'Magic Cards', selected: modalMagic, setSelected: setModalMagic, arr: linked.magicCards })}
-                          {row({ label: 'SFS Book', selected: modalSfs, setSelected: setModalSfs, arr: linked.sfsBook })}
-                          {row({ label: 'Golden Record', selected: modalGr, setSelected: setModalGr, arr: linked.goldenRecord })}
-                          <div className="text-xs text-red-700 mt-1">Select at least one item to send for this project.</div>
-                        </>
+                        <label className={`inline-flex items-center gap-2 ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4"
+                            checked={selected}
+                            onChange={(e) => !disabled && setSelected(e.target.checked)}
+                            disabled={disabled}
+                          />
+                          <span>
+                            {label}
+                            {hint && <span className="ml-1 text-[11px] text-slate-500">{hint}</span>}
+                          </span>
+                        </label>
                       );
-                    })()}
-                </div>
+                    };
+                    return (
+                      <>
+                        {row({ label: 'Magic Cards', selected: modalMagic, setSelected: setModalMagic, arr: linked.magicCards })}
+                        {row({ label: 'SFS Book', selected: modalSfs, setSelected: setModalSfs, arr: linked.sfsBook })}
+                        {row({ label: 'Golden Record', selected: modalGr, setSelected: setModalGr, arr: linked.goldenRecord })}
+                        {!(modalMagic || modalSfs || modalGr) && (
+                          <div className="text-xs text-red-700 mt-1">Select at least one item to send for this project.</div>
+                        )}
+                      </>
+                    );
+                  })()}
               </div>
-            )}
+            </div>
 
             {/* Address section (only when missing in data; cannot be filled here) */}
             {!contact.streetLine1 && (
