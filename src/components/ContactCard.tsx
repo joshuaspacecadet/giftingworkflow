@@ -198,46 +198,51 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 goldenRecord: contact.goldenRecordProjects || [],
               };
               const thisProjectId = currentProjectId || '';
-              const available = {
-                magicCards: linked.magicCards.length === 0,
-                sfsBook: linked.sfsBook.length === 0,
-                goldenRecord: linked.goldenRecord.length === 0,
-              };
-              const availableItems = [
+              const keys = [
                 { key: 'magicCards' as const, label: 'Magic Cards' },
                 { key: 'sfsBook' as const, label: 'SFS Book' },
                 { key: 'goldenRecord' as const, label: 'Golden Record' },
-              ].filter((i) => available[i.key]);
-              const alreadySentItems = [
-                { key: 'magicCards' as const, label: 'Magic Cards', sent: linked.magicCards.some(id => id !== thisProjectId) },
-                { key: 'sfsBook' as const, label: 'SFS Book', sent: linked.sfsBook.some(id => id !== thisProjectId) },
-                { key: 'goldenRecord' as const, label: 'Golden Record', sent: linked.goldenRecord.some(id => id !== thisProjectId) },
-              ].filter((i) => i.sent);
+              ];
+
+              const canToggle = (k: 'magicCards'|'sfsBook'|'goldenRecord') => {
+                const arr = linked[k];
+                const selectedHere = arr.includes(thisProjectId);
+                const neverSent = arr.length === 0;
+                return selectedHere || neverSent;
+              };
+
+              const alreadySentItems = keys.filter(({ key }) => {
+                const arr = linked[key];
+                return arr.length > 0 && !arr.includes(thisProjectId);
+              });
 
               return (
                 <>
                   <div className="flex flex-col gap-1">
-                    {availableItems.length > 0 ? (
-                      availableItems.map((i) => (
-                        <label key={i.key} className="inline-flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={(contact as any)[`${i.key}Projects`]?.includes(thisProjectId) || false}
-                            onChange={async (e) => {
-                              const currentArr: string[] = (contact as any)[`${i.key}Projects`] || [];
-                              const next = e.target.checked
-                                ? Array.from(new Set([...currentArr, thisProjectId])).filter(Boolean)
-                                : currentArr.filter((id) => id !== thisProjectId);
-                              await onUpdate(contact.id, { [`${i.key}Projects`]: next } as any);
-                            }}
-                            disabled={isStageLocked || !thisProjectId}
-                          />
-                          <span>{i.label}</span>
-                        </label>
-                      ))
-                    ) : (
-                      <span className="text-[11px] text-slate-500">No items available to send.</span>
-                    )}
+                    {keys.map((i) => {
+                      const arr: string[] = linked[i.key];
+                      const checked = arr.includes(thisProjectId);
+                      if (canToggle(i.key)) {
+                        return (
+                          <label key={i.key} className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={async (e) => {
+                                const currentArr: string[] = (contact as any)[`${i.key}Projects`] || [];
+                                const next = e.target.checked
+                                  ? Array.from(new Set([...currentArr, thisProjectId])).filter(Boolean)
+                                  : currentArr.filter((id) => id !== thisProjectId);
+                                await onUpdate(contact.id, { [`${i.key}Projects`]: next } as any);
+                              }}
+                              disabled={isStageLocked || !thisProjectId}
+                            />
+                            <span>{i.label}</span>
+                          </label>
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
 
                   {alreadySentItems.length > 0 && (
@@ -344,6 +349,14 @@ const ContactCard: React.FC<ContactCardProps> = ({
           onClick={() => {
             if (isStageLocked) return;
             // If Magic Cards is selected, enforce required assets
+            // Prevent Approve if no items selected for this project
+            const anyItemSelected = isMagicCards || isSfsBook || isGoldenRecord;
+            if (!anyItemSelected) {
+              // Show a brief inline error and block approve
+              setApproveError('Select at least one item for this project before approving.');
+              return;
+            }
+
             if (isMagicCards) {
               const hasAddress = !!contact.streetLine1;
               const hasCompany = !!(contact.company && contact.company.trim().length > 0);
