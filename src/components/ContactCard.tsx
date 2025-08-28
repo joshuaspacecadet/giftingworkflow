@@ -47,6 +47,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const [notesInput, setNotesInput] = useState<string>("");
+  const [showItemsSelector, setShowItemsSelector] = useState<boolean>(false);
   const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
   const isSfsBook = (contact.sfsBookProjects || []).includes(currentProjectId || '');
   const isGoldenRecord = (contact.goldenRecordProjects || []).includes(currentProjectId || '');
@@ -366,6 +367,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
             setModalMagic(isMagicCards);
             setModalSfs(isSfsBook);
             setModalGr(isGoldenRecord);
+            // Only initially show items selector if nothing is selected for this project
+            setShowItemsSelector(!(isMagicCards || isSfsBook || isGoldenRecord));
 
             // Prevent Approve if no items selected for this project → open modal to select
             const anyItemSelected = isMagicCards || isSfsBook || isGoldenRecord;
@@ -374,6 +377,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
               setApproveError("");
               setHeadshotNew([]);
               setLogoNew([]);
+              setShowItemsSelector(true);
               setIsApproveModalOpen(true);
               return;
             }
@@ -388,6 +392,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 setApproveError("");
                 setHeadshotNew([]);
                 setLogoNew([]);
+                setShowItemsSelector(false);
                 setIsApproveModalOpen(true);
                 return;
               }
@@ -455,7 +460,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </div>
             <p className="text-xs text-slate-600 mb-4">To print a Magic Card, we need the recipient’s address, company, headshot, and company logo.</p>
 
-            {/* Items section (always visible; red if none selected, neutral otherwise) */}
+            {/* Items section: initially shown only if missing; remains visible after selection until modal closed */}
+            {showItemsSelector && (
             <div className={`mb-4 p-3 rounded border ${!(modalMagic || modalSfs || modalGr) ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`}>
               <div className="text-sm font-medium text-slate-900 mb-2">Items to send</div>
               <div className="flex flex-col gap-2 text-sm">
@@ -508,6 +514,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
                   })()}
               </div>
             </div>
+            )}
 
             {/* Address section (only when missing in data; cannot be filled here) */}
             {!contact.streetLine1 && (
