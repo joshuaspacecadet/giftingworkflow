@@ -339,6 +339,14 @@ export class AirtableService {
         createFields["SFS Book"] = (contactData as any).sfsBookProjects;
       if ((contactData as any).goldenRecordProjects !== undefined)
         createFields["Golden Record"] = (contactData as any).goldenRecordProjects;
+      // Also ensure the generic Projects link includes any of the above selections
+      {
+        const projectIds = new Set<string>();
+        if ((contactData as any).magicCardsProjects) (contactData as any).magicCardsProjects.forEach((id: string) => projectIds.add(id));
+        if ((contactData as any).sfsBookProjects) (contactData as any).sfsBookProjects.forEach((id: string) => projectIds.add(id));
+        if ((contactData as any).goldenRecordProjects) (contactData as any).goldenRecordProjects.forEach((id: string) => projectIds.add(id));
+        if (projectIds.size > 0) createFields["Projects"] = Array.from(projectIds);
+      }
       if (contactData.copyTitle1)
         createFields["Copy Title 1"] = contactData.copyTitle1;
       if (contactData.copyTitle2)
@@ -417,6 +425,14 @@ export class AirtableService {
         updateFields["SFS Book"] = (updates as any).sfsBookProjects;
       if ((updates as any).goldenRecordProjects !== undefined)
         updateFields["Golden Record"] = (updates as any).goldenRecordProjects;
+      // Also ensure the generic Projects link includes any of the above selections
+      {
+        const projectIds = new Set<string>();
+        if ((updates as any).magicCardsProjects) (updates as any).magicCardsProjects.forEach((id: string) => projectIds.add(id));
+        if ((updates as any).sfsBookProjects) (updates as any).sfsBookProjects.forEach((id: string) => projectIds.add(id));
+        if ((updates as any).goldenRecordProjects) (updates as any).goldenRecordProjects.forEach((id: string) => projectIds.add(id));
+        if (projectIds.size > 0) updateFields["Projects"] = Array.from(projectIds);
+      }
       if (updates.copyTitle1 !== undefined)
         updateFields["Copy Title 1"] = updates.copyTitle1;
       if (updates.copyTitle2 !== undefined)
