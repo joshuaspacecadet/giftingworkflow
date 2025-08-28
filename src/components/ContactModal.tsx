@@ -177,6 +177,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
     const controller = new AbortController();
     const q = (formData.name || "").trim();
     if (!isOpen) return;
+    // If a suggestion was selected and the input matches it exactly, suppress suggestions
+    if (selectedExistingContact && q.toLowerCase() === (selectedExistingContact.name || '').trim().toLowerCase()) {
+      setNameSuggestions([]);
+      setShowNameSuggestions(false);
+      setIsSearchingNames(false);
+      return;
+    }
     if (q.length < 2) {
       setNameSuggestions([]);
       setShowNameSuggestions(false);
@@ -635,6 +642,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                               setHeadshots(convertedHeadshots);
                               setCompanyLogos(convertedCompanyLogos);
                               setShowNameSuggestions(false);
+                              setNameSuggestions([]);
+                              setIsSearchingNames(false);
                               // Move focus out to collapse dropdown
                               nameInputRef.current?.blur();
                             }}
