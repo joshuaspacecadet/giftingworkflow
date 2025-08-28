@@ -452,9 +452,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
     // Require at least one new item selection if using an existing contact
     if (selectedExistingContact) {
       const previouslySent = {
-        magicCards: !!selectedExistingContact.magicCards,
-        sfsBook: !!selectedExistingContact.sfsBook,
-        goldenRecord: !!selectedExistingContact.goldenRecord,
+        magicCards: (selectedExistingContact.magicCardsProjects || []).some((id) => id !== (currentProjectId || "")),
+        sfsBook: (selectedExistingContact.sfsBookProjects || []).some((id) => id !== (currentProjectId || "")),
+        goldenRecord: (selectedExistingContact.goldenRecordProjects || []).some((id) => id !== (currentProjectId || "")),
       };
       const anyNew = (
         (formData.magicCards && !previouslySent.magicCards) ||

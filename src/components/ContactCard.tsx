@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Edit, User, ExternalLink, Copy, Check, X, Info } from 'lucide-react';
 import { Contact } from '../types';
-import { normalizeUrl, openUrlSafely } from '../utils/urlHelpers';
+import { openUrlSafely } from '../utils/urlHelpers';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 
 interface ContactCardProps {
@@ -42,6 +42,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [notesInput, setNotesInput] = useState<string>("");
   const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
+  const isSfsBook = (contact.sfsBookProjects || []).includes(currentProjectId || '');
+  const isGoldenRecord = (contact.goldenRecordProjects || []).includes(currentProjectId || '');
 
   console.log("Debug: ContactCard received contact:", contact);
 
@@ -155,7 +157,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 </button>
               )}
             </div>
-            {contact.company && (isMagicCards || contact.sfsBook || contact.goldenRecord) && (
+            {contact.company && (isMagicCards || isSfsBook || isGoldenRecord) && (
               <div className="flex items-center text-sm text-slate-600 mt-1">
                 {isMagicCards ? (
                   contact.companyLogo && contact.companyLogo.length > 0 ? (
@@ -342,7 +344,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
           onClick={() => {
             if (isStageLocked) return;
             // If Magic Cards is selected, enforce required assets
-            if (contact.magicCards) {
+            if (isMagicCards) {
               const hasAddress = !!contact.streetLine1;
               const hasCompany = !!(contact.company && contact.company.trim().length > 0);
               const hasHeadshot = !!(contact.headshot && contact.headshot.length > 0);
@@ -357,7 +359,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
               }
             }
             // If SFS Book and/or Golden Record are selected but no address, prompt for confirm address
-            if (!contact.magicCards && (contact.sfsBook || contact.goldenRecord) && !contact.streetLine1) {
+            if (!isMagicCards && (isSfsBook || isGoldenRecord) && !contact.streetLine1) {
               setIsAddressRequiredModalOpen(true);
               return;
             }
