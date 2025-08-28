@@ -12,6 +12,7 @@ interface ContactCardProps {
   isStageLocked?: boolean;
   previouslySent?: { magicCards: boolean; sfsBook: boolean; goldenRecord: boolean }; // deprecated
   currentProjectId?: string;
+  onRemoveFromProject?: (contactId: string) => Promise<void> | void;
 }
 
 const ContactCard: React.FC<ContactCardProps> = ({ 
@@ -20,7 +21,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
   onUpdate,
   isStageLocked = false,
   previouslySent,
-  currentProjectId
+  currentProjectId,
+  onRemoveFromProject
 }) => {
   const [showDetails] = useState(true);
   const [copiedConfirmUrl, setCopiedConfirmUrl] = useState(false);
@@ -43,6 +45,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [modalSfs, setModalSfs] = useState<boolean>(false);
   const [modalGr, setModalGr] = useState<boolean>(false);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const [notesInput, setNotesInput] = useState<string>("");
   const isMagicCards = (contact.magicCardsProjects || []).includes(currentProjectId || '');
   const isSfsBook = (contact.sfsBookProjects || []).includes(currentProjectId || '');
@@ -265,8 +268,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
                           </span>
                         ))}
                       </div>
-                    </div>
-                  )}
+                </div>
+              )}
                 </>
               );
             })()}
@@ -419,16 +422,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
           Send Later
         </button>
         <button
-          className={`px-2.5 py-1 text-xs rounded border transition-colors ${contact.contactReview === 'Remove' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-700 border-red-300 hover:bg-red-50'}`}
+          className={`px-2.5 py-1 text-xs rounded border transition-colors bg-white text-red-700 border-red-300 hover:bg-red-50`}
           onClick={() => {
             if (isStageLocked) return;
-            const hasFeedback = !!(contact.contactReviewFeedback && contact.contactReviewFeedback.trim().length > 0);
-            if (hasFeedback) {
-              setConfirmClearNextStatus('Remove');
-              setIsConfirmClearFeedbackOpen(true);
-            } else {
-              onUpdate(contact.id, { contactReview: 'Remove', contactReviewFeedback: '' });
-            }
+            setIsRemoveConfirmOpen(true);
           }}
           disabled={isStageLocked}
         >
@@ -824,7 +821,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
               </button>
               <button
                 onClick={() => {
-                  const next = confirmClearNextStatus || 'Remove';
+                  const next = confirmClearNextStatus || 'Approve';
                   onUpdate(contact.id, { contactReview: next, contactReviewFeedback: '' });
                   setIsConfirmClearFeedbackOpen(false);
                   setConfirmClearNextStatus(null);
@@ -837,6 +834,40 @@ const ContactCard: React.FC<ContactCardProps> = ({
           </div>
             </div>
           )}
+
+      {/* Remove from Project Confirm Modal */}
+      {isRemoveConfirmOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-[1000] flex items-center justify-center p-4"
+          onClick={() => setIsRemoveConfirmOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-slate-900">Remove from current project?</h4>
+              <button onClick={() => setIsRemoveConfirmOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+            </div>
+            <p className="text-xs text-slate-600 mb-4">This will unlink {contact.name} from this project but keep their contact record. You can always add them back later.</p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setIsRemoveConfirmOpen(false)} className="px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-700 hover:bg-slate-50">Cancel</button>
+              <button
+                onClick={async () => {
+                  try {
+                    await (onRemoveFromProject?.(contact.id));
+                  } finally {
+                    setIsRemoveConfirmOpen(false);
+                  }
+                }}
+                className="px-3 py-1.5 text-xs rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add notes modal */}
       {isNotesModalOpen && (
