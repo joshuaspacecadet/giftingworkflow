@@ -1577,17 +1577,23 @@ const ProjectFunnelPage: React.FC = () => {
                 <ul className="divide-y divide-slate-200">
                   {filteredExistingResults.map((c) => {
                     const alreadyLinked = (project.linkedContacts || []).includes(c.id);
-                    const alreadySent: { label: string; sent: boolean }[] = [
-                      { label: 'Magic Cards', sent: (c.magicCardsProjects || []).length > 0 },
-                      { label: 'SFS Book', sent: (c.sfsBookProjects || []).length > 0 },
-                      { label: 'Golden Record', sent: (c.goldenRecordProjects || []).length > 0 },
-                      { label: 'Cards Against', sent: ((c as any).cardsAgainstRealityProjects || []).length > 0 },
-                      { label: 'Fund II Video', sent: ((c as any).fundIiVideoProjects || []).length > 0 },
+                    const pid = project.id;
+                    const sendingHere = {
+                      magic: (c.magicCardsProjects || []).includes(pid),
+                      sfs: (c.sfsBookProjects || []).includes(pid),
+                      golden: (c.goldenRecordProjects || []).includes(pid),
+                    };
+                    const alreadySentElsewhere = [
+                      { key: 'magic', label: 'Magic Cards', sent: (c.magicCardsProjects || []).length > 0 && !sendingHere.magic },
+                      { key: 'sfs', label: 'SFS Book', sent: (c.sfsBookProjects || []).length > 0 && !sendingHere.sfs },
+                      { key: 'golden', label: 'Golden Record', sent: (c.goldenRecordProjects || []).length > 0 && !sendingHere.golden },
+                      { key: 'cards', label: 'Cards Against', sent: ((c as any).cardsAgainstRealityProjects || []).length > 0 },
+                      { key: 'video', label: 'Fund II Video', sent: ((c as any).fundIiVideoProjects || []).length > 0 },
                     ].filter((i) => i.sent);
                     const available = {
-                      magic: (c.magicCardsProjects || []).length === 0 || (c.magicCardsProjects || []).includes(project.id),
-                      sfs: (c.sfsBookProjects || []).length === 0 || (c.sfsBookProjects || []).includes(project.id),
-                      golden: (c.goldenRecordProjects || []).length === 0 || (c.goldenRecordProjects || []).includes(project.id),
+                      magic: (c.magicCardsProjects || []).length === 0,
+                      sfs: (c.sfsBookProjects || []).length === 0,
+                      golden: (c.goldenRecordProjects || []).length === 0,
                     };
                     const sel = selectedItemsByContact[c.id] || { magic: false, sfs: false, golden: false };
                     return (
@@ -1602,26 +1608,38 @@ const ProjectFunnelPage: React.FC = () => {
                               <div className="text-xs text-slate-600 truncate">• {c.company}</div>
                             )}
                           </div>
-                          {/* Item selection row */}
+                          {/* Item selection row: only for items not sent anywhere */}
                           <div className="mt-2 text-xs text-slate-700 flex flex-wrap gap-3">
-                            <label className={`inline-flex items-center gap-1 ${!available.magic ? 'opacity-50 cursor-not-allowed' : ''}`} title={!available.magic ? 'Already sent in another project' : ''}>
-                              <input type="checkbox" disabled={!available.magic} checked={sel.magic} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), magic: e.target.checked } }))} />
+                            <label className={`inline-flex items-center gap-1 ${available.magic ? '' : 'hidden'}`}>
+                              <input type="checkbox" checked={sel.magic} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), magic: e.target.checked } }))} />
                               <span>Magic Cards</span>
                             </label>
-                            <label className={`inline-flex items-center gap-1 ${!available.sfs ? 'opacity-50 cursor-not-allowed' : ''}`} title={!available.sfs ? 'Already sent in another project' : ''}>
-                              <input type="checkbox" disabled={!available.sfs} checked={sel.sfs} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), sfs: e.target.checked } }))} />
+                            <label className={`inline-flex items-center gap-1 ${available.sfs ? '' : 'hidden'}`}>
+                              <input type="checkbox" checked={sel.sfs} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), sfs: e.target.checked } }))} />
                               <span>SFS Book</span>
                             </label>
-                            <label className={`inline-flex items-center gap-1 ${!available.golden ? 'opacity-50 cursor-not-allowed' : ''}`} title={!available.golden ? 'Already sent in another project' : ''}>
-                              <input type="checkbox" disabled={!available.golden} checked={sel.golden} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), golden: e.target.checked } }))} />
+                            <label className={`inline-flex items-center gap-1 ${available.golden ? '' : 'hidden'}`}>
+                              <input type="checkbox" checked={sel.golden} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), golden: e.target.checked } }))} />
                               <span>Golden Record</span>
                             </label>
                           </div>
-                          {alreadySent.length > 0 && (
+                          {/* Currently sending in this project */}
+                          {(sendingHere.magic || sendingHere.sfs || sendingHere.golden) && (
+                            <div className="mt-1 text-[11px] text-slate-700">
+                              <span className="mr-1">Sending in this project:</span>
+                              <span className="inline-flex flex-wrap gap-1 align-middle">
+                                {sendingHere.magic && (<span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Magic Cards</span>)}
+                                {sendingHere.sfs && (<span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">SFS Book</span>)}
+                                {sendingHere.golden && (<span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Golden Record</span>)}
+                              </span>
+                            </div>
+                          )}
+                          {/* Already sent in other projects */}
+                          {alreadySentElsewhere.length > 0 && (
                             <div className="mt-1 text-[11px] text-slate-700">
                               <span className="mr-1">Already sent:</span>
                               <span className="inline-flex flex-wrap gap-1 align-middle">
-                                {alreadySent.map((i, idx) => (
+                                {alreadySentElsewhere.map((i, idx) => (
                                   <span key={`${c.id}-sent-${idx}`} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                                     {i.label}
                                   </span>
