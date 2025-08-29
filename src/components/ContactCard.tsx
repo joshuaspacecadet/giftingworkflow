@@ -211,6 +211,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 magicCards: contact.magicCardsProjects || [],
                 sfsBook: contact.sfsBookProjects || [],
                 goldenRecord: contact.goldenRecordProjects || [],
+                cardsAgainstReality: (contact as any).cardsAgainstRealityProjects || [],
+                fundIiVideo: (contact as any).fundIiVideoProjects || [],
               };
               const thisProjectId = currentProjectId || '';
               const keys = [
@@ -226,10 +228,18 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 return selectedHere || neverSent;
               };
 
-              const alreadySentItems = keys.filter(({ key }) => {
-                const arr = linked[key];
-                return arr.length > 0 && !arr.includes(thisProjectId);
-              });
+              const alreadySentItems = [
+                ...keys.filter(({ key }) => {
+                  const arr = linked[key];
+                  return arr.length > 0 && !arr.includes(thisProjectId);
+                }),
+                ...(((linked.cardsAgainstReality || []).length > 0 && !linked.cardsAgainstReality.includes(thisProjectId))
+                  ? [{ key: 'cardsAgainstReality' as const, label: 'Cards Against Reality' }]
+                  : []),
+                ...(((linked.fundIiVideo || []).length > 0 && !linked.fundIiVideo.includes(thisProjectId))
+                  ? [{ key: 'fundIiVideo' as const, label: 'Fund II Video' }]
+                  : []),
+              ];
 
               return (
                 <>

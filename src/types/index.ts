@@ -35,6 +35,9 @@ export interface Contact {
   magicCardsProjects?: string[];
   sfsBookProjects?: string[];
   goldenRecordProjects?: string[];
+  // Read-only: additional items we track as previously sent
+  cardsAgainstRealityProjects?: string[];
+  fundIiVideoProjects?: string[];
   // Legacy booleans kept optional for backward compatibility (should not be used going forward)
   magicCards?: boolean;
   sfsBook?: boolean;

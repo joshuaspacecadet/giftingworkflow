@@ -754,7 +754,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   magicCards: (selectedExistingContact?.magicCardsProjects || []).some((id) => id !== (currentProjectId || "")),
                   sfsBook: (selectedExistingContact?.sfsBookProjects || []).some((id) => id !== (currentProjectId || "")),
                   goldenRecord: (selectedExistingContact?.goldenRecordProjects || []).some((id) => id !== (currentProjectId || "")),
-                };
+                  cardsAgainstReality: ((selectedExistingContact as any)?.cardsAgainstRealityProjects || []).some((id: string) => id !== (currentProjectId || "")),
+                  fundIiVideo: ((selectedExistingContact as any)?.fundIiVideoProjects || []).some((id: string) => id !== (currentProjectId || "")),
+                } as const;
                 const availableItems = [
                   { key: "magicCards" as const, label: "Magic Cards" },
                   { key: "sfsBook" as const, label: "SFS Book" },
@@ -764,6 +766,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   { key: "magicCards" as const, label: "Magic Cards", sent: previouslySent.magicCards },
                   { key: "sfsBook" as const, label: "SFS Book", sent: previouslySent.sfsBook },
                   { key: "goldenRecord" as const, label: "Golden Record", sent: previouslySent.goldenRecord },
+                  { key: "cardsAgainstReality" as const, label: "Cards Against Reality", sent: previouslySent.cardsAgainstReality },
+                  { key: "fundIiVideo" as const, label: "Fund II Video", sent: previouslySent.fundIiVideo },
                 ].filter((i) => i.sent);
 
                 return (

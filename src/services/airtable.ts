@@ -59,6 +59,8 @@ const transformAirtableContact = (record: any): Contact => {
     magicCardsProjects: (fields["Magic Cards"] || []) as string[],
     sfsBookProjects: (fields["SFS Book"] || []) as string[],
     goldenRecordProjects: (fields["Golden Record"] || []) as string[],
+    cardsAgainstRealityProjects: (fields["Cards Against Reality"] || []) as string[],
+    fundIiVideoProjects: (fields["Fund II Video"] || []) as string[],
     copyTitle1: fields["Copy Title 1"] || "",
     copyTitle2: fields["Copy Title 2"] || "",
     copyTitle3: fields["Copy Title 3"] || "",
