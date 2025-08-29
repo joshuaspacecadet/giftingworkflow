@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Users,
@@ -185,6 +186,17 @@ const ProjectFunnelPage: React.FC = () => {
       }
     };
     loadAll();
+  }, [isAddExistingOpen]);
+
+  // Disable background scroll when Add Existing modal is open
+  useEffect(() => {
+    if (isAddExistingOpen && typeof document !== "undefined") {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
   }, [isAddExistingOpen]);
 
   // Compute filtered results client-side from dataset, search, and filters
@@ -1486,9 +1498,9 @@ const ProjectFunnelPage: React.FC = () => {
       />
 
       {/* Add Existing Modal */}
-      {isAddExistingOpen && (
+      {isAddExistingOpen && createPortal(
         <div
-          className="fixed inset-0 bg-black/60 z-[1000] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 z-[2000] flex items-center justify-center p-4"
           onClick={() => setIsAddExistingOpen(false)}
         >
           <div
@@ -1505,7 +1517,7 @@ const ProjectFunnelPage: React.FC = () => {
                 ×
               </button>
             </div>
-            <p className="text-xs text-slate-600 mb-3">Search by name or company. You can add an existing contact to this project's recipient list. Their review status will be cleared.</p>
+            <p className="text-xs text-slate-600 mb-3">You can add an existing contact to this project's recipient list. Search by name or company.</p>
             <div className="flex flex-col gap-2 mb-3">
               {/* Filters row */}
               <div className="flex items-center gap-4 text-xs text-slate-700">
@@ -1632,7 +1644,8 @@ const ProjectFunnelPage: React.FC = () => {
               <button onClick={() => setIsAddExistingOpen(false)} className="px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-700 hover:bg-slate-50">Close</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
