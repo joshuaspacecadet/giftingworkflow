@@ -1595,6 +1595,9 @@ const ProjectFunnelPage: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <div className="font-medium text-slate-900 truncate">{c.name}</div>
+                            {alreadyLinked && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded border text-[10px] bg-green-50 text-green-700 border-green-200">Added</span>
+                            )}
                             {c.company && (
                               <div className="text-xs text-slate-600 truncate">• {c.company}</div>
                             )}
@@ -1657,6 +1660,8 @@ const ProjectFunnelPage: React.FC = () => {
                                     return exists ? prev.map((pc) => (pc.id === c.id ? fresh : pc)) : [...prev, fresh];
                                   });
                                   setProject((prev) => prev ? { ...prev, linkedContacts: Array.from(new Set([...(prev.linkedContacts || []), c.id])) } : prev);
+                                  // Update modal dataset so badges and available items reflect immediately
+                                  setAllContactsDataset((prev) => prev.map((ac) => (ac.id === c.id ? fresh : ac)));
                                 }
                                 // Clear selection for this contact
                                 setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { magic: false, sfs: false, golden: false } }));
