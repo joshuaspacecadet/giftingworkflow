@@ -766,7 +766,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   { key: "magicCards" as const, label: "Magic Cards", sent: previouslySent.magicCards },
                   { key: "sfsBook" as const, label: "SFS Book", sent: previouslySent.sfsBook },
                   { key: "goldenRecord" as const, label: "Golden Record", sent: previouslySent.goldenRecord },
-                  { key: "cardsAgainstReality" as const, label: "Cards Against Reality", sent: previouslySent.cardsAgainstReality },
+                  { key: "cardsAgainstReality" as const, label: "Cards Against", sent: previouslySent.cardsAgainstReality },
                   { key: "fundIiVideo" as const, label: "Fund II Video", sent: previouslySent.fundIiVideo },
                 ].filter((i) => i.sent);
 

@@ -234,7 +234,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
                   return arr.length > 0 && !arr.includes(thisProjectId);
                 }),
                 ...(((linked.cardsAgainstReality || []).length > 0 && !linked.cardsAgainstReality.includes(thisProjectId))
-                  ? [{ key: 'cardsAgainstReality' as const, label: 'Cards Against Reality' }]
+                  ? [{ key: 'cardsAgainstReality' as const, label: 'Cards Against' }]
                   : []),
                 ...(((linked.fundIiVideo || []).length > 0 && !linked.fundIiVideo.includes(thisProjectId))
                   ? [{ key: 'fundIiVideo' as const, label: 'Fund II Video' }]
