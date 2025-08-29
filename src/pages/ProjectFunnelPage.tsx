@@ -867,7 +867,7 @@ const ProjectFunnelPage: React.FC = () => {
         >
           <div className="space-y-6">
             {/* Contact Management Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between rounded-lg bg-slate-50 p-3 border border-slate-200">
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
               <div className="flex items-center space-x-4">
                 {PREDEFINED_CONTACT_CREATORS.length > 0 && (
                   <>
