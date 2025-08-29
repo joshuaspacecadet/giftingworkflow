@@ -854,11 +854,11 @@ const ProjectFunnelPage: React.FC = () => {
         >
           <div className="space-y-6">
             {/* Contact Management Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 rounded-lg bg-slate-50 p-3 border border-slate-200">
+              <div className="flex items-center flex-wrap gap-3">
                 {PREDEFINED_CONTACT_CREATORS.length > 0 && (
                   <>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <Filter className="h-4 w-4 text-slate-500" />
                       <label
                         htmlFor="contact-filter"
@@ -894,7 +894,7 @@ const ProjectFunnelPage: React.FC = () => {
                   </>
                 )}
                 {/* Show/Hide completed toggle */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2 ml-1">
                   <span className="text-sm font-medium text-slate-700">Show completed</span>
                   <button
                     type="button"
@@ -913,36 +913,29 @@ const ProjectFunnelPage: React.FC = () => {
                   </button>
                 </div>
                 {/* Status counts */}
-                <div className="hidden sm:flex items-center flex-wrap gap-2 ml-2">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-green-50 text-green-700 border-green-200">Approved: {statusCounts.approve}</span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200">Send Later: {statusCounts.sendLater}</span>
+                <div className="flex items-center flex-wrap gap-2 ml-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] bg-green-50 text-green-700 border-green-200">Approved: {statusCounts.approve}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200">Send Later: {statusCounts.sendLater}</span>
                 </div>
               </div>
-              {/* Status counts (mobile) */}
-              <div className="sm:hidden w-full -mt-2">
-                <div className="flex items-center flex-wrap gap-2">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-green-50 text-green-700 border-green-200">Approved: {statusCounts.approve}</span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200">Send Later: {statusCounts.sendLater}</span>
-                </div>
+              <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                <button
+                  onClick={() => setIsAddExistingOpen(true)}
+                  className="flex items-center gap-2 px-3.5 py-2 bg-white text-slate-700 rounded-md border border-slate-300 hover:bg-white hover:border-slate-400 shadow-sm transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isStageCompleted('Contacts')}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Add Existing</span>
+                </button>
+                <button
+                  onClick={handleCreateContact}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isStageCompleted('Contacts')}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create Recipient</span>
+                </button>
               </div>
-
-              <button
-                onClick={() => setIsAddExistingOpen(true)}
-                className="flex items-center space-x-2 px-4 py-2 bg-white text-slate-700 rounded-lg border border-slate-300 hover:bg-slate-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isStageCompleted("Contacts")}
-              >
-                <Search className="h-4 w-4" />
-                <span>Add Existing</span>
-              </button>
-
-              <button
-                onClick={handleCreateContact}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isStageCompleted("Contacts")}
-              >
-                <Plus className="h-4 w-4" />
-                <span>Create Recipient</span>
-              </button>
             </div>
 
             {/* Contacts Grid */}
