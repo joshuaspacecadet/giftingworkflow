@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Calendar,
   Upload,
+  Loader2,
 } from "lucide-react";
 import { Project, ProjectStage, Contact } from "../types";
 import { AirtableService } from "../services/airtable";
@@ -1552,7 +1553,10 @@ const ProjectFunnelPage: React.FC = () => {
             )}
             <div className="max-h-[50vh] overflow-auto border border-slate-200 rounded">
               {isLoadingAllContacts ? (
-                <div className="p-4 text-sm text-slate-500">Loading contacts…</div>
+                <div className="p-6 flex items-center justify-center text-sm text-slate-500 gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span>Loading contacts…</span>
+                </div>
               ) : filteredExistingResults.length === 0 ? (
                 <div className="p-4 text-sm text-slate-500">No matching contacts.</div>
               ) : (
