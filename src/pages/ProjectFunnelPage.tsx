@@ -157,6 +157,52 @@ const ProjectFunnelPage: React.FC = () => {
   const [isSearchingExisting, setIsSearchingExisting] = useState<boolean>(false);
   const [existingResults, setExistingResults] = useState<Contact[]>([]);
   const [addExistingError, setAddExistingError] = useState<string>("");
+  // All contacts dataset for Add Existing modal
+  const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
+  const [isLoadingAllContacts, setIsLoadingAllContacts] = useState<boolean>(false);
+  // Filters: show who has NOT been sent these items (ever)
+  const [filterNotMagic, setFilterNotMagic] = useState<boolean>(false);
+  const [filterNotSfs, setFilterNotSfs] = useState<boolean>(false);
+  const [filterNotGolden, setFilterNotGolden] = useState<boolean>(false);
+
+  // When opening the Add Existing modal, load all contacts once
+  useEffect(() => {
+    const loadAll = async () => {
+      if (!isAddExistingOpen) return;
+      setAddExistingError("");
+      setIsLoadingAllContacts(true);
+      try {
+        const all = await AirtableService.getContacts();
+        // Sort by name ascending
+        const sorted = [...all].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        setAllContactsDataset(sorted);
+      } catch (e) {
+        console.error('Failed to load all contacts for Add Existing', e);
+        setAddExistingError('Failed to load contacts.');
+      } finally {
+        setIsLoadingAllContacts(false);
+      }
+    };
+    loadAll();
+  }, [isAddExistingOpen]);
+
+  // Compute filtered results client-side from dataset, search, and filters
+  const filteredExistingResults = useMemo(() => {
+    const q = existingSearch.trim().toLowerCase();
+    return (allContactsDataset || []).filter((c) => {
+      const matchesQuery = !q ||
+        (c.name || '').toLowerCase().includes(q) ||
+        (c.company || '').toLowerCase().includes(q);
+      if (!matchesQuery) return false;
+      const notSentMagic = (c.magicCardsProjects || []).length === 0;
+      const notSentSfs = (c.sfsBookProjects || []).length === 0;
+      const notSentGolden = (c.goldenRecordProjects || []).length === 0;
+      if (filterNotMagic && !notSentMagic) return false;
+      if (filterNotSfs && !notSentSfs) return false;
+      if (filterNotGolden && !notSentGolden) return false;
+      return true;
+    });
+  }, [allContactsDataset, existingSearch, filterNotMagic, filterNotSfs, filterNotGolden]);
 
   // Refs for scrolling to stages
   const contactsStageRef = useRef<HTMLDivElement>(null);
@@ -1457,7 +1503,25 @@ const ProjectFunnelPage: React.FC = () => {
               </button>
             </div>
             <p className="text-xs text-slate-600 mb-3">Search by name or company. You can add an existing contact to this project's recipient list. Their review status will be cleared.</p>
-            <div className="flex gap-2 mb-3">
+            <div className="flex flex-col gap-2 mb-3">
+              {/* Filters row */}
+              <div className="flex items-center gap-4 text-xs text-slate-700">
+                <span className="font-medium">Show only contacts who have not been sent:</span>
+                <label className="inline-flex items-center gap-1">
+                  <input type="checkbox" checked={filterNotMagic} onChange={(e) => setFilterNotMagic(e.target.checked)} />
+                  <span>Magic Cards</span>
+                </label>
+                <label className="inline-flex items-center gap-1">
+                  <input type="checkbox" checked={filterNotSfs} onChange={(e) => setFilterNotSfs(e.target.checked)} />
+                  <span>SFS Book</span>
+                </label>
+                <label className="inline-flex items-center gap-1">
+                  <input type="checkbox" checked={filterNotGolden} onChange={(e) => setFilterNotGolden(e.target.checked)} />
+                  <span>Golden Record</span>
+                </label>
+              </div>
+              {/* Search row */}
+              <div className="flex gap-2">
               <div className="flex-1">
                 <input
                   type="text"
@@ -1465,16 +1529,8 @@ const ProjectFunnelPage: React.FC = () => {
                   onChange={(e) => setExistingSearch(e.target.value)}
                   onKeyDown={async (e) => {
                     if (e.key === 'Enter') {
-                      setIsSearchingExisting(true);
-                      setAddExistingError("");
-                      try {
-                        const results = await AirtableService.searchContactsByNameOrCompany(existingSearch, 25);
-                        setExistingResults(results);
-                      } catch (err) {
-                        setAddExistingError("Search failed. Please try again.");
-                      } finally {
-                        setIsSearchingExisting(false);
-                      }
+                      // No remote search; results compute automatically
+                      e.preventDefault();
                     }
                   }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1482,32 +1538,24 @@ const ProjectFunnelPage: React.FC = () => {
                 />
               </div>
               <button
-                onClick={async () => {
-                  setIsSearchingExisting(true);
-                  setAddExistingError("");
-                  try {
-                    const results = await AirtableService.searchContactsByNameOrCompany(existingSearch, 25);
-                    setExistingResults(results);
-                  } catch (err) {
-                    setAddExistingError("Search failed. Please try again.");
-                  } finally {
-                    setIsSearchingExisting(false);
-                  }
-                }}
+                onClick={() => { /* client-side filter updates automatically */ }}
                 className="px-3 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
               >
-                {isSearchingExisting ? 'Searching…' : 'Search'}
+                Apply
               </button>
+              </div>
             </div>
             {addExistingError && (
               <div className="text-xs text-red-600 mb-2">{addExistingError}</div>
             )}
             <div className="max-h-[50vh] overflow-auto border border-slate-200 rounded">
-              {existingResults.length === 0 ? (
-                <div className="p-4 text-sm text-slate-500">{isSearchingExisting ? 'Searching…' : 'No results yet.'}</div>
+              {isLoadingAllContacts ? (
+                <div className="p-4 text-sm text-slate-500">Loading contacts…</div>
+              ) : filteredExistingResults.length === 0 ? (
+                <div className="p-4 text-sm text-slate-500">No matching contacts.</div>
               ) : (
                 <ul className="divide-y divide-slate-200">
-                  {existingResults.map((c) => {
+                  {filteredExistingResults.map((c) => {
                     const alreadyLinked = (project.linkedContacts || []).includes(c.id);
                     const alreadySent: { label: string; sent: boolean }[] = [
                       { label: 'Magic Cards', sent: (c.magicCardsProjects || []).length > 0 },
