@@ -9,6 +9,7 @@ import {
   Palette,
   Filter,
   Hash,
+  Search,
   ExternalLink,
   Calendar,
   Upload,
@@ -149,6 +150,13 @@ const ProjectFunnelPage: React.FC = () => {
     useState<string>("");
   // Stage 1: toggle to show/hide completed contacts (Approve / Send Later / Remove)
   const [showCompletedContacts, setShowCompletedContacts] = useState<boolean>(false);
+
+  // Add Existing modal state
+  const [isAddExistingOpen, setIsAddExistingOpen] = useState<boolean>(false);
+  const [existingSearch, setExistingSearch] = useState<string>("");
+  const [isSearchingExisting, setIsSearchingExisting] = useState<boolean>(false);
+  const [existingResults, setExistingResults] = useState<Contact[]>([]);
+  const [addExistingError, setAddExistingError] = useState<string>("");
 
   // Refs for scrolling to stages
   const contactsStageRef = useRef<HTMLDivElement>(null);
@@ -873,6 +881,15 @@ const ProjectFunnelPage: React.FC = () => {
               </div>
 
               <button
+                onClick={() => setIsAddExistingOpen(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-white text-slate-700 rounded-lg border border-slate-300 hover:bg-slate-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isStageCompleted("Contacts")}
+              >
+                <Search className="h-4 w-4" />
+                <span>Add Existing</span>
+              </button>
+
+              <button
                 onClick={handleCreateContact}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isStageCompleted("Contacts")}
@@ -1418,6 +1435,151 @@ const ProjectFunnelPage: React.FC = () => {
         availableCreators={PREDEFINED_CONTACT_CREATORS}
         currentProjectId={project.id}
       />
+
+      {/* Add Existing Modal */}
+      {isAddExistingOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-[1000] flex items-center justify-center p-4"
+          onClick={() => setIsAddExistingOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-slate-900">Add Existing Recipient</h4>
+              <button
+                onClick={() => setIsAddExistingOpen(false)}
+                className="text-slate-400 hover:text-slate-600"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-xs text-slate-600 mb-3">Search by name or company. You can add an existing contact to this project's recipient list. Their review status will be cleared.</p>
+            <div className="flex gap-2 mb-3">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={existingSearch}
+                  onChange={(e) => setExistingSearch(e.target.value)}
+                  onKeyDown={async (e) => {
+                    if (e.key === 'Enter') {
+                      setIsSearchingExisting(true);
+                      setAddExistingError("");
+                      try {
+                        const results = await AirtableService.searchContactsByNameOrCompany(existingSearch, 25);
+                        setExistingResults(results);
+                      } catch (err) {
+                        setAddExistingError("Search failed. Please try again.");
+                      } finally {
+                        setIsSearchingExisting(false);
+                      }
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Search recipients by name or company"
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  setIsSearchingExisting(true);
+                  setAddExistingError("");
+                  try {
+                    const results = await AirtableService.searchContactsByNameOrCompany(existingSearch, 25);
+                    setExistingResults(results);
+                  } catch (err) {
+                    setAddExistingError("Search failed. Please try again.");
+                  } finally {
+                    setIsSearchingExisting(false);
+                  }
+                }}
+                className="px-3 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
+              >
+                {isSearchingExisting ? 'Searching…' : 'Search'}
+              </button>
+            </div>
+            {addExistingError && (
+              <div className="text-xs text-red-600 mb-2">{addExistingError}</div>
+            )}
+            <div className="max-h-[50vh] overflow-auto border border-slate-200 rounded">
+              {existingResults.length === 0 ? (
+                <div className="p-4 text-sm text-slate-500">{isSearchingExisting ? 'Searching…' : 'No results yet.'}</div>
+              ) : (
+                <ul className="divide-y divide-slate-200">
+                  {existingResults.map((c) => {
+                    const alreadyLinked = (project.linkedContacts || []).includes(c.id);
+                    const alreadySent: { label: string; sent: boolean }[] = [
+                      { label: 'Magic Cards', sent: (c.magicCardsProjects || []).length > 0 },
+                      { label: 'SFS Book', sent: (c.sfsBookProjects || []).length > 0 },
+                      { label: 'Golden Record', sent: (c.goldenRecordProjects || []).length > 0 },
+                      { label: 'Cards Against', sent: ((c as any).cardsAgainstRealityProjects || []).length > 0 },
+                      { label: 'Fund II Video', sent: ((c as any).fundIiVideoProjects || []).length > 0 },
+                    ].filter((i) => i.sent);
+                    return (
+                      <li key={c.id} className="p-3 flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium text-slate-900 truncate">{c.name}</div>
+                            {c.company && (
+                              <div className="text-xs text-slate-600 truncate">• {c.company}</div>
+                            )}
+                          </div>
+                          {alreadySent.length > 0 && (
+                            <div className="mt-1 text-[11px] text-slate-700">
+                              <span className="mr-1">Already sent:</span>
+                              <span className="inline-flex flex-wrap gap-1 align-middle">
+                                {alreadySent.map((i, idx) => (
+                                  <span key={`${c.id}-sent-${idx}`} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                    {i.label}
+                                  </span>
+                                ))}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="shrink-0">
+                          <button
+                            className={`px-2.5 py-1 text-xs rounded border font-medium ${alreadyLinked ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}`}
+                            disabled={alreadyLinked}
+                            onClick={async () => {
+                              if (!project) return;
+                              try {
+                                // Clear review status and feedback
+                                await AirtableService.updateContact(c.id, { contactReview: null as any, contactReviewFeedback: '' });
+                                // Link to project
+                                const success = await AirtableService.linkContactToProject(project.id, c.id);
+                                if (success) {
+                                  // Fetch latest contact record and update local state
+                                  const [fresh] = await AirtableService.getContactsByIds([c.id]);
+                                  if (fresh) {
+                                    setContacts((prev) => {
+                                      const exists = prev.some((pc) => pc.id === c.id);
+                                      return exists ? prev.map((pc) => (pc.id === c.id ? fresh : pc)) : [...prev, fresh];
+                                    });
+                                    setProject((prev) => prev ? { ...prev, linkedContacts: Array.from(new Set([...(prev.linkedContacts || []), c.id])) } : prev);
+                                  }
+                                }
+                              } catch (e) {
+                                console.error('Failed to add existing contact', e);
+                              }
+                            }}
+                          >
+                            {alreadyLinked ? 'Added' : 'Add to Project'}
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+            <div className="flex justify-end mt-3">
+              <button onClick={() => setIsAddExistingOpen(false)} className="px-3 py-1.5 text-xs rounded border border-slate-300 text-slate-700 hover:bg-slate-50">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

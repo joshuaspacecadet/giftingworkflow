@@ -263,6 +263,34 @@ export class AirtableService {
     }
   }
 
+  // Search contacts by name OR company (case-insensitive)
+  static async searchContactsByNameOrCompany(query: string, limit: number = 15): Promise<Contact[]> {
+    if (!base) {
+      console.warn("Airtable not configured");
+      return [];
+    }
+
+    const trimmed = (query || "").trim();
+    if (!trimmed) return [];
+
+    try {
+      const q = trimmed.replace(/"/g, '\\"');
+      const filterFormula = `OR(FIND(LOWER("${q}"), LOWER({Recipient Name*})), FIND(LOWER("${q}"), LOWER({Company})))`;
+      const records = await base(airtableConfig.tables.contacts)
+        .select({
+          filterByFormula: filterFormula,
+          maxRecords: limit,
+          sort: [{ field: "Recipient Name*", direction: "asc" }],
+        })
+        .all();
+
+      return records.map(transformAirtableContact);
+    } catch (error) {
+      console.error("Error searching contacts by name or company:", error);
+      return [];
+    }
+  }
+
   // Fixed method to fetch contacts by their IDs - removed sort option
   static async getContactsByIds(contactIds: string[]): Promise<Contact[]> {
     if (!base || !contactIds || contactIds.length === 0) {
