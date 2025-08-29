@@ -166,6 +166,8 @@ const ProjectFunnelPage: React.FC = () => {
   const [filterNotMagic, setFilterNotMagic] = useState<boolean>(false);
   const [filterNotSfs, setFilterNotSfs] = useState<boolean>(false);
   const [filterNotGolden, setFilterNotGolden] = useState<boolean>(false);
+  // Per-result item selections
+  const [selectedItemsByContact, setSelectedItemsByContact] = useState<Record<string, { magic: boolean; sfs: boolean; golden: boolean }>>({});
 
   // When opening the Add Existing modal, load all contacts once
   useEffect(() => {
@@ -1582,6 +1584,12 @@ const ProjectFunnelPage: React.FC = () => {
                       { label: 'Cards Against', sent: ((c as any).cardsAgainstRealityProjects || []).length > 0 },
                       { label: 'Fund II Video', sent: ((c as any).fundIiVideoProjects || []).length > 0 },
                     ].filter((i) => i.sent);
+                    const available = {
+                      magic: (c.magicCardsProjects || []).length === 0 || (c.magicCardsProjects || []).includes(project.id),
+                      sfs: (c.sfsBookProjects || []).length === 0 || (c.sfsBookProjects || []).includes(project.id),
+                      golden: (c.goldenRecordProjects || []).length === 0 || (c.goldenRecordProjects || []).includes(project.id),
+                    };
+                    const sel = selectedItemsByContact[c.id] || { magic: false, sfs: false, golden: false };
                     return (
                       <li key={c.id} className="p-3 flex items-start gap-3">
                         <div className="flex-1 min-w-0">
@@ -1590,6 +1598,21 @@ const ProjectFunnelPage: React.FC = () => {
                             {c.company && (
                               <div className="text-xs text-slate-600 truncate">• {c.company}</div>
                             )}
+                          </div>
+                          {/* Item selection row */}
+                          <div className="mt-2 text-xs text-slate-700 flex flex-wrap gap-3">
+                            <label className={`inline-flex items-center gap-1 ${!available.magic ? 'opacity-50 cursor-not-allowed' : ''}`} title={!available.magic ? 'Already sent in another project' : ''}>
+                              <input type="checkbox" disabled={!available.magic} checked={sel.magic} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), magic: e.target.checked } }))} />
+                              <span>Magic Cards</span>
+                            </label>
+                            <label className={`inline-flex items-center gap-1 ${!available.sfs ? 'opacity-50 cursor-not-allowed' : ''}`} title={!available.sfs ? 'Already sent in another project' : ''}>
+                              <input type="checkbox" disabled={!available.sfs} checked={sel.sfs} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), sfs: e.target.checked } }))} />
+                              <span>SFS Book</span>
+                            </label>
+                            <label className={`inline-flex items-center gap-1 ${!available.golden ? 'opacity-50 cursor-not-allowed' : ''}`} title={!available.golden ? 'Already sent in another project' : ''}>
+                              <input type="checkbox" disabled={!available.golden} checked={sel.golden} onChange={(e) => setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { ...(prev[c.id] || { magic: false, sfs: false, golden: false }), golden: e.target.checked } }))} />
+                              <span>Golden Record</span>
+                            </label>
                           </div>
                           {alreadySent.length > 0 && (
                             <div className="mt-1 text-[11px] text-slate-700">
@@ -1606,32 +1629,43 @@ const ProjectFunnelPage: React.FC = () => {
                         </div>
                         <div className="shrink-0">
                           <button
-                            className={`px-2.5 py-1 text-xs rounded border font-medium ${alreadyLinked ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}`}
-                            disabled={alreadyLinked}
+                            className={`px-2.5 py-1 text-xs rounded border font-medium ${sel.magic || sel.sfs || sel.golden ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed'}`}
+                            disabled={!(sel.magic || sel.sfs || sel.golden)}
                             onClick={async () => {
                               if (!project) return;
                               try {
-                                // Clear review status and feedback
-                                await AirtableService.updateContact(c.id, { contactReview: null as any, contactReviewFeedback: '' });
-                                // Link to project
-                                const success = await AirtableService.linkContactToProject(project.id, c.id);
-                                if (success) {
-                                  // Fetch latest contact record and update local state
-                                  const [fresh] = await AirtableService.getContactsByIds([c.id]);
-                                  if (fresh) {
-                                    setContacts((prev) => {
-                                      const exists = prev.some((pc) => pc.id === c.id);
-                                      return exists ? prev.map((pc) => (pc.id === c.id ? fresh : pc)) : [...prev, fresh];
-                                    });
-                                    setProject((prev) => prev ? { ...prev, linkedContacts: Array.from(new Set([...(prev.linkedContacts || []), c.id])) } : prev);
-                                  }
+                                // Prepare item updates
+                                const pid = project.id;
+                                const mcArr = (c.magicCardsProjects || []);
+                                const sfsArr = (c.sfsBookProjects || []);
+                                const grArr = (c.goldenRecordProjects || []);
+                                const updates: Partial<Contact> = { contactReview: null as any, contactReviewFeedback: '' } as Partial<Contact>;
+                                if (sel.magic && available.magic) (updates as any).magicCardsProjects = Array.from(new Set([...mcArr, pid]));
+                                if (sel.sfs && available.sfs) (updates as any).sfsBookProjects = Array.from(new Set([...sfsArr, pid]));
+                                if (sel.golden && available.golden) (updates as any).goldenRecordProjects = Array.from(new Set([...grArr, pid]));
+                                // Save selected items
+                                await AirtableService.updateContact(c.id, updates);
+                                // Link to project (idempotent)
+                                if (!alreadyLinked) {
+                                  await AirtableService.linkContactToProject(project.id, c.id);
                                 }
+                                // Fetch latest contact record and update local state
+                                const [fresh] = await AirtableService.getContactsByIds([c.id]);
+                                if (fresh) {
+                                  setContacts((prev) => {
+                                    const exists = prev.some((pc) => pc.id === c.id);
+                                    return exists ? prev.map((pc) => (pc.id === c.id ? fresh : pc)) : [...prev, fresh];
+                                  });
+                                  setProject((prev) => prev ? { ...prev, linkedContacts: Array.from(new Set([...(prev.linkedContacts || []), c.id])) } : prev);
+                                }
+                                // Clear selection for this contact
+                                setSelectedItemsByContact((prev) => ({ ...prev, [c.id]: { magic: false, sfs: false, golden: false } }));
                               } catch (e) {
                                 console.error('Failed to add existing contact', e);
                               }
                             }}
                           >
-                            {alreadyLinked ? 'Added' : 'Add to Project'}
+                            Add Selected
                           </button>
                         </div>
                       </li>
