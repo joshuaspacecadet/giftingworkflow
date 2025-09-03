@@ -201,6 +201,19 @@ const ProjectFunnelPage: React.FC = () => {
     }
   }, [isAddExistingOpen]);
 
+  // Reset Add Existing modal state when opened
+  useEffect(() => {
+    if (isAddExistingOpen) {
+      setExistingSearch("");
+      setIsSearchingExisting(false);
+      setAddExistingError("");
+      setFilterNotMagic(false);
+      setFilterNotSfs(false);
+      setFilterNotGolden(false);
+      setSelectedItemsByContact({});
+    }
+  }, [isAddExistingOpen]);
+
   // Compute filtered results client-side from dataset, search, and filters
   const filteredExistingResults = useMemo(() => {
     const q = existingSearch.trim().toLowerCase();
