@@ -435,7 +435,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
           }}
           disabled={isStageLocked}
         >
-          Send Later
+          Save for Later
         </button>
         <button
           className={`px-2.5 py-1 text-xs rounded border transition-colors bg-white text-red-700 border-red-300 hover:bg-red-50`}
