@@ -979,7 +979,8 @@ const ProjectFunnelPage: React.FC = () => {
                 {!selectedFilterCreator && (
                   <button
                     onClick={handleCreateContact}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isStageCompleted("Contacts")}
                   >
                     Add First Contact
                   </button>
