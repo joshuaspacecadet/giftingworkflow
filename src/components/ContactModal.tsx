@@ -151,7 +151,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setLinkedinUrlError("");
     setSelectedExistingContact(contact ?? null);
     setItemsError("");
-  }, [contact]);
+  }, [contact, isOpen, currentProjectId]);
 
   // Clear items error when a new selection is made or availability changes
   useEffect(() => {
