@@ -15,7 +15,7 @@ const ContactCopyEditor: React.FC<ContactCopyEditorProps> = ({
 }) => {
   const [copyData, setCopyData] = useState({
     copyTitle1: contact.copyTitle1 || '',
-    copyTitle2: contact.copyTitle2 || '',
+    copyTitle2: (contact.copyTitle2 && contact.copyTitle2.length > 0) ? contact.copyTitle2 : 'Human Creature - ',
     copyTitle3: (contact as any).copyTitle3 || '',
     copyMainText: contact.copyMainText || '',
     imageDirection: contact.imageDirection || ''
@@ -27,7 +27,7 @@ const ContactCopyEditor: React.FC<ContactCopyEditorProps> = ({
   useEffect(() => {
     setCopyData({
       copyTitle1: contact.copyTitle1 || '',
-      copyTitle2: contact.copyTitle2 || '',
+      copyTitle2: (contact.copyTitle2 && contact.copyTitle2.length > 0) ? contact.copyTitle2 : 'Human Creature - ',
       copyTitle3: (contact as any).copyTitle3 || '',
       copyMainText: contact.copyMainText || '',
       imageDirection: contact.imageDirection || ''
@@ -37,7 +37,16 @@ const ContactCopyEditor: React.FC<ContactCopyEditorProps> = ({
   }, [contact]);
 
   const handleInputChange = (field: keyof typeof copyData, value: string) => {
-    setCopyData(prev => ({ ...prev, [field]: value }));
+    // Enforce character limits per field
+    let limited = value;
+    if (field === 'copyTitle1') {
+      limited = value.slice(0, 24);
+    } else if (field === 'copyTitle2') {
+      limited = value.slice(0, 36);
+    } else if (field === 'copyMainText') {
+      limited = value.slice(0, 362);
+    }
+    setCopyData(prev => ({ ...prev, [field]: limited }));
     setHasChanges(true);
     setSaveStatus('idle');
   };
@@ -178,6 +187,7 @@ const ContactCopyEditor: React.FC<ContactCopyEditorProps> = ({
             disabled={isReadOnly}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500"
             placeholder="Enter first title line..."
+            maxLength={24}
           />
         </div>
 
@@ -191,7 +201,8 @@ const ContactCopyEditor: React.FC<ContactCopyEditorProps> = ({
             onChange={(e) => handleInputChange('copyTitle2', e.target.value)}
             disabled={isReadOnly}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500"
-            placeholder="Enter second title line..."
+            placeholder="Human Creature - "
+            maxLength={36}
           />
         </div>
 
@@ -220,6 +231,7 @@ const ContactCopyEditor: React.FC<ContactCopyEditorProps> = ({
             rows={4}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500"
             placeholder="Enter main copy text..."
+            maxLength={362}
           />
         </div>
 
