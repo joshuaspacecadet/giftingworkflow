@@ -367,10 +367,18 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
     }
   };
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const handleFilePreview = (file: AirtableAttachment) => {
+  const [previewGroup, setPreviewGroup] = useState<AirtableAttachment[] | null>(null);
+  const [previewStartIndex, setPreviewStartIndex] = useState<number>(0);
+  const openPreviewGrid = (group: AirtableAttachment[], clicked: AirtableAttachment) => {
+    const images = group.filter((f) => isImage(f));
+    if (images.length === 0) return;
+    const startIdx = images.findIndex((img) => img.url === clicked.url);
+    setPreviewGroup(images);
+    setPreviewStartIndex(startIdx >= 0 ? startIdx : 0);
+  };
+  const handlePreviewClick = (group: AirtableAttachment[], file: AirtableAttachment) => {
     if (isImage(file)) {
-      setPreviewUrl(file.url);
+      openPreviewGrid(group, file);
     } else {
       window.open(file.url, "_blank");
     }
@@ -441,24 +449,33 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-6 space-y-6">
-      {previewUrl && (
+      {previewGroup && (
         <div
           className="fixed inset-0 bg-black/80 z-[1000] flex items-center justify-center p-4"
-          onClick={() => setPreviewUrl(null)}
+          onClick={() => setPreviewGroup(null)}
         >
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            onClick={() => setPreviewUrl(null)}
-            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
-            aria-label="Close preview"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="w-full max-w-[95vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-white text-sm opacity-80">
+                Viewing {previewGroup.length} image{previewGroup.length === 1 ? '' : 's'}
+              </div>
+              <button
+                onClick={() => setPreviewGroup(null)}
+                className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
+                aria-label="Close preview"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto max-h-[82vh]">
+              {previewGroup.map((img, idx) => (
+                <div key={idx} className={`bg-white rounded border overflow-hidden ${idx === previewStartIndex ? 'ring-2 ring-blue-500' : ''}`}>
+                  <img src={img.url} alt={img.filename} className="w-full h-full object-contain max-h-[70vh]" />
+                  <div className="text-xs text-slate-600 p-2 truncate">{img.filename}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
       
@@ -554,7 +571,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                     <div key={index} className="relative group bg-slate-50 rounded-lg border border-slate-200 p-4">
                       {isImage(file) ? (
                         <div className="h-64 mb-3 bg-white rounded border overflow-hidden flex items-center justify-center">
-                          <img src={file.url} alt={file.filename} className="max-h-full max-w-full object-contain cursor-pointer hover:opacity-90 transition-opacity" onClick={() => handleFilePreview(file)} />
+                          <img src={file.url} alt={file.filename} className="max-h-full max-w-full object-contain cursor-pointer hover:opacity-90 transition-opacity" onClick={() => handlePreviewClick(previousRoundFiles, file)} />
                         </div>
                       ) : (
                         <div className="h-64 mb-3 bg-white rounded border flex items-center justify-center">
@@ -631,7 +648,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                     <div key={index} className="relative group bg-slate-50 rounded-lg border border-slate-200 p-4">
                       {isImage(file) ? (
                         <div className="h-64 mb-3 bg-white rounded border overflow-hidden flex items-center justify-center">
-                          <img src={file.url} alt={file.filename} className="max-h-full max-w-full object-contain cursor-pointer hover:opacity-90 transition-opacity" onClick={() => handleFilePreview(file)} />
+                          <img src={file.url} alt={file.filename} className="max-h-full max-w-full object-contain cursor-pointer hover:opacity-90 transition-opacity" onClick={() => handlePreviewClick(currentFiles, file)} />
                         </div>
                       ) : (
                         <div className="h-64 mb-3 bg-white rounded border flex items-center justify-center">{getFileIcon(file)}</div>
@@ -733,7 +750,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                   <div key={index} className="relative group bg-slate-50 rounded-lg border border-slate-200 p-4">
                     {isImage(file) ? (
                       <div className="aspect-square mb-3 bg-white rounded border overflow-hidden">
-                        <img src={file.url} alt={file.filename} className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onClick={() => handleFilePreview(file)} />
+                        <img src={file.url} alt={file.filename} className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onClick={() => handlePreviewClick(currentFiles, file)} />
                       </div>
                     ) : (
                       <div className="aspect-square mb-3 bg-white rounded border flex items-center justify-center">{getFileIcon(file)}</div>
@@ -743,7 +760,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                       {file.size && (<p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>)}
                     </div>
                     <div className="flex items-center justify-between mt-3">
-                      <button onClick={() => handleFilePreview(file)} className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-700 transition-colors"><Eye className="h-3 w-3" /><span>Preview</span></button>
+                      <button onClick={() => handlePreviewClick(currentFiles, file)} className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-700 transition-colors"><Eye className="h-3 w-3" /><span>Preview</span></button>
                       {!isReadOnly && (
                         <button onClick={() => setConfirmRemoveIndex(index)} className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 transition-colors"><X className="h-3 w-3" /><span>Remove</span></button>
                       )}
