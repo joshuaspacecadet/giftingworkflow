@@ -369,6 +369,15 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
 
   const [previewGroup, setPreviewGroup] = useState<AirtableAttachment[] | null>(null);
   const [previewStartIndex, setPreviewStartIndex] = useState<number>(0);
+  const getPreviewLayout = (count: number) => {
+    if (count <= 2) return { cols: 2, rows: 1 };
+    if (count <= 4) return { cols: 2, rows: 2 };
+    if (count <= 6) return { cols: 3, rows: 2 };
+    if (count <= 9) return { cols: 3, rows: 3 };
+    const cols = 4;
+    const rows = Math.ceil(count / cols);
+    return { cols, rows };
+  };
   const openPreviewGrid = (group: AirtableAttachment[], clicked: AirtableAttachment) => {
     const images = group.filter((f) => isImage(f));
     if (images.length === 0) return;
@@ -467,14 +476,32 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto max-h-[82vh]">
-              {previewGroup.map((img, idx) => (
-                <div key={idx} className={`bg-white rounded border overflow-hidden ${idx === previewStartIndex ? 'ring-2 ring-blue-500' : ''}`}>
-                  <img src={img.url} alt={img.filename} className="w-full h-full object-contain max-h-[70vh]" />
-                  <div className="text-xs text-slate-600 p-2 truncate">{img.filename}</div>
+            {(() => {
+              const { cols, rows } = getPreviewLayout(previewGroup.length);
+              const gapPx = 16; // Tailwind gap-4
+              const headerPx = 40; // approx header height
+              const containerVh = 82; // we will use 82vh available for grid
+              const perItemHeight = `calc((min(82vh, 82vh) - ${headerPx}px - ${(rows - 1) * gapPx}px) / ${rows})`;
+              return (
+                <div
+                  className="grid gap-4 h-[82vh] overflow-hidden"
+                  style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+                >
+                  {previewGroup.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className={`bg-white rounded border overflow-hidden flex flex-col ${idx === previewStartIndex ? 'ring-2 ring-blue-500' : ''}`}
+                      style={{ height: perItemHeight }}
+                    >
+                      <div className="flex-1 flex items-center justify-center bg-white">
+                        <img src={img.url} alt={img.filename} className="max-w-full max-h-full object-contain" />
+                      </div>
+                      <div className="text-xs text-slate-600 p-2 truncate">{img.filename}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </div>
         </div>
       )}
