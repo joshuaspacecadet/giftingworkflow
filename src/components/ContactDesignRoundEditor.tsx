@@ -54,6 +54,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
   }>({});
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedConfirmUrl, setCopiedConfirmUrl] = useState(false);
+  const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null);
   const [lastAction, setLastAction] = useState<
     "idle" | "upload" | "remove" | "feedback" | "reject"
   >("idle");
@@ -637,8 +638,40 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                       )}
                       <div className="space-y-2"><p className="text-sm font-medium text-slate-900 truncate" title={file.filename}>{file.filename}</p>{file.size && (<p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>)}</div>
                       <div className="flex items-center justify-end mt-3">
-                        {!isReadOnly && (<button onClick={() => handleRemoveFile(index)} className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 transition-colors"><X className="h-3 w-3" /><span>Remove</span></button>)}
+                        {!isReadOnly && (
+                          <button
+                            onClick={() => setConfirmRemoveIndex(index)}
+                            className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 transition-colors"
+                          >
+                            <X className="h-3 w-3" />
+                            <span>Remove</span>
+                          </button>
+                        )}
                       </div>
+                      {confirmRemoveIndex === index && (
+                        <div className="absolute inset-0 z-10 bg-white/95 rounded-lg border-2 border-red-200 p-4 flex flex-col items-center justify-center text-center space-y-3">
+                          <div className="flex items-center text-red-700 font-semibold"><AlertCircle className="h-4 w-4 mr-2" />Remove this file?</div>
+                          <div className="text-xs text-slate-600">This will remove the file from this round.</div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={async () => {
+                                const removeIdx = index;
+                                setConfirmRemoveIndex(null);
+                                await handleRemoveFile(removeIdx);
+                              }}
+                              className="px-3 py-1.5 text-xs font-medium rounded bg-red-600 text-white hover:bg-red-700"
+                            >
+                              Remove
+                            </button>
+                            <button
+                              onClick={() => setConfirmRemoveIndex(null)}
+                              className="px-3 py-1.5 text-xs font-medium rounded bg-slate-200 text-slate-700 hover:bg-slate-300"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -693,7 +726,56 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
           )}
           {errorMessage && (<div className="flex items-start space-x-2 text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200"><AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" /><span>{errorMessage}</span></div>)}
           {currentFiles.length > 0 && (
-            <div className="space-y-4"><h5 className="font-medium text-slate-900">Design Round {currentRound} Files ({currentFiles.length})</h5><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{currentFiles.map((file, index) => (<div key={index} className="relative group bg-slate-50 rounded-lg border border-slate-200 p-4">{isImage(file) ? (<div className="aspect-square mb-3 bg-white rounded border overflow-hidden"><img src={file.url} alt={file.filename} className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onClick={() => handleFilePreview(file)} /></div>) : (<div className="aspect-square mb-3 bg-white rounded border flex items-center justify-center">{getFileIcon(file)}</div>)}<div className="space-y-2"><p className="text-sm font-medium text-slate-900 truncate" title={file.filename}>{file.filename}</p>{file.size && (<p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>)}</div><div className="flex items-center justify-between mt-3"><button onClick={() => handleFilePreview(file)} className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-700 transition-colors"><Eye className="h-3 w-3" /><span>Preview</span></button>{!isReadOnly && (<button onClick={() => handleRemoveFile(index)} className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 transition-colors"><X className="h-3 w-3" /><span>Remove</span></button>)}</div></div>))}</div></div>
+            <div className="space-y-4">
+              <h5 className="font-medium text-slate-900">Design Round {currentRound} Files ({currentFiles.length})</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {currentFiles.map((file, index) => (
+                  <div key={index} className="relative group bg-slate-50 rounded-lg border border-slate-200 p-4">
+                    {isImage(file) ? (
+                      <div className="aspect-square mb-3 bg-white rounded border overflow-hidden">
+                        <img src={file.url} alt={file.filename} className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onClick={() => handleFilePreview(file)} />
+                      </div>
+                    ) : (
+                      <div className="aspect-square mb-3 bg-white rounded border flex items-center justify-center">{getFileIcon(file)}</div>
+                    )}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-900 truncate" title={file.filename}>{file.filename}</p>
+                      {file.size && (<p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>)}
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <button onClick={() => handleFilePreview(file)} className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-700 transition-colors"><Eye className="h-3 w-3" /><span>Preview</span></button>
+                      {!isReadOnly && (
+                        <button onClick={() => setConfirmRemoveIndex(index)} className="flex items-center space-x-1 text-xs text-red-600 hover:text-red-700 transition-colors"><X className="h-3 w-3" /><span>Remove</span></button>
+                      )}
+                    </div>
+                    {confirmRemoveIndex === index && (
+                      <div className="absolute inset-0 z-10 bg-white/95 rounded-lg border-2 border-red-200 p-4 flex flex-col items-center justify-center text-center space-y-3">
+                        <div className="flex items-center text-red-700 font-semibold"><AlertCircle className="h-4 w-4 mr-2" />Remove this file?</div>
+                        <div className="text-xs text-slate-600">This will remove the file from this round.</div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={async () => {
+                              const removeIdx = index;
+                              setConfirmRemoveIndex(null);
+                              await handleRemoveFile(removeIdx);
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium rounded bg-red-600 text-white hover:bg-red-700"
+                          >
+                            Remove
+                          </button>
+                          <button
+                            onClick={() => setConfirmRemoveIndex(null)}
+                            className="px-3 py-1.5 text-xs font-medium rounded bg-slate-200 text-slate-700 hover:bg-slate-300"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
           {renderSuccessBanner()}
           {currentRound !== 3 && (<div className="space-y-4"><h5 className="font-medium text-slate-900">Design Round {currentRound} Feedback</h5><textarea value={feedback} onChange={(e) => handleFeedbackChange(e.target.value)} disabled={isReadOnly || !isRejected} rows={4} className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-500" placeholder={isRejected ? `Enter feedback for ${contact.name}'s design round ${currentRound}...` : 'Feedback enabled after clicking Reject'} />{!isReadOnly && (<div className="flex justify-end"><button onClick={handleSaveFeedback} disabled={!isRejected || !hasChanges || isSaving} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center ${hasChanges && !isSaving && isRejected ? "bg-blue-600 text-white hover:bg-blue-700" : saveStatus === "success" ? "bg-green-600 text-white" : saveStatus === "error" ? "bg-red-600 text-white" : "bg-slate-200 text-slate-500 cursor-not-allowed"}`}>{getSaveButtonContent()}</button></div>)}</div>)}
