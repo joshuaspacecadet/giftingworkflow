@@ -371,7 +371,8 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
   const [previewStartIndex, setPreviewStartIndex] = useState<number>(0);
   const getPreviewLayout = (count: number) => {
     if (count <= 2) return { cols: 2, rows: 1 };
-    if (count <= 4) return { cols: 2, rows: 2 };
+    if (count === 3) return { cols: 2, rows: 2 }; // make images larger
+    if (count === 4) return { cols: 2, rows: 2 };
     if (count <= 6) return { cols: 3, rows: 2 };
     if (count <= 9) return { cols: 3, rows: 3 };
     const cols = 4;
@@ -494,12 +495,12 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
             </div>
             {(() => {
               const { cols, rows } = getPreviewLayout(previewGroup.length);
-              const gapPx = 16; // Tailwind gap-4
+              const gapPx = 8; // Tailwind gap-2
               const headerPx = 40; // approx header height (outside grid)
               const perItemHeight = `calc((100% - ${(rows - 1) * gapPx}px) / ${rows})`;
               return (
                 <div
-                  className="grid gap-4 h-[90vh] overflow-hidden"
+                  className="grid gap-2 h-[95vh] overflow-hidden"
                   style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
                 >
                   {previewGroup.map((img, idx) => (
