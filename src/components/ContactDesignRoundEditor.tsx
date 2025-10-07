@@ -370,9 +370,9 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
   const [previewGroup, setPreviewGroup] = useState<AirtableAttachment[] | null>(null);
   const [previewStartIndex, setPreviewStartIndex] = useState<number>(0);
   const getPreviewLayout = (count: number) => {
-    if (count <= 2) return { cols: 2, rows: 1 };
-    if (count === 3) return { cols: 2, rows: 2 }; // make images larger
-    if (count === 4) return { cols: 2, rows: 2 };
+    // Favor taller tiles by reducing row count for small groups
+    if (count <= 2) return { cols: count, rows: 1 };
+    if (count <= 4) return { cols: count, rows: 1 }; // 1 row for 3-4
     if (count <= 6) return { cols: 3, rows: 2 };
     if (count <= 9) return { cols: 3, rows: 3 };
     const cols = 4;
