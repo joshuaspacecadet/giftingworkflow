@@ -369,6 +369,8 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
 
   const [previewGroup, setPreviewGroup] = useState<AirtableAttachment[] | null>(null);
   const [previewStartIndex, setPreviewStartIndex] = useState<number>(0);
+  const [previewGroupKey, setPreviewGroupKey] = useState<"current" | "previous" | null>(null);
+  const [overlayConfirmIndex, setOverlayConfirmIndex] = useState<number | null>(null);
   const getPreviewLayout = (count: number) => {
     // Favor taller tiles by reducing row count for small groups
     if (count <= 2) return { cols: count, rows: 1 };
@@ -385,6 +387,8 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
     const startIdx = images.findIndex((img) => img.url === clicked.url);
     setPreviewGroup(images);
     setPreviewStartIndex(startIdx >= 0 ? startIdx : 0);
+    setPreviewGroupKey(group === currentFiles ? "current" : "previous");
+    setOverlayConfirmIndex(null);
   };
   const handlePreviewClick = (group: AirtableAttachment[], file: AirtableAttachment) => {
     if (isImage(file)) {
@@ -392,6 +396,25 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
     } else {
       window.open(file.url, "_blank");
     }
+  };
+
+  const handleRemoveFromPreview = async (idx: number) => {
+    if (!previewGroup || previewGroupKey !== "current") return;
+    const target = previewGroup[idx];
+    const indexInCurrent = currentFiles.findIndex(
+      (f) => f.url === target.url && f.filename === target.filename
+    );
+    if (indexInCurrent === -1) {
+      setOverlayConfirmIndex(null);
+      return;
+    }
+    await handleRemoveFile(indexInCurrent);
+    setPreviewGroup((prev) => {
+      if (!prev) return prev;
+      const next = prev.filter((_, i) => i !== idx);
+      return next.length > 0 ? next : null;
+    });
+    setOverlayConfirmIndex(null);
   };
 
   // Lock background scroll when preview is open
@@ -515,6 +538,34 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                       <div className="absolute bottom-0 left-0 right-0 bg-white/80 text-xs text-slate-700 px-2 py-1 truncate">
                         {img.filename}
                       </div>
+                      {previewGroupKey === 'current' && !isReadOnly && (
+                        <div className="absolute top-2 right-2">
+                          {overlayConfirmIndex === idx ? (
+                            <div className="bg-white/95 border border-red-300 rounded shadow p-2 flex items-center space-x-2">
+                              <span className="text-xs text-red-700">Remove?</span>
+                              <button
+                                onClick={() => handleRemoveFromPreview(idx)}
+                                className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                              >
+                                Remove
+                              </button>
+                              <button
+                                onClick={() => setOverlayConfirmIndex(null)}
+                                className="px-2 py-1 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setOverlayConfirmIndex(idx)}
+                              className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
