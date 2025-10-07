@@ -509,7 +509,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                       style={{ height: perItemHeight }}
                     >
                       <div className="absolute inset-0 flex items-center justify-center bg-white">
-                        <img src={img.url} alt={img.filename} className="max-w-full max-h-full object-contain" />
+                        <img src={img.url} alt={img.filename} className="w-full h-full object-contain" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 bg-white/80 text-xs text-slate-700 px-2 py-1 truncate">
                         {img.filename}
