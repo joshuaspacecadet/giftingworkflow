@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Upload,
   X,
@@ -393,6 +393,22 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
     }
   };
 
+  // Lock background scroll when preview is open
+  useEffect(() => {
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const prevHtmlOverflow = htmlEl.style.overflow;
+    const prevBodyOverflow = bodyEl.style.overflow;
+    if (previewGroup) {
+      htmlEl.style.overflow = 'hidden';
+      bodyEl.style.overflow = 'hidden';
+    }
+    return () => {
+      htmlEl.style.overflow = prevHtmlOverflow;
+      bodyEl.style.overflow = prevBodyOverflow;
+    };
+  }, [previewGroup]);
+
   const isImage = (file: AirtableAttachment) => {
     return (
       file.type?.startsWith("image/") ||
@@ -480,8 +496,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
               const { cols, rows } = getPreviewLayout(previewGroup.length);
               const gapPx = 16; // Tailwind gap-4
               const headerPx = 40; // approx header height
-              const containerVh = 82; // we will use 82vh available for grid
-              const perItemHeight = `calc((min(82vh, 82vh) - ${headerPx}px - ${(rows - 1) * gapPx}px) / ${rows})`;
+              const perItemHeight = `calc((82vh - ${headerPx}px - ${(rows - 1) * gapPx}px) / ${rows})`;
               return (
                 <div
                   className="grid gap-4 h-[82vh] overflow-hidden"
@@ -494,7 +509,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                       style={{ height: perItemHeight }}
                     >
                       <div className="flex-1 flex items-center justify-center bg-white">
-                        <img src={img.url} alt={img.filename} className="max-w-full max-h-full object-contain" />
+                        <img src={img.url} alt={img.filename} className="w-full h-full object-contain" />
                       </div>
                       <div className="text-xs text-slate-600 p-2 truncate">{img.filename}</div>
                     </div>
