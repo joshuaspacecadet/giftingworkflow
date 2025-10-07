@@ -505,11 +505,11 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
                   {previewGroup.map((img, idx) => (
                     <div
                       key={idx}
-                      className={`bg-white rounded border overflow-hidden flex flex-col ${idx === previewStartIndex ? 'ring-2 ring-blue-500' : ''}`}
+                      className={`bg-white rounded border flex flex-col ${idx === previewStartIndex ? 'ring-2 ring-blue-500' : ''}`}
                       style={{ height: perItemHeight }}
                     >
                       <div className="flex-1 flex items-center justify-center bg-white">
-                        <img src={img.url} alt={img.filename} className="w-full h-full object-contain" />
+                        <img src={img.url} alt={img.filename} className="max-w-full max-h-full object-contain" />
                       </div>
                       <div className="text-xs text-slate-600 p-2 truncate">{img.filename}</div>
                     </div>
