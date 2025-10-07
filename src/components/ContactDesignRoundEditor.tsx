@@ -480,7 +480,7 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
           className="fixed inset-0 bg-black/80 z-[1000] flex items-center justify-center p-4"
           onClick={() => setPreviewGroup(null)}
         >
-          <div className="w-full max-w-[95vw] max-h-[95vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-[95vw] max-h-[100vh]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <div className="text-white text-sm opacity-80">
                 Viewing {previewGroup.length} image{previewGroup.length === 1 ? '' : 's'}
@@ -500,8 +500,8 @@ const ContactDesignRoundEditor: React.FC<ContactDesignRoundEditorProps> = ({
               const perItemHeight = `calc((100% - ${(rows - 1) * gapPx}px) / ${rows})`;
               return (
                 <div
-                  className="grid gap-2 h-[95vh] overflow-hidden"
-                  style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+                  className="grid gap-2 overflow-hidden"
+                  style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, height: `calc(100vh - ${headerPx + 16}px)` }}
                 >
                   {previewGroup.map((img, idx) => (
                     <div
