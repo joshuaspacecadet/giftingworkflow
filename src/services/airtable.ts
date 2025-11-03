@@ -1,6 +1,6 @@
 import Airtable from "airtable";
 import { airtableConfig } from "../config/airtable";
-import { Project, Contact, ProjectStage, AirtableAttachment } from "../types";
+import { Project, Contact, ProjectStage, AirtableAttachment, SpecificStage } from "../types";
 
 // Initialize Airtable
 let base: Airtable.Base | null = null;
@@ -56,6 +56,7 @@ const transformAirtableContact = (record: any): Contact => {
     confirmAddressUrl: fields["Confirm Address URL"] || "",
     additionalContactContext: fields["Additional Contact Context"] || "",
     contactAddedBy: fields["Contact Added By"] || "", // ADD THIS LINE
+    specificStage: (fields["Specific Stage"] as SpecificStage) || undefined,
     magicCardsProjects: (fields["Magic Cards"] || []) as string[],
     sfsBookProjects: (fields["SFS Book"] || []) as string[],
     goldenRecordProjects: (fields["Golden Record"] || []) as string[],

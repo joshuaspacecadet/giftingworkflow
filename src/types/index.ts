@@ -13,6 +13,18 @@ export interface Project {
   updatedAt: string;
 }
 
+// Single-select from Airtable "Specific Stage" for reviewer dashboard flows
+export type SpecificStage =
+  | 'Review to receive gift'
+  | 'Approved to receive gift'
+  | 'Gathering details'
+  | 'Drafting copy'
+  | 'In design'
+  | 'Design review'
+  | 'Design approved'
+  | 'Fulfillment'
+  | 'Shipped';
+
 export interface Contact {
   id: string;
   name: string;
@@ -31,6 +43,7 @@ export interface Contact {
   confirmAddressUrl?: string;
   additionalContactContext?: string;
   contactAddedBy?: string; // New field for who added the contact
+  specificStage?: SpecificStage; // Maps to Airtable "Specific Stage"
   // Linked projects for each item (Airtable "Link to Projects" fields)
   magicCardsProjects?: string[];
   sfsBookProjects?: string[];

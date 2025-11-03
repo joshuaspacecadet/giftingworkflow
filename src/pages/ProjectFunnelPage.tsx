@@ -169,6 +169,16 @@ const ProjectFunnelPage: React.FC = () => {
   // Per-result item selections
   const [selectedItemsByContact, setSelectedItemsByContact] = useState<Record<string, { magic: boolean; sfs: boolean; golden: boolean }>>({});
 
+  // Deep-link support: open Add Existing modal via ?modal=add-existing
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('modal') === 'add-existing') {
+        setIsAddExistingOpen(true);
+      }
+    } catch {}
+  }, []);
+
   // When opening the Add Existing modal, load all contacts once
   useEffect(() => {
     const loadAll = async () => {
