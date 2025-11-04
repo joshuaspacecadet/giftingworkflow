@@ -507,10 +507,17 @@ const ReviewerDashboardPage: React.FC = () => {
                             <button
                               onClick={async ()=>{
                                 try {
+                                  const selected = selectedItemsByContact[c.id] || { magic: false, sfs: false, golden: false };
+                                  const draftOrderItems: string[] = [];
+                                  if (selected.magic) draftOrderItems.push('Magic Cards');
+                                  if (selected.sfs) draftOrderItems.push('SFS Book');
+                                  if (selected.golden) draftOrderItems.push('Golden Record');
+
                                   const updated = await AirtableService.updateContact(c.id, {
                                     contactAddedBy: creator,
                                     specificStage: 'Approved to receive gift' as any,
-                                  });
+                                    ...(draftOrderItems.length > 0 ? { draftOrderItems } : {}),
+                                  } as any);
                                   if (updated) {
                                     setContacts(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
                                     setAllContactsDataset(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
