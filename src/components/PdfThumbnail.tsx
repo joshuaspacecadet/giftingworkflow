@@ -58,18 +58,25 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
 
   if (failed) {
     return (
-      <a href={url} target="_blank" rel="noreferrer" title={alt || 'PDF'}>
-        <div className={`rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center ${className || 'h-16 w-12'}`}>
-          <span className="text-[10px] text-slate-300">PDF</span>
-        </div>
-      </a>
+      <div
+        className={`rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center ${className || 'h-16 w-12'}`}
+        role="img"
+        aria-label={alt || 'PDF'}
+        title={alt || 'PDF'}
+      >
+        <span className="text-[10px] text-slate-300">PDF</span>
+      </div>
     );
   }
 
   return (
-    <a href={url} target="_blank" rel="noreferrer" title={alt || 'PDF'}>
-      <canvas ref={canvasRef} className={`rounded-md border border-[#27282B] bg-[#141518] ${className || 'h-16 w-12'}`} />
-    </a>
+    <canvas
+      ref={canvasRef}
+      className={`rounded-md border border-[#27282B] bg-[#141518] ${className || 'h-16 w-12'}`}
+      role="img"
+      aria-label={alt || 'PDF'}
+      title={alt || 'PDF'}
+    />
   );
 };
 
