@@ -75,7 +75,7 @@ const ReviewerDashboardPage: React.FC = () => {
     return previews;
   }, [designsReady]);
   const designApprovedMissingAddress = filtered.filter(
-    c => c.specificStage === 'Design approved' && (!c.streetLine1 || !c.city || !c.countryCode)
+    c => c.specificStage === 'Fulfillment' && (!c.streetLine1 || !c.city || !c.countryCode)
   );
   const reviewToReceiveGift = filtered.filter(c => c.specificStage === 'Review to receive gift');
 
