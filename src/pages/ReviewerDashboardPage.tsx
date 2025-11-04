@@ -15,7 +15,6 @@ const IN_DESIGN_STAGES: SpecificStage[] = [
   'In design',
   'Design review',
   'Design approved',
-  'Fulfillment',
 ];
 
 const normalizeCreator = (raw?: string): string => {
@@ -89,6 +88,13 @@ const ReviewerDashboardPage: React.FC = () => {
       inDesign: src.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)),
       fulfillment: src.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped'),
     };
+  }, [pipelineSource]);
+
+  // Total count for header: only stages in design pipeline + Fulfillment (exclude empty)
+  const pipelineCount = useMemo(() => {
+    return pipelineSource.filter(
+      (c) => !!c.specificStage && (IN_DESIGN_STAGES.includes(c.specificStage) || c.specificStage === 'Fulfillment')
+    ).length;
   }, [pipelineSource]);
 
   const defaultProject = useMemo(
@@ -280,17 +286,17 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Production Pipeline */}
       <div className="max-w-[1200px] mx-auto px-6 mt-8">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm text-slate-300">Production Pipeline ({pipelineSource.length})</h3>
+          <h3 className="text-sm text-slate-300">Production Pipeline ({pipelineCount})</h3>
           <div className="flex items-center gap-3">
             <span className={`text-xs ${!showAllGifts ? 'text-white' : 'text-slate-400'}`}>{creator}’s Gifts</span>
             <button
               type="button"
               aria-pressed={showAllGifts}
               onClick={() => setShowAllGifts(v => !v)}
-              className={`relative inline-flex h-7 w-14 items-center rounded-full border border-[#3A3B3F] bg-[#1A1B1E] p-0.5 ${showAllGifts ? 'justify-end' : 'justify-start'}`}
+              className={`relative inline-flex h-6 w-12 items-center rounded-full border border-[#3A3B3F] bg-[#1A1B1E] p-0.5`}
               title={showAllGifts ? 'Showing all gifts' : `Showing ${creator}’s gifts`}
             >
-              <span className="inline-block h-6 w-6 rounded-full bg-white shadow" />
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${showAllGifts ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
             <span className={`text-xs ${showAllGifts ? 'text-white' : 'text-slate-400'}`}>All Gifts</span>
           </div>
