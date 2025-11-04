@@ -165,8 +165,11 @@ const ReviewerDashboardPage: React.FC = () => {
                     );
                   })}
                   {designsReady.length > designPreviewAttachments.length && (
-                    <div className="h-[100px] w-[70px] rounded-md border border-[#27282B] bg-[#111214] flex items-center justify-center text-[11px] text-slate-300 shadow-sm">
-                      and {designsReady.length - designPreviewAttachments.length} more...
+                    <div className="h-[100px] w-[70px] rounded-md border border-[#27282B] bg-[#111214] flex items-center justify-center shadow-sm">
+                      <div className="text-center leading-tight">
+                        <div className="text-[13px] font-semibold text-slate-100">+{designsReady.length - designPreviewAttachments.length}</div>
+                        <div className="text-[10px] text-slate-400">more</div>
+                      </div>
                     </div>
                   )}
                 </div>
