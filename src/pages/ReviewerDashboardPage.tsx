@@ -132,7 +132,7 @@ const ReviewerDashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0C] text-white">
+    <div className="min-h-screen bg-[#0B0B0C] text-white pb-24 md:pb-32">
       {/* Header */}
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
         <div>
@@ -311,7 +311,10 @@ const ReviewerDashboardPage: React.FC = () => {
                 <li className="italic text-slate-500">None yet</li>
               ) : (
                 approvedRecipients.slice(0, 50).map(c => (
-                  <li key={c.id} className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
+                  <li key={c.id} className="flex items-center gap-2 truncate">
+                    <span className="text-slate-500">•</span>
+                    <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                  </li>
                 ))
               )}
             </ul>
@@ -326,7 +329,10 @@ const ReviewerDashboardPage: React.FC = () => {
                 <li className="italic text-slate-500">None yet</li>
               ) : (
                 inDesign.slice(0, 50).map(c => (
-                  <li key={c.id} className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
+                  <li key={c.id} className="flex items-center gap-2 truncate">
+                    <span className="text-slate-500">•</span>
+                    <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                  </li>
                 ))
               )}
             </ul>
@@ -341,7 +347,10 @@ const ReviewerDashboardPage: React.FC = () => {
                 <li className="italic text-slate-500">None yet</li>
               ) : (
                 fulfillment.slice(0, 50).map(c => (
-                  <li key={c.id} className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
+                  <li key={c.id} className="flex items-center gap-2 truncate">
+                    <span className="text-slate-500">•</span>
+                    <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                  </li>
                 ))
               )}
             </ul>
