@@ -18,11 +18,11 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
       try {
         // Dynamically import pdfjs from CDN to avoid bundling a large lib
         const pdfjs: any = await import(
-          /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.mjs'
+          /* @vite-ignore */ 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.mjs'
         );
         // Configure worker
         pdfjs.GlobalWorkerOptions.workerSrc =
-          'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+          'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.mjs';
 
         const loadingTask = pdfjs.getDocument({ url });
         const pdf = await loadingTask.promise;
@@ -35,10 +35,10 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
         const context = canvas.getContext('2d');
         if (!context) return;
 
-        // Target canvas size similar to image thumbnails
-        const targetWidth = 48; // px
+        // Target canvas size: 100px tall thumbnail
+        const targetHeight = 100; // px
         const viewport = page.getViewport({ scale: 1 });
-        const scale = targetWidth / viewport.width;
+        const scale = targetHeight / viewport.height;
         const scaled = page.getViewport({ scale });
 
         canvas.width = Math.ceil(scaled.width);
@@ -59,7 +59,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
   if (failed) {
     return (
       <div
-        className={`rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center ${className || 'h-16 w-12'}`}
+        className={`rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center ${className || 'h-[100px] w-20'}`}
         role="img"
         aria-label={alt || 'PDF'}
         title={alt || 'PDF'}
@@ -72,7 +72,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
   return (
     <canvas
       ref={canvasRef}
-      className={`rounded-md border border-[#27282B] bg-[#141518] ${className || 'h-16 w-12'}`}
+      className={`rounded-md border border-[#27282B] bg-[#141518] ${className || 'h-[100px] w-auto'}`}
       role="img"
       aria-label={alt || 'PDF'}
       title={alt || 'PDF'}

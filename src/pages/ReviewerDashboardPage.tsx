@@ -155,7 +155,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         key={a.id || `${a.url}-${idx}`}
                         url={a.url}
                         alt={a.filename || `Design ${idx + 1}`}
-                        className="h-16 w-12"
+                        className="h-[100px] w-auto"
                       />
                     );
                   })}
