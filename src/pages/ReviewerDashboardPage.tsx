@@ -138,7 +138,7 @@ const ReviewerDashboardPage: React.FC = () => {
               </div>
               <ul className="text-xs text-slate-400 space-y-1 max-h-24 overflow-auto pr-1">
                 {designApprovedMissingAddress.slice(0, 6).map(c => (
-                  <li key={c.id}>{c.name || 'Unnamed'}</li>
+                  <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
                 ))}
               </ul>
               <div className="mt-3">
