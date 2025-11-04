@@ -15,6 +15,7 @@ const IN_DESIGN_STAGES: SpecificStage[] = [
   'In design',
   'Design review',
   'Design approved',
+  'Fulfillment',
 ];
 
 const normalizeCreator = (raw?: string): string => {
@@ -286,12 +287,10 @@ const ReviewerDashboardPage: React.FC = () => {
               type="button"
               aria-pressed={showAllGifts}
               onClick={() => setShowAllGifts(v => !v)}
-              className={`relative inline-flex h-6 w-12 items-center rounded-full border border-[#3A3B3F] bg-[#1A1B1E]`}
+              className={`relative inline-flex h-7 w-14 items-center rounded-full border border-[#3A3B3F] bg-[#1A1B1E] p-0.5 ${showAllGifts ? 'justify-end' : 'justify-start'}`}
               title={showAllGifts ? 'Showing all gifts' : `Showing ${creator}’s gifts`}
             >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${showAllGifts ? 'translate-x-6' : 'translate-x-1'}`}
-              />
+              <span className="inline-block h-6 w-6 rounded-full bg-white shadow" />
             </button>
             <span className={`text-xs ${showAllGifts ? 'text-white' : 'text-slate-400'}`}>All Gifts</span>
           </div>
