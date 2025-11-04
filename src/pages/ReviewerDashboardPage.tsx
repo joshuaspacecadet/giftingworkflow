@@ -37,6 +37,10 @@ const ReviewerDashboardPage: React.FC = () => {
   // Create Recipient modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
+  const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
+  const [isLoadingAllContacts, setIsLoadingAllContacts] = useState(false);
+  const [existingSearch, setExistingSearch] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -54,6 +58,21 @@ const ReviewerDashboardPage: React.FC = () => {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    const loadAll = async () => {
+      if (!isAddExistingOpen) return;
+      setIsLoadingAllContacts(true);
+      try {
+        const all = await AirtableService.getContacts();
+        const sorted = [...all].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        setAllContactsDataset(sorted);
+      } finally {
+        setIsLoadingAllContacts(false);
+      }
+    };
+    loadAll();
+  }, [isAddExistingOpen]);
 
   const filtered = useMemo(
     () => contacts.filter(c => (c.contactAddedBy || '').toLowerCase() === creator.toLowerCase()),
@@ -248,7 +267,7 @@ const ReviewerDashboardPage: React.FC = () => {
 
           {/* Action row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <button onClick={handleOpenAddExisting} className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 text-left flex items-center justify-between">
+            <button onClick={() => setIsAddExistingOpen(true)} className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 text-left flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
                   <Package className="h-4 w-4 text-slate-300" />
@@ -366,6 +385,73 @@ const ReviewerDashboardPage: React.FC = () => {
         isLoading={isSaving}
         availableCreators={PREDEFINED_CONTACT_CREATORS}
       />
+
+      {/* Add Existing Recipient Modal (dashboard) */}
+      {isAddExistingOpen && (
+        <div
+          className="fixed inset-0 z-[2000] bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setIsAddExistingOpen(false)}
+        >
+          <div
+            className="bg-[#0F1012] text-white w-full max-w-3xl rounded-xl border border-[#27282B] p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
+                  <Package className="h-4 w-4 text-slate-300" />
+                </div>
+                <h4 className="text-sm font-semibold">Add Existing Recipient</h4>
+              </div>
+              <button className="text-slate-400 hover:text-slate-200" onClick={() => setIsAddExistingOpen(false)}>×</button>
+            </div>
+
+            <div className="mb-3">
+              <input
+                type="text"
+                value={existingSearch}
+                onChange={(e) => setExistingSearch(e.target.value)}
+                placeholder="Search by name or company..."
+                className="w-full px-3 py-2 rounded-md bg-[#0B0B0C] border border-[#27282B] text-sm placeholder-slate-500"
+              />
+            </div>
+
+            <div className="max-h-[50vh] overflow-auto pr-1">
+              {isLoadingAllContacts ? (
+                <div className="text-sm text-slate-400">Loading contacts…</div>
+              ) : (
+                <ul className="text-sm space-y-1.5">
+                  {allContactsDataset
+                    .filter((c) => {
+                      const q = existingSearch.trim().toLowerCase();
+                      if (!q) return true;
+                      return (
+                        (c.name || '').toLowerCase().includes(q) ||
+                        (c.company || '').toLowerCase().includes(q)
+                      );
+                    })
+                    .slice(0, 50)
+                    .map((c) => (
+                      <li key={c.id} className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="text-slate-500">•</span>
+                          <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                        </div>
+                        <button
+                          onClick={handleOpenAddExisting}
+                          className="text-xs px-2 py-1 rounded border border-[#3A3B3F] hover:bg-[#151619]"
+                          title="Continue in workflow to add"
+                        >
+                          Continue →
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
