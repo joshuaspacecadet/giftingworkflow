@@ -140,6 +140,9 @@ const ReviewerDashboardPage: React.FC = () => {
                 {designApprovedMissingAddress.slice(0, 6).map(c => (
                   <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
                 ))}
+                {designApprovedMissingAddress.length > 6 && (
+                  <li className="italic text-slate-500">and {designApprovedMissingAddress.length - 6} more...</li>
+                )}
               </ul>
               <div className="mt-3">
                 <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Start address requests →</button>
@@ -155,6 +158,9 @@ const ReviewerDashboardPage: React.FC = () => {
                 {reviewToReceiveGift.slice(0, 6).map(c => (
                   <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
                 ))}
+                {reviewToReceiveGift.length > 6 && (
+                  <li className="italic text-slate-500">and {reviewToReceiveGift.length - 6} more...</li>
+                )}
               </ul>
               <div className="mt-3">
                 <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Review contacts →</button>
