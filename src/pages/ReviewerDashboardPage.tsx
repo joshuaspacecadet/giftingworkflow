@@ -135,7 +135,7 @@ const ReviewerDashboardPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Designs ready for review */}
-            <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
+            <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
               </div>
@@ -166,17 +166,17 @@ const ReviewerDashboardPage: React.FC = () => {
                   )}
                 </div>
               )}
-              <div className="mt-3">
+              <div className="mt-auto pt-3">
                 <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Open review →</button>
               </div>
             </div>
 
             {/* Missing address */}
-            <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
+            <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{designApprovedMissingAddress.length}</span> people are ready to receive their gift, but are missing an address.
               </div>
-              <ul className="text-xs text-slate-300 space-y-1.5 mt-2">
+              <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
                 {designApprovedMissingAddress.slice(0, 5).map(c => (
                   <li key={c.id} className="flex items-center gap-2 truncate">
                     <span className="text-slate-500">•</span>
@@ -187,17 +187,17 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li className="italic text-slate-500 pl-4">and {designApprovedMissingAddress.length - 5} more...</li>
                 )}
               </ul>
-              <div className="mt-3">
+              <div className="mt-auto pt-3">
                 <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Start address requests →</button>
               </div>
             </div>
 
             {/* Review to receive gift */}
-            <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
+            <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
               </div>
-              <ul className="text-xs text-slate-300 space-y-1.5 mt-2">
+              <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
                 {reviewToReceiveGift.slice(0, 5).map(c => (
                   <li key={c.id} className="flex items-center gap-2 truncate">
                     <span className="text-slate-500">•</span>
@@ -208,7 +208,7 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li className="italic text-slate-500 pl-4">and {reviewToReceiveGift.length - 5} more...</li>
                 )}
               </ul>
-              <div className="mt-3">
+              <div className="mt-auto pt-3">
                 <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Review contacts →</button>
               </div>
             </div>
