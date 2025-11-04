@@ -373,6 +373,8 @@ export class AirtableService {
         createFields["SFS Book"] = (contactData as any).sfsBookProjects;
       if ((contactData as any).goldenRecordProjects !== undefined)
         createFields["Golden Record"] = (contactData as any).goldenRecordProjects;
+      if ((contactData as any).draftOrderItems !== undefined)
+        createFields["Draft Order Items"] = (contactData as any).draftOrderItems;
       // Also ensure the generic Projects link includes any of the above selections
       {
         const projectIds = new Set<string>();
@@ -453,6 +455,8 @@ export class AirtableService {
           updates.additionalContactContext;
       if ((updates as any).specificStage !== undefined)
         updateFields["Specific Stage"] = (updates as any).specificStage;
+      if ((updates as any).draftOrderItems !== undefined)
+        updateFields["Draft Order Items"] = (updates as any).draftOrderItems;
       if (updates.contactAddedBy !== undefined && updates.contactAddedBy !== "")
         updateFields["Contact Added By"] = updates.contactAddedBy;
       if ((updates as any).magicCardsProjects !== undefined)
