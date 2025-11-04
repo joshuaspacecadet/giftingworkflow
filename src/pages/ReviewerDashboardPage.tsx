@@ -159,6 +159,11 @@ const ReviewerDashboardPage: React.FC = () => {
                       />
                     );
                   })}
+                  {designsReady.length > designPreviewAttachments.length && (
+                    <div className="h-16 w-12 md:h-[100px] md:w-20 rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center text-[10px] text-slate-300">
+                      and {designsReady.length - designPreviewAttachments.length} more...
+                    </div>
+                  )}
                 </div>
               )}
               <div className="mt-3">
