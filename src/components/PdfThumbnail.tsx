@@ -11,6 +11,7 @@ interface PdfThumbnailProps {
 const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [failed, setFailed] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null); // width / height
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +44,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
 
         canvas.width = Math.ceil(scaled.width);
         canvas.height = Math.ceil(scaled.height);
+        setAspectRatio(scaled.width / scaled.height);
 
         await page.render({ canvasContext: context, viewport: scaled }).promise;
       } catch (e) {
@@ -63,6 +65,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
         role="img"
         aria-label={alt || 'PDF'}
         title={alt || 'PDF'}
+        style={{ height: 100, aspectRatio: aspectRatio || 0.7 }}
       >
         <span className="text-[10px] text-slate-300">PDF</span>
       </div>
@@ -76,6 +79,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
       role="img"
       aria-label={alt || 'PDF'}
       title={alt || 'PDF'}
+      style={{ height: 100, aspectRatio: aspectRatio || undefined }}
     />
   );
 };
