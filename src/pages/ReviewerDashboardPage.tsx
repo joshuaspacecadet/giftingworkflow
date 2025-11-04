@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AirtableService } from '../services/airtable';
 import { Contact, Project, SpecificStage } from '../types';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
 import PdfThumbnail from '../components/PdfThumbnail';
 import ContactModal from '../components/ContactModal';
 
@@ -143,20 +143,25 @@ const ReviewerDashboardPage: React.FC = () => {
                 <div className="mt-2 flex items-center gap-2">
                   {designPreviewAttachments.map((a, idx) => {
                     const isImage = (a.type || '').startsWith('image/');
-                    return isImage ? (
-                      <img
+                    if (isImage) {
+                      return (
+                        <img
+                          key={a.id || `${a.url}-${idx}`}
+                          src={a.url}
+                          alt={a.filename || `Design ${idx + 1}`}
+                          className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
+                        />
+                      );
+                    }
+                    // Match the icon-based preview used in stages 4 & 5
+                    return (
+                      <div
                         key={a.id || `${a.url}-${idx}`}
-                        src={a.url}
-                        alt={a.filename || `Design ${idx + 1}`}
-                        className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
-                      />
-                    ) : (
-                      <PdfThumbnail
-                        key={a.id || `${a.url}-${idx}`}
-                        url={a.url}
-                        alt={a.filename || `Design ${idx + 1}`}
-                        className="h-[100px] w-auto"
-                      />
+                        className="h-16 w-12 rounded-md border border-[#27282B] bg-white flex items-center justify-center"
+                        title={a.filename || 'Design file'}
+                      >
+                        <FileText className="h-5 w-5 text-slate-500" />
+                      </div>
                     );
                   })}
                 </div>
