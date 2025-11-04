@@ -133,7 +133,11 @@ const ReviewerDashboardPage: React.FC = () => {
   const handleCreateSave = async (contactData: Partial<Contact>) => {
     setIsSaving(true);
     try {
-      const saved = await AirtableService.createContact(contactData);
+      const saved = await AirtableService.createContact({
+        ...contactData,
+        contactAddedBy: creator,
+        specificStage: 'Approved to receive gift' as any,
+      });
       if (saved) {
         setContacts(prev => [saved, ...prev]);
       }
@@ -160,7 +164,7 @@ const ReviewerDashboardPage: React.FC = () => {
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{creator}’s Gifting Dashboard</h1>
-          <p className="text-sm text-slate-400">Quick actions and reviews to keep the gifts flowin’.</p>
+          <p className="text-sm text-slate-400">Your instant queue for reviews, address fixes, and shipments.</p>
         </div>
         <img src="/spacecadet-logo.png" alt="SPACECADET" className="h-5 opacity-90" />
       </div>
@@ -278,7 +282,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-sm">Add recipient from a past shipment</div>
-                  <div className="text-xs text-slate-400">Send the recipient something else</div>
+                  <div className="text-xs text-slate-400">Send the recipient something else.</div>
                 </div>
               </div>
               <span className="text-slate-400">→</span>
@@ -291,7 +295,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-sm">Create a new recipient</div>
-                  <div className="text-xs text-slate-400">Add name, email, and address</div>
+                  <div className="text-xs text-slate-400">Send a gift to someone new.</div>
                 </div>
               </div>
               <span className="text-slate-400">→</span>

@@ -365,6 +365,8 @@ export class AirtableService {
           contactData.additionalContactContext;
       if (contactData.contactAddedBy && contactData.contactAddedBy !== "")
         createFields["Contact Added By"] = contactData.contactAddedBy;
+      if ((contactData as any).specificStage)
+        createFields["Specific Stage"] = (contactData as any).specificStage;
       if ((contactData as any).magicCardsProjects !== undefined)
         createFields["Magic Cards"] = (contactData as any).magicCardsProjects;
       if ((contactData as any).sfsBookProjects !== undefined)
