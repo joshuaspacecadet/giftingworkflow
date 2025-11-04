@@ -301,7 +301,7 @@ const ReviewerDashboardPage: React.FC = () => {
           {/* Beast mode */}
           <div className="mt-5 border border-[#FF5C00] rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/red-star.svg" alt="" className="h-5 w-5" />
+              <img src="/red-star.svg" alt="" className="h-6 w-6" />
               <div className="text-sm">Ready to tackle it all?</div>
             </div>
             <button className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5">Enter beast mode →</button>
@@ -348,7 +348,7 @@ const ReviewerDashboardPage: React.FC = () => {
 
           {/* In Design */}
           <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-5 flex flex-col min-h-[240px]">
-            <div className="text-[15px] font-semibold mb-1">In design ({inDesign.length})</div>
+            <div className="text-[15px] font-semibold mb-1">In Design ({inDesign.length})</div>
             <div className="text-xs text-slate-400 mb-3">Design in progress.</div>
             <ul className="text-xs text-slate-300 space-y-1.5 flex-1 overflow-auto pr-1">
               {inDesign.length === 0 ? (
