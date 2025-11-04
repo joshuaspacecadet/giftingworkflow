@@ -143,25 +143,20 @@ const ReviewerDashboardPage: React.FC = () => {
                 <div className="mt-2 flex items-center gap-2">
                   {designPreviewAttachments.map((a, idx) => {
                     const isImage = (a.type || '').startsWith('image/');
-                    if (isImage) {
-                      return (
-                        <img
-                          key={a.id || `${a.url}-${idx}`}
-                          src={a.url}
-                          alt={a.filename || `Design ${idx + 1}`}
-                          className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
-                        />
-                      );
-                    }
-                    // Match the icon-based preview used in stages 4 & 5
-                    return (
-                      <div
+                    return isImage ? (
+                      <img
                         key={a.id || `${a.url}-${idx}`}
-                        className="h-16 w-12 rounded-md border border-[#27282B] bg-white flex items-center justify-center"
-                        title={a.filename || 'Design file'}
-                      >
-                        <FileText className="h-5 w-5 text-slate-500" />
-                      </div>
+                        src={a.url}
+                        alt={a.filename || `Design ${idx + 1}`}
+                        className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
+                      />
+                    ) : (
+                      <PdfThumbnail
+                        key={a.id || `${a.url}-${idx}`}
+                        url={a.url}
+                        alt={a.filename || `Design ${idx + 1}`}
+                        className="h-[100px]"
+                      />
                     );
                   })}
                 </div>
