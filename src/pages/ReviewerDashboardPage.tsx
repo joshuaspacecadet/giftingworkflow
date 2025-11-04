@@ -419,29 +419,29 @@ const ReviewerDashboardPage: React.FC = () => {
           onClick={() => setIsAddExistingOpen(false)}
         >
           <div
-            className="bg-[#0F1012] text-white w-full max-w-3xl rounded-xl border border-[#27282B] p-5"
+            className="bg-white text-slate-900 w-full max-w-3xl rounded-xl border border-slate-200 p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <Package className="h-4 w-4 text-white" />
+                <div className="h-7 w-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+                  <Package className="h-4 w-4 text-slate-600" />
                 </div>
                 <h4 className="text-sm font-semibold">Add Existing Recipient</h4>
               </div>
-              <button className="text-slate-400 hover:text-slate-200" onClick={() => setIsAddExistingOpen(false)}>×</button>
+              <button className="text-slate-500 hover:text-slate-700" onClick={() => setIsAddExistingOpen(false)}>×</button>
             </div>
 
             {/* Description */}
-            <p className="text-xs text-slate-400 mb-3">You can add an existing contact to this project's recipient list. Search by name or company.</p>
+            <p className="text-xs text-slate-600 mb-3">Send a gift to someone we've gifted in the past.</p>
 
             {/* Filters: show only who has NOT been sent */}
-            <div className="flex items-center gap-3 text-xs text-slate-300 mb-2">
-              <span className="text-slate-400">Show only contacts who have not been sent:</span>
+            <div className="flex items-center gap-3 text-xs text-slate-600 mb-2">
+              <span className="text-slate-600">Show only contacts who have not been sent:</span>
               <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotMagic} onChange={(e)=>setFilterNotMagic(e.target.checked)} /> Magic Cards</label>
               <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotSfs} onChange={(e)=>setFilterNotSfs(e.target.checked)} /> SFS Book</label>
               <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotGolden} onChange={(e)=>setFilterNotGolden(e.target.checked)} /> Golden Record</label>
-              <button className="ml-auto text-[11px] px-2 py-1 rounded border border-[#3A3B3F] text-slate-300/80">Apply</button>
+              <button className="ml-auto text-[11px] px-2 py-1 rounded border border-slate-300 text-slate-600 hover:bg-slate-50">Apply</button>
             </div>
 
             <div className="mb-3">
@@ -450,7 +450,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 value={existingSearch}
                 onChange={(e) => setExistingSearch(e.target.value)}
                 placeholder="Search by name or company..."
-                className="w-full px-3 py-2 rounded-md bg-[#0B0B0C] border border-[#27282B] text-sm placeholder-slate-500"
+                className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-sm placeholder-slate-400"
               />
             </div>
 
@@ -479,7 +479,7 @@ const ReviewerDashboardPage: React.FC = () => {
                     })
                     .slice(0, 50)
                     .map((c) => (
-                      <li key={c.id} className="p-2 rounded-md border border-[#27282B] bg-[#0B0B0C]">
+                      <li key={c.id} className="p-2 rounded-md border border-slate-200 bg-white">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2 truncate">
                             <span className="text-slate-500">•</span>
@@ -502,7 +502,7 @@ const ReviewerDashboardPage: React.FC = () => {
                                   }
                                 } catch(e) { console.error('Add selected failed', e); }
                               }}
-                              className="text-xs px-2 py-1 rounded border border-[#3A3B3F] hover:bg-[#151619]"
+                              className="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50"
                             >
                               Add Selected
                             </button>
@@ -510,22 +510,22 @@ const ReviewerDashboardPage: React.FC = () => {
                         </div>
                         {/* Already sent badges */}
                         <div className="mt-2 pl-4">
-                          <span className="text-[11px] text-slate-400 mr-2">Already sent:</span>
+                          <span className="text-[11px] text-slate-600 mr-2">Already sent:</span>
                           <span className="inline-flex flex-wrap gap-1 align-middle">
                             {(c.magicCardsProjects || []).length > 0 && (
-                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Magic Cards</span>
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-slate-300 text-slate-700">Magic Cards</span>
                             )}
                             {(c.goldenRecordProjects || []).length > 0 && (
-                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Golden Record</span>
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-slate-300 text-slate-700">Golden Record</span>
                             )}
                             {(c.cardsAgainstRealityProjects || []).length > 0 && (
-                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Cards Against Reality</span>
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-slate-300 text-slate-700">Cards Against Reality</span>
                             )}
                             {(c.fundIiVideoProjects || []).length > 0 && (
-                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Fund II Video</span>
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-slate-300 text-slate-700">Fund II Video</span>
                             )}
                             {(c.sfsBookProjects || []).length > 0 && (
-                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">SFS Book</span>
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-slate-300 text-slate-700">SFS Book</span>
                             )}
                             {(c.magicCardsProjects || []).length === 0 && (c.goldenRecordProjects || []).length === 0 && (c.cardsAgainstRealityProjects || []).length === 0 && (c.fundIiVideoProjects || []).length === 0 && (c.sfsBookProjects || []).length === 0 && (
                               <span className="text-[10px] text-slate-500">None</span>
