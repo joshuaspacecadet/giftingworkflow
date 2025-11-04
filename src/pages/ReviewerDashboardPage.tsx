@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { AirtableService } from '../services/airtable';
 import { Contact, Project, SpecificStage } from '../types';
@@ -45,6 +45,8 @@ const ReviewerDashboardPage: React.FC = () => {
   const [filterNotMagic, setFilterNotMagic] = useState(false);
   const [filterNotSfs, setFilterNotSfs] = useState(false);
   const [filterNotGolden, setFilterNotGolden] = useState(false);
+  const [visibleExistingCount, setVisibleExistingCount] = useState(50);
+  const existingListRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -76,6 +78,7 @@ const ReviewerDashboardPage: React.FC = () => {
       }
     };
     loadAll();
+    if (isAddExistingOpen) setVisibleExistingCount(50);
   }, [isAddExistingOpen]);
 
   // Freeze background scroll while Add Existing modal is open
@@ -92,6 +95,20 @@ const ReviewerDashboardPage: React.FC = () => {
       bodyEl.style.overflow = prevBodyOverflow;
     };
   }, [isAddExistingOpen]);
+
+  // Reset infinite list window when filters/search change
+  useEffect(() => {
+    setVisibleExistingCount(50);
+  }, [existingSearch, filterNotMagic, filterNotSfs, filterNotGolden]);
+
+  const handleExistingInfiniteScroll = useCallback(() => {
+    const el = existingListRef.current;
+    if (!el) return;
+    const threshold = 120; // px before bottom to trigger
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - threshold) {
+      setVisibleExistingCount((prev) => prev + 50);
+    }
+  }, []);
 
   const filtered = useMemo(
     () => contacts.filter(c => (c.contactAddedBy || '').toLowerCase() === creator.toLowerCase()),
@@ -441,7 +458,6 @@ const ReviewerDashboardPage: React.FC = () => {
               <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotMagic} onChange={(e)=>setFilterNotMagic(e.target.checked)} /> Magic Cards</label>
               <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotSfs} onChange={(e)=>setFilterNotSfs(e.target.checked)} /> SFS Book</label>
               <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotGolden} onChange={(e)=>setFilterNotGolden(e.target.checked)} /> Golden Record</label>
-              <button className="ml-auto text-[11px] px-2 py-1 rounded border border-slate-300 text-slate-600 hover:bg-slate-50">Apply</button>
             </div>
 
             <div className="mb-3">
@@ -454,7 +470,7 @@ const ReviewerDashboardPage: React.FC = () => {
               />
             </div>
 
-            <div className="max-h-[50vh] overflow-auto pr-1">
+            <div className="max-h-[50vh] overflow-auto pr-1" ref={existingListRef} onScroll={handleExistingInfiniteScroll}>
               {isLoadingAllContacts ? (
                 <div className="text-sm text-slate-400">Loading contacts…</div>
               ) : (
@@ -477,12 +493,11 @@ const ReviewerDashboardPage: React.FC = () => {
                       if (filterNotGolden && !notSentGolden) return false;
                       return true;
                     })
-                    .slice(0, 50)
+                    .slice(0, visibleExistingCount)
                     .map((c) => (
                       <li key={c.id} className="p-2 rounded-md border border-slate-200 bg-white">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 truncate">
-                            <span className="text-slate-500">•</span>
+                          <div className="truncate">
                             <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs">
