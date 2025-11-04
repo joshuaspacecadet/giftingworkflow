@@ -41,6 +41,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
   const [isLoadingAllContacts, setIsLoadingAllContacts] = useState(false);
   const [existingSearch, setExistingSearch] = useState('');
+  const [selectedItemsByContact, setSelectedItemsByContact] = useState<Record<string, { magic: boolean; sfs: boolean; golden: boolean }>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -432,18 +433,35 @@ const ReviewerDashboardPage: React.FC = () => {
                     })
                     .slice(0, 50)
                     .map((c) => (
-                      <li key={c.id} className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="text-slate-500">•</span>
-                          <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                      <li key={c.id} className="p-2 rounded-md border border-[#27282B] bg-[#0B0B0C]">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="text-slate-500">•</span>
+                            <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.magic} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: e.target.checked, sfs: !!prev[c.id]?.sfs, golden: !!prev[c.id]?.golden } }))}/> Magic Cards</label>
+                            <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.sfs} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: !!prev[c.id]?.magic, sfs: e.target.checked, golden: !!prev[c.id]?.golden } }))}/> SFS Book</label>
+                            <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.golden} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: !!prev[c.id]?.magic, sfs: !!prev[c.id]?.sfs, golden: e.target.checked } }))}/> Golden Record</label>
+                            <button
+                              onClick={async ()=>{
+                                try {
+                                  const updated = await AirtableService.updateContact(c.id, {
+                                    contactAddedBy: creator,
+                                    specificStage: 'Approved to receive gift' as any,
+                                  });
+                                  if (updated) {
+                                    setContacts(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
+                                    setAllContactsDataset(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
+                                  }
+                                } catch(e) { console.error('Add selected failed', e); }
+                              }}
+                              className="text-xs px-2 py-1 rounded border border-[#3A3B3F] hover:bg-[#151619]"
+                            >
+                              Add Selected
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={handleOpenAddExisting}
-                          className="text-xs px-2 py-1 rounded border border-[#3A3B3F] hover:bg-[#151619]"
-                          title="Continue in workflow to add"
-                        >
-                          Continue →
-                        </button>
                       </li>
                     ))}
                 </ul>

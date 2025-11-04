@@ -449,6 +449,8 @@ export class AirtableService {
       if (updates.additionalContactContext !== undefined)
         updateFields["Additional Contact Context"] =
           updates.additionalContactContext;
+      if ((updates as any).specificStage !== undefined)
+        updateFields["Specific Stage"] = (updates as any).specificStage;
       if (updates.contactAddedBy !== undefined && updates.contactAddedBy !== "")
         updateFields["Contact Added By"] = updates.contactAddedBy;
       if ((updates as any).magicCardsProjects !== undefined)
