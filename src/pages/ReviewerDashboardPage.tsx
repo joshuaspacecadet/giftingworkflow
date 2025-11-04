@@ -177,7 +177,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
                   <Images className="h-3.5 w-3.5 text-slate-300" />
                 </div>
-                <div className="text-sm text-slate-300">
+                <div className="text-sm text-white">
                   <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
                 </div>
               </div>
@@ -222,7 +222,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
                   <MapPin className="h-3.5 w-3.5 text-slate-300" />
                 </div>
-                <div className="text-sm text-slate-300">
+                <div className="text-sm text-white">
                   <span className="font-semibold">{designApprovedMissingAddress.length}</span> gifts are set to ship, but have no address.
                 </div>
               </div>
@@ -248,7 +248,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
                   <UsersIcon className="h-3.5 w-3.5 text-slate-300" />
                 </div>
-                <div className="text-sm text-slate-300">
+                <div className="text-sm text-white">
                   <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
                 </div>
               </div>
@@ -301,7 +301,7 @@ const ReviewerDashboardPage: React.FC = () => {
           {/* Beast mode */}
           <div className="mt-5 border border-[#FF5C00] rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/red-star.svg" alt="" className="h-6 w-6" />
+              <img src="/red-star.svg" alt="" className="h-7 w-7" />
               <div className="text-sm">Ready to tackle it all?</div>
             </div>
             <button className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5">Enter beast mode →</button>
