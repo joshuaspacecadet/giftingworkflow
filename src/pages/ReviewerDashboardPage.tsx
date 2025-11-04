@@ -136,12 +136,12 @@ const ReviewerDashboardPage: React.FC = () => {
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{designApprovedMissingAddress.length}</span> people are ready to receive their gift, but are missing an address.
               </div>
-              <ul className="text-xs text-slate-400 space-y-1 max-h-24 overflow-auto pr-1">
-                {designApprovedMissingAddress.slice(0, 6).map(c => (
+              <ul className="text-xs text-slate-400 space-y-1">
+                {designApprovedMissingAddress.slice(0, 5).map(c => (
                   <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
                 ))}
-                {designApprovedMissingAddress.length > 6 && (
-                  <li className="italic text-slate-500">and {designApprovedMissingAddress.length - 6} more...</li>
+                {designApprovedMissingAddress.length > 5 && (
+                  <li className="italic text-slate-500">and {designApprovedMissingAddress.length - 5} more...</li>
                 )}
               </ul>
               <div className="mt-3">
@@ -154,12 +154,12 @@ const ReviewerDashboardPage: React.FC = () => {
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
               </div>
-              <ul className="text-xs text-slate-400 space-y-1 max-h-24 overflow-auto pr-1">
-                {reviewToReceiveGift.slice(0, 6).map(c => (
+              <ul className="text-xs text-slate-400 space-y-1">
+                {reviewToReceiveGift.slice(0, 5).map(c => (
                   <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
                 ))}
-                {reviewToReceiveGift.length > 6 && (
-                  <li className="italic text-slate-500">and {reviewToReceiveGift.length - 6} more...</li>
+                {reviewToReceiveGift.length > 5 && (
+                  <li className="italic text-slate-500">and {reviewToReceiveGift.length - 5} more...</li>
                 )}
               </ul>
               <div className="mt-3">
