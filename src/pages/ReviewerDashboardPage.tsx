@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AirtableService } from '../services/airtable';
 import { Contact, Project, SpecificStage } from '../types';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
-import { Loader2, FileText } from 'lucide-react';
+import { Loader2, FileText, Images, MapPin, Users as UsersIcon } from 'lucide-react';
 import PdfThumbnail from '../components/PdfThumbnail';
 import ContactModal from '../components/ContactModal';
 
@@ -136,8 +136,13 @@ const ReviewerDashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Designs ready for review */}
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
-              <div className="text-sm text-slate-300 mb-2">
-                <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
+                  <Images className="h-3.5 w-3.5 text-slate-300" />
+                </div>
+                <div className="text-sm text-slate-300">
+                  <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
+                </div>
               </div>
               {designPreviewAttachments.length > 0 && (
                 <div className="mt-3 flex items-center gap-2">
@@ -173,8 +178,13 @@ const ReviewerDashboardPage: React.FC = () => {
 
             {/* Missing address */}
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
-              <div className="text-sm text-slate-300 mb-2">
-                <span className="font-semibold">{designApprovedMissingAddress.length}</span> people are ready to receive their gift, but are missing an address.
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
+                  <MapPin className="h-3.5 w-3.5 text-slate-300" />
+                </div>
+                <div className="text-sm text-slate-300">
+                  <span className="font-semibold">{designApprovedMissingAddress.length}</span> people are ready to receive their gift, but are missing an address.
+                </div>
               </div>
               <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
                 {designApprovedMissingAddress.slice(0, 5).map(c => (
@@ -194,8 +204,13 @@ const ReviewerDashboardPage: React.FC = () => {
 
             {/* Review to receive gift */}
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
-              <div className="text-sm text-slate-300 mb-2">
-                <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
+                  <UsersIcon className="h-3.5 w-3.5 text-slate-300" />
+                </div>
+                <div className="text-sm text-slate-300">
+                  <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
+                </div>
               </div>
               <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
                 {reviewToReceiveGift.slice(0, 5).map(c => (
