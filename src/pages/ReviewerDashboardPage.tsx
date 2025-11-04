@@ -78,6 +78,21 @@ const ReviewerDashboardPage: React.FC = () => {
     loadAll();
   }, [isAddExistingOpen]);
 
+  // Freeze background scroll while Add Existing modal is open
+  useEffect(() => {
+    if (!isAddExistingOpen) return;
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const prevHtmlOverflow = htmlEl.style.overflow;
+    const prevBodyOverflow = bodyEl.style.overflow;
+    htmlEl.style.overflow = 'hidden';
+    bodyEl.style.overflow = 'hidden';
+    return () => {
+      htmlEl.style.overflow = prevHtmlOverflow;
+      bodyEl.style.overflow = prevBodyOverflow;
+    };
+  }, [isAddExistingOpen]);
+
   const filtered = useMemo(
     () => contacts.filter(c => (c.contactAddedBy || '').toLowerCase() === creator.toLowerCase()),
     [contacts, creator]
