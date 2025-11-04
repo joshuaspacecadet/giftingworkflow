@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AirtableService } from '../services/airtable';
 import { Contact, Project, SpecificStage } from '../types';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
 import ContactModal from '../components/ContactModal';
 
 type NameParam = 'wiz' | 'john' | 'daniel';
@@ -61,11 +61,11 @@ const ReviewerDashboardPage: React.FC = () => {
   // Quick action datasets
   const designsReady = filtered.filter(c => c.specificStage === 'Design review');
   const designPreviewAttachments = useMemo(() => {
-    const previews: { id?: string; url: string; filename?: string }[] = [];
+    const previews: { id?: string; url: string; filename?: string; type?: string }[] = [];
     for (const c of designsReady) {
       const files = (c.designFiles || []).filter(a => a && a.url);
       for (const f of files) {
-        previews.push({ id: f.id, url: f.url, filename: f.filename });
+        previews.push({ id: f.id, url: f.url, filename: f.filename, type: f.type });
         if (previews.length >= 3) break;
       }
       if (previews.length >= 3) break;
@@ -140,14 +140,30 @@ const ReviewerDashboardPage: React.FC = () => {
               </div>
               {designPreviewAttachments.length > 0 && (
                 <div className="mt-2 flex items-center gap-2">
-                  {designPreviewAttachments.map((a, idx) => (
-                    <img
-                      key={a.id || `${a.url}-${idx}`}
-                      src={a.url}
-                      alt={a.filename || `Design ${idx + 1}`}
-                      className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
-                    />
-                  ))}
+                  {designPreviewAttachments.map((a, idx) => {
+                    const isImage = (a.type || '').startsWith('image/');
+                    return isImage ? (
+                      <img
+                        key={a.id || `${a.url}-${idx}`}
+                        src={a.url}
+                        alt={a.filename || `Design ${idx + 1}`}
+                        className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
+                      />
+                    ) : (
+                      <a
+                        key={a.id || `${a.url}-${idx}`}
+                        href={a.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        title={a.filename || 'Design file'}
+                      >
+                        <div className="h-16 w-12 rounded-md border border-[#27282B] bg-[#141518] flex flex-col items-center justify-center text-slate-300">
+                          <FileText className="h-4 w-4 mb-0.5" />
+                          <span className="text-[10px] leading-none">PDF</span>
+                        </div>
+                      </a>
+                    );
+                  })}
                 </div>
               )}
               <div className="mt-3">
