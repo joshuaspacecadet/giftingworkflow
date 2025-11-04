@@ -60,6 +60,18 @@ const ReviewerDashboardPage: React.FC = () => {
 
   // Quick action datasets
   const designsReady = filtered.filter(c => c.specificStage === 'Design review');
+  const designPreviewAttachments = useMemo(() => {
+    const previews: { id?: string; url: string; filename?: string }[] = [];
+    for (const c of designsReady) {
+      const files = (c.designFiles || []).filter(a => a && a.url);
+      for (const f of files) {
+        previews.push({ id: f.id, url: f.url, filename: f.filename });
+        if (previews.length >= 3) break;
+      }
+      if (previews.length >= 3) break;
+    }
+    return previews;
+  }, [designsReady]);
   const designApprovedMissingAddress = filtered.filter(
     c => c.specificStage === 'Design approved' && (!c.streetLine1 || !c.city || !c.countryCode)
   );
@@ -126,6 +138,18 @@ const ReviewerDashboardPage: React.FC = () => {
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
               </div>
+              {designPreviewAttachments.length > 0 && (
+                <div className="mt-2 flex items-center gap-2">
+                  {designPreviewAttachments.map((a, idx) => (
+                    <img
+                      key={a.id || `${a.url}-${idx}`}
+                      src={a.url}
+                      alt={a.filename || `Design ${idx + 1}`}
+                      className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
+                    />
+                  ))}
+                </div>
+              )}
               <div className="mt-3">
                 <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Open review →</button>
               </div>

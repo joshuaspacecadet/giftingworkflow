@@ -44,6 +44,8 @@ export interface Contact {
   additionalContactContext?: string;
   contactAddedBy?: string; // New field for who added the contact
   specificStage?: SpecificStage; // Maps to Airtable "Specific Stage"
+  // New: attachments for design previews on reviewer dashboard (Airtable: "Design File")
+  designFiles?: AirtableAttachment[];
   // Linked projects for each item (Airtable "Link to Projects" fields)
   magicCardsProjects?: string[];
   sfsBookProjects?: string[];
