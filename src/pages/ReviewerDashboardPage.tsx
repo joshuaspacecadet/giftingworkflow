@@ -32,6 +32,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllGifts, setShowAllGifts] = useState(false);
 
   // Create Recipient modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -78,10 +79,16 @@ const ReviewerDashboardPage: React.FC = () => {
   );
   const reviewToReceiveGift = filtered.filter(c => c.specificStage === 'Review to receive gift');
 
-  // Pipeline datasets
-  const approvedRecipients = filtered.filter(c => c.specificStage === 'Approved to receive gift');
-  const inDesign = filtered.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage));
-  const fulfillment = filtered.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped');
+  // Pipeline datasets (toggle between creator-only vs all)
+  const pipelineSource = showAllGifts ? contacts : filtered;
+  const { approvedRecipients, inDesign, fulfillment } = useMemo(() => {
+    const src = pipelineSource;
+    return {
+      approvedRecipients: src.filter(c => c.specificStage === 'Approved to receive gift'),
+      inDesign: src.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)),
+      fulfillment: src.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped'),
+    };
+  }, [pipelineSource]);
 
   const defaultProject = useMemo(
     () => projects.find(p => p.stage !== 'Project Complete') || projects[0],
@@ -271,7 +278,24 @@ const ReviewerDashboardPage: React.FC = () => {
 
       {/* Production Pipeline */}
       <div className="max-w-[1200px] mx-auto px-6 mt-8">
-        <h3 className="text-sm text-slate-300 mb-3">Production Pipeline ({filtered.length})</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm text-slate-300">Production Pipeline ({pipelineSource.length})</h3>
+          <div className="flex items-center gap-3">
+            <span className={`text-xs ${!showAllGifts ? 'text-white' : 'text-slate-400'}`}>{creator}’s Gifts</span>
+            <button
+              type="button"
+              aria-pressed={showAllGifts}
+              onClick={() => setShowAllGifts(v => !v)}
+              className={`relative inline-flex h-6 w-12 items-center rounded-full border border-[#3A3B3F] bg-[#1A1B1E]`}
+              title={showAllGifts ? 'Showing all gifts' : `Showing ${creator}’s gifts`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${showAllGifts ? 'translate-x-6' : 'translate-x-1'}`}
+              />
+            </button>
+            <span className={`text-xs ${showAllGifts ? 'text-white' : 'text-slate-400'}`}>All Gifts</span>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
             <div className="text-sm mb-2">Approved Recipients ({approvedRecipients.length})</div>
