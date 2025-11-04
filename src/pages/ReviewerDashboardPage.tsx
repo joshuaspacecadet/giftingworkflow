@@ -300,7 +300,10 @@ const ReviewerDashboardPage: React.FC = () => {
 
           {/* Beast mode */}
           <div className="mt-5 border border-[#F97316] rounded-xl p-4 flex items-center justify-between">
-            <div className="text-sm">Ready to tackle it all?</div>
+            <div className="flex items-center gap-2">
+              <img src="/red-star.svg" alt="" className="h-5 w-5" />
+              <div className="text-sm">Ready to tackle it all?</div>
+            </div>
             <button className="text-xs bg-[#F97316] text-black font-semibold rounded-md px-3 py-1.5">Enter beast mode →</button>
           </div>
         </div>
