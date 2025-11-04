@@ -42,6 +42,9 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isLoadingAllContacts, setIsLoadingAllContacts] = useState(false);
   const [existingSearch, setExistingSearch] = useState('');
   const [selectedItemsByContact, setSelectedItemsByContact] = useState<Record<string, { magic: boolean; sfs: boolean; golden: boolean }>>({});
+  const [filterNotMagic, setFilterNotMagic] = useState(false);
+  const [filterNotSfs, setFilterNotSfs] = useState(false);
+  const [filterNotGolden, setFilterNotGolden] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -407,6 +410,18 @@ const ReviewerDashboardPage: React.FC = () => {
               <button className="text-slate-400 hover:text-slate-200" onClick={() => setIsAddExistingOpen(false)}>×</button>
             </div>
 
+            {/* Description */}
+            <p className="text-xs text-slate-400 mb-3">You can add an existing contact to this project's recipient list. Search by name or company.</p>
+
+            {/* Filters: show only who has NOT been sent */}
+            <div className="flex items-center gap-3 text-xs text-slate-300 mb-2">
+              <span className="text-slate-400">Show only contacts who have not been sent:</span>
+              <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotMagic} onChange={(e)=>setFilterNotMagic(e.target.checked)} /> Magic Cards</label>
+              <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotSfs} onChange={(e)=>setFilterNotSfs(e.target.checked)} /> SFS Book</label>
+              <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={filterNotGolden} onChange={(e)=>setFilterNotGolden(e.target.checked)} /> Golden Record</label>
+              <button className="ml-auto text-[11px] px-2 py-1 rounded border border-[#3A3B3F] text-slate-300/80">Apply</button>
+            </div>
+
             <div className="mb-3">
               <input
                 type="text"
@@ -430,6 +445,15 @@ const ReviewerDashboardPage: React.FC = () => {
                         (c.name || '').toLowerCase().includes(q) ||
                         (c.company || '').toLowerCase().includes(q)
                       );
+                    })
+                    .filter((c)=>{
+                      const notSentMagic = (c.magicCardsProjects || []).length === 0;
+                      const notSentSfs = (c.sfsBookProjects || []).length === 0;
+                      const notSentGolden = (c.goldenRecordProjects || []).length === 0;
+                      if (filterNotMagic && !notSentMagic) return false;
+                      if (filterNotSfs && !notSentSfs) return false;
+                      if (filterNotGolden && !notSentGolden) return false;
+                      return true;
                     })
                     .slice(0, 50)
                     .map((c) => (
@@ -461,6 +485,30 @@ const ReviewerDashboardPage: React.FC = () => {
                               Add Selected
                             </button>
                           </div>
+                        </div>
+                        {/* Already sent badges */}
+                        <div className="mt-2 pl-4">
+                          <span className="text-[11px] text-slate-400 mr-2">Already sent:</span>
+                          <span className="inline-flex flex-wrap gap-1 align-middle">
+                            {(c.magicCardsProjects || []).length > 0 && (
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Magic Cards</span>
+                            )}
+                            {(c.goldenRecordProjects || []).length > 0 && (
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Golden Record</span>
+                            )}
+                            {(c.cardsAgainstRealityProjects || []).length > 0 && (
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Cards Against Reality</span>
+                            )}
+                            {(c.fundIiVideoProjects || []).length > 0 && (
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">Fund II Video</span>
+                            )}
+                            {(c.sfsBookProjects || []).length > 0 && (
+                              <span className="inline-block text-[10px] px-2 py-0.5 rounded border border-[#3A3B3F] text-slate-300">SFS Book</span>
+                            )}
+                            {(c.magicCardsProjects || []).length === 0 && (c.goldenRecordProjects || []).length === 0 && (c.cardsAgainstRealityProjects || []).length === 0 && (c.fundIiVideoProjects || []).length === 0 && (c.sfsBookProjects || []).length === 0 && (
+                              <span className="text-[10px] text-slate-500">None</span>
+                            )}
+                          </span>
                         </div>
                       </li>
                     ))}
