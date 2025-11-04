@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AirtableService } from '../services/airtable';
 import { Contact, Project, SpecificStage } from '../types';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
-import { Loader2, FileText, Images, MapPin, Users as UsersIcon } from 'lucide-react';
+import { Loader2, FileText, Images, MapPin, Users as UsersIcon, Package, UserPlus } from 'lucide-react';
 import PdfThumbnail from '../components/PdfThumbnail';
 import ContactModal from '../components/ContactModal';
 
@@ -183,7 +183,7 @@ const ReviewerDashboardPage: React.FC = () => {
                   <MapPin className="h-3.5 w-3.5 text-slate-300" />
                 </div>
                 <div className="text-sm text-slate-300">
-                  <span className="font-semibold">{designApprovedMissingAddress.length}</span> people are ready to receive their gift, but are missing an address.
+                  <span className="font-semibold">{designApprovedMissingAddress.length}</span> gifts are set to ship, but have no address.
                 </div>
               </div>
               <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
@@ -232,17 +232,27 @@ const ReviewerDashboardPage: React.FC = () => {
           {/* Action row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <button onClick={handleOpenAddExisting} className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 text-left flex items-center justify-between">
-              <div>
-                <div className="text-sm">Add recipient from a past shipment</div>
-                <div className="text-xs text-slate-400">Send the recipient something else</div>
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
+                  <Package className="h-4 w-4 text-slate-300" />
+                </div>
+                <div>
+                  <div className="text-sm">Add recipient from a past shipment</div>
+                  <div className="text-xs text-slate-400">Send the recipient something else</div>
+                </div>
               </div>
               <span className="text-slate-400">→</span>
             </button>
 
             <button onClick={() => setIsCreateOpen(true)} className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 text-left flex items-center justify-between">
-              <div>
-                <div className="text-sm">Create a new recipient</div>
-                <div className="text-xs text-slate-400">Add name, email, and address</div>
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
+                  <UserPlus className="h-4 w-4 text-slate-300" />
+                </div>
+                <div>
+                  <div className="text-sm">Create a new recipient</div>
+                  <div className="text-xs text-slate-400">Add name, email, and address</div>
+                </div>
               </div>
               <span className="text-slate-400">→</span>
             </button>
