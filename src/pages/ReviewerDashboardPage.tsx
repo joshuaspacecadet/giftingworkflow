@@ -133,14 +133,14 @@ const ReviewerDashboardPage: React.FC = () => {
         <div className="bg-[#111214] rounded-2xl border border-[#27282B] p-6">
           <h2 className="text-sm text-slate-300 mb-4">Quick Actions</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Designs ready for review */}
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
               </div>
               {designPreviewAttachments.length > 0 && (
-                <div className="mt-2 flex items-center gap-2">
+                <div className="mt-3 flex items-center gap-2">
                   {designPreviewAttachments.map((a, idx) => {
                     const isImage = (a.type || '').startsWith('image/');
                     return isImage ? (
@@ -148,19 +148,19 @@ const ReviewerDashboardPage: React.FC = () => {
                         key={a.id || `${a.url}-${idx}`}
                         src={a.url}
                         alt={a.filename || `Design ${idx + 1}`}
-                        className="h-16 w-12 object-cover rounded-md border border-[#27282B]"
+                        className="h-[100px] w-[70px] object-cover rounded-md border border-[#27282B] shadow-sm"
                       />
                     ) : (
                       <PdfThumbnail
                         key={a.id || `${a.url}-${idx}`}
                         url={a.url}
                         alt={a.filename || `Design ${idx + 1}`}
-                        className="h-[100px]"
+                        className="h-[100px] w-[70px] shadow-sm"
                       />
                     );
                   })}
                   {designsReady.length > designPreviewAttachments.length && (
-                    <div className="h-16 w-12 md:h-[100px] md:w-20 rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center text-[10px] text-slate-300">
+                    <div className="h-[100px] w-[70px] rounded-md border border-[#27282B] bg-[#111214] flex items-center justify-center text-[11px] text-slate-300 shadow-sm">
                       and {designsReady.length - designPreviewAttachments.length} more...
                     </div>
                   )}
@@ -176,12 +176,15 @@ const ReviewerDashboardPage: React.FC = () => {
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{designApprovedMissingAddress.length}</span> people are ready to receive their gift, but are missing an address.
               </div>
-              <ul className="text-xs text-slate-400 space-y-1">
+              <ul className="text-xs text-slate-300 space-y-1.5 mt-2">
                 {designApprovedMissingAddress.slice(0, 5).map(c => (
-                  <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
+                  <li key={c.id} className="flex items-center gap-2 truncate">
+                    <span className="text-slate-500">•</span>
+                    <span className="truncate">{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</span>
+                  </li>
                 ))}
                 {designApprovedMissingAddress.length > 5 && (
-                  <li className="italic text-slate-500">and {designApprovedMissingAddress.length - 5} more...</li>
+                  <li className="italic text-slate-500 pl-4">and {designApprovedMissingAddress.length - 5} more...</li>
                 )}
               </ul>
               <div className="mt-3">
@@ -194,12 +197,15 @@ const ReviewerDashboardPage: React.FC = () => {
               <div className="text-sm text-slate-300 mb-2">
                 <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
               </div>
-              <ul className="text-xs text-slate-400 space-y-1">
+              <ul className="text-xs text-slate-300 space-y-1.5 mt-2">
                 {reviewToReceiveGift.slice(0, 5).map(c => (
-                  <li key={c.id}>{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</li>
+                  <li key={c.id} className="flex items-center gap-2 truncate">
+                    <span className="text-slate-500">•</span>
+                    <span className="truncate">{`${c.name || 'Unnamed'}${c.company ? `, ${c.company}` : ''}`}</span>
+                  </li>
                 ))}
                 {reviewToReceiveGift.length > 5 && (
-                  <li className="italic text-slate-500">and {reviewToReceiveGift.length - 5} more...</li>
+                  <li className="italic text-slate-500 pl-4">and {reviewToReceiveGift.length - 5} more...</li>
                 )}
               </ul>
               <div className="mt-3">
