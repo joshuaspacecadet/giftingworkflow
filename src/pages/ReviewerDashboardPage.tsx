@@ -175,7 +175,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <Images className="h-3.5 w-3.5 text-slate-300" />
+                  <Images className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div className="text-sm text-white">
                   <span className="font-semibold">{designsReady.length}</span> Magic Card designs ready for your review.
@@ -220,7 +220,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <MapPin className="h-3.5 w-3.5 text-slate-300" />
+                  <MapPin className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div className="text-sm text-white">
                   <span className="font-semibold">{designApprovedMissingAddress.length}</span> gifts are set to ship, but have no address.
@@ -246,7 +246,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 flex flex-col min-h-[220px]">
               <div className="flex items-center gap-2 mb-2">
                 <div className="h-6 w-6 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <UsersIcon className="h-3.5 w-3.5 text-slate-300" />
+                  <UsersIcon className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div className="text-sm text-white">
                   <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
@@ -274,7 +274,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <button onClick={() => setIsAddExistingOpen(true)} className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 text-left flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <Package className="h-4 w-4 text-slate-300" />
+                  <Package className="h-4 w-4 text-white" />
                 </div>
                 <div>
                   <div className="text-sm">Add recipient from a past shipment</div>
@@ -287,7 +287,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <button onClick={() => setIsCreateOpen(true)} className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4 text-left flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <UserPlus className="h-4 w-4 text-slate-300" />
+                  <UserPlus className="h-4 w-4 text-white" />
                 </div>
                 <div>
                   <div className="text-sm">Create a new recipient</div>
@@ -406,7 +406,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div className="h-7 w-7 rounded-full bg-[#151619] border border-[#27282B] flex items-center justify-center">
-                  <Package className="h-4 w-4 text-slate-300" />
+                  <Package className="h-4 w-4 text-white" />
                 </div>
                 <h4 className="text-sm font-semibold">Add Existing Recipient</h4>
               </div>
