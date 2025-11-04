@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Loader2, Upload, Trash2, AlertCircle, Info, CheckCircle } from "lucide-react";
+import { X, Loader2, Upload, Trash2, AlertCircle, Info, CheckCircle, UserPlus } from "lucide-react";
 import { Contact } from "../types";
 import { normalizeUrl, isValidUrl } from "../utils/urlHelpers";
 import { uploadToCloudinary } from "../utils/cloudinaryUpload";
@@ -540,16 +540,21 @@ const ContactModal: React.FC<ContactModalProps> = ({
       }}
     >
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => {
           console.log("Modal content clicked", e.target);
           e.stopPropagation();
         }}
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-          <h2 className="text-lg font-semibold text-slate-900">
-            {contact ? "Edit Contact" : "Add New Contact"}
-          </h2>
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+              <UserPlus className="h-4 w-4 text-slate-600" />
+            </div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              {contact ? "Edit Contact" : "Add New Contact"}
+            </h2>
+          </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 transition-colors"
