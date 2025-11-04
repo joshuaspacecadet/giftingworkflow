@@ -301,31 +301,49 @@ const ReviewerDashboardPage: React.FC = () => {
             <span className={`text-xs ${showAllGifts ? 'text-white' : 'text-slate-400'}`}>All Gifts</span>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
-            <div className="text-sm mb-2">Approved Recipients ({approvedRecipients.length})</div>
-            <ul className="text-xs text-slate-400 space-y-1 max-h-48 overflow-auto pr-1">
-              {approvedRecipients.slice(0, 10).map(c => (
-                <li key={c.id}>{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Approved Recipients */}
+          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-5 flex flex-col min-h-[240px]">
+            <div className="text-[15px] font-semibold mb-1">Approved Recipients ({approvedRecipients.length})</div>
+            <div className="text-xs text-slate-400 mb-3">Selected to receive a gift.</div>
+            <ul className="text-xs text-slate-300 space-y-1.5 flex-1 overflow-auto pr-1">
+              {approvedRecipients.length === 0 ? (
+                <li className="italic text-slate-500">None yet</li>
+              ) : (
+                approvedRecipients.slice(0, 50).map(c => (
+                  <li key={c.id} className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
+                ))
+              )}
             </ul>
           </div>
 
-          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
-            <div className="text-sm mb-2">In design ({inDesign.length})</div>
-            <ul className="text-xs text-slate-400 space-y-1 max-h-48 overflow-auto pr-1">
-              {inDesign.slice(0, 10).map(c => (
-                <li key={c.id}>{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
-              ))}
+          {/* In Design */}
+          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-5 flex flex-col min-h-[240px]">
+            <div className="text-[15px] font-semibold mb-1">In design ({inDesign.length})</div>
+            <div className="text-xs text-slate-400 mb-3">Design in progress.</div>
+            <ul className="text-xs text-slate-300 space-y-1.5 flex-1 overflow-auto pr-1">
+              {inDesign.length === 0 ? (
+                <li className="italic text-slate-500">None yet</li>
+              ) : (
+                inDesign.slice(0, 50).map(c => (
+                  <li key={c.id} className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
+                ))
+              )}
             </ul>
           </div>
 
-          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-4">
-            <div className="text-sm mb-2">Fulfillment ({fulfillment.length})</div>
-            <ul className="text-xs text-slate-400 space-y-1 max-h-48 overflow-auto pr-1">
-              {fulfillment.slice(0, 10).map(c => (
-                <li key={c.id}>{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
-              ))}
+          {/* Fulfillment */}
+          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-5 flex flex-col min-h-[240px]">
+            <div className="text-[15px] font-semibold mb-1">Fulfillment ({fulfillment.length})</div>
+            <div className="text-xs text-slate-400 mb-3">Ready to go to the recipient.</div>
+            <ul className="text-xs text-slate-300 space-y-1.5 flex-1 overflow-auto pr-1">
+              {fulfillment.length === 0 ? (
+                <li className="italic text-slate-500">None yet</li>
+              ) : (
+                fulfillment.slice(0, 50).map(c => (
+                  <li key={c.id} className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</li>
+                ))
+              )}
             </ul>
           </div>
         </div>
