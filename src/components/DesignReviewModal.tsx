@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Contact } from '../types';
 import PdfThumbnail from './PdfThumbnail';
 import { AirtableService } from '../services/airtable';
-import { X, ThumbsUp, ThumbsDown, ExternalLink } from 'lucide-react';
+import { X, ThumbsUp, ThumbsDown, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DesignReviewModalProps {
   isOpen: boolean;
@@ -97,6 +97,12 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       onClose();
     }
   };
+  const goPrev = () => {
+    if (index > 0) {
+      setFeedback('');
+      setIndex(index - 1);
+    }
+  };
 
   const approve = async () => {
     if (!current) return;
@@ -158,23 +164,31 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                 <div className="text-sm text-slate-500">No design file</div>
               )}
             </div>
-            {design && (
-              <div className="mt-3 text-xs text-slate-600 space-y-1">
-                <div className="font-medium">
-                  <a className="inline-flex items-center gap-1 text-blue-600 hover:underline" href={design.url} target="_blank" rel="noreferrer">
-                    {design.filename} <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-                <div>Uploaded {formatDateTime(current.latestDesignDate)}</div>
-                {typeof design.size === 'number' && (
-                  <div>Size {formatFileSize(design.size)}</div>
-                )}
-                <button type="button" className="text-blue-600 hover:underline" onClick={() => setIsPreviewOpen(true)}>Preview</button>
-              </div>
-            )}
+            {/* Removed filename/date/size/preview row under the thumbnail, per request */}
           </div>
 
           <div>
+            <div className="flex items-center justify-between mb-3">
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={index === 0 || saving}
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                title="Previous"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="text-xs text-slate-500">{index + 1} of {contacts.length}</div>
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={index >= contacts.length - 1 || saving}
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                title="Next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
             <div className="text-sm font-medium mb-3">Do you approve this design?</div>
             <div className="flex items-center gap-6 mb-4">
               <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300'}`}>
@@ -199,7 +213,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
-        <div className="px-6 pb-6 text-xs text-slate-500">{index + 1} of {contacts.length}</div>
+        {/* Moved pager above approval section */}
 
         {isPreviewOpen && design && (
           <div className="fixed inset-0 bg-black/80 z-[3100] flex items-center justify-center p-4" onClick={() => setIsPreviewOpen(false)}>
