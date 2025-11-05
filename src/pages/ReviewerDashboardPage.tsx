@@ -311,7 +311,7 @@ const ReviewerDashboardPage: React.FC = () => {
                   <UsersIcon className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div className="text-sm text-white">
-                  <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to send a gift to.
+                  <span className="font-semibold">{reviewToReceiveGift.length}</span> contacts you might want to gift.
                 </div>
               </div>
               <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
@@ -453,6 +453,7 @@ const ReviewerDashboardPage: React.FC = () => {
         onSave={handleCreateSave}
         isLoading={isSaving}
         availableCreators={PREDEFINED_CONTACT_CREATORS}
+        lockedCreator={creator}
       />
 
       {/* Add Existing Recipient Modal (dashboard) */}

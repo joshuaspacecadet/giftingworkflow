@@ -23,6 +23,7 @@ interface ContactModalProps {
   isLoading?: boolean;
   availableCreators: string[];
   currentProjectId?: string;
+  lockedCreator?: string;
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({
@@ -33,6 +34,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   isLoading = false,
   availableCreators,
   currentProjectId,
+  lockedCreator,
 }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -152,6 +154,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setSelectedExistingContact(contact ?? null);
     setItemsError("");
   }, [contact, isOpen, currentProjectId]);
+
+  // Enforce locked creator from parent (dashboard)
+  useEffect(() => {
+    if (lockedCreator) {
+      setFormData((prev) => ({ ...prev, contactAddedBy: lockedCreator }));
+    }
+  }, [lockedCreator]);
 
   // Clear items error when a new selection is made or availability changes
   useEffect(() => {
@@ -741,21 +750,27 @@ const ContactModal: React.FC<ContactModalProps> = ({
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Contact Added By
                 </label>
-                <select
-                  value={formData.contactAddedBy}
-                  onChange={(e) =>
-                    setFormData({ ...formData, contactAddedBy: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={isLoading}
-                >
-                  <option value="">Please Select</option>
-                  {availableCreators.map((creator) => (
-                    <option key={creator} value={creator}>
-                      {creator}
-                    </option>
-                  ))}
-                </select>
+                {lockedCreator ? (
+                  <div className="w-full px-3 py-2 border border-slate-300 rounded-md bg-slate-50 text-slate-700">
+                    {lockedCreator}
+                  </div>
+                ) : (
+                  <select
+                    value={formData.contactAddedBy}
+                    onChange={(e) =>
+                      setFormData({ ...formData, contactAddedBy: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isLoading}
+                  >
+                    <option value="">Please Select</option>
+                    {availableCreators.map((creator) => (
+                      <option key={creator} value={creator}>
+                        {creator}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
 
