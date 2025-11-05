@@ -178,11 +178,24 @@ const ReviewerDashboardPage: React.FC = () => {
   const handleCreateSave = async (contactData: Partial<Contact>) => {
     setIsSaving(true);
     try {
-      const saved = await AirtableService.createContact({
-        ...contactData,
-        contactAddedBy: creator,
-        specificStage: 'Approved to receive gift' as any,
-      });
+      const draftOrderItems = ((contactData as any).draftOrderItems || []) as string[];
+      const specificStage = draftOrderItems.length > 0 ? ('Approved to receive gift' as any) : (null as any);
+      let saved: Contact | null = null;
+      if ((contactData as any).id) {
+        // Update existing contact
+        saved = await AirtableService.updateContact((contactData as any).id, {
+          ...contactData,
+          contactAddedBy: creator,
+          specificStage,
+        } as any);
+      } else {
+        // Create new contact
+        saved = await AirtableService.createContact({
+          ...contactData,
+          contactAddedBy: creator,
+          specificStage,
+        } as any);
+      }
       if (saved) {
         setContacts(prev => [saved, ...prev]);
       }

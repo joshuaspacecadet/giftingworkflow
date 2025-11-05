@@ -637,9 +637,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
                                 linkedinUrl: c.linkedinUrl || "",
                                 additionalContactContext: c.additionalContactContext || "",
                                 contactAddedBy: c.contactAddedBy || "",
-                                magicCards: (c.magicCardsProjects || []).includes(currentProjectId || ""),
-                                sfsBook: (c.sfsBookProjects || []).includes(currentProjectId || ""),
-                                goldenRecord: (c.goldenRecordProjects || []).includes(currentProjectId || ""),
+                                // Pre-check from Draft Order Items (dashboard) and fall back to project link flags
+                                magicCards: ((c as any).draftOrderItems || []).includes('Magic Cards') || (c.magicCardsProjects || []).includes(currentProjectId || ""),
+                                sfsBook: ((c as any).draftOrderItems || []).includes('SFS Book') || (c.sfsBookProjects || []).includes(currentProjectId || ""),
+                                goldenRecord: ((c as any).draftOrderItems || []).includes('Golden Record') || (c.goldenRecordProjects || []).includes(currentProjectId || ""),
                               });
                               // Populate previews for images
                               const convertedHeadshots = (c.headshot || []).map((a) => ({
