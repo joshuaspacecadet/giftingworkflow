@@ -134,12 +134,11 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-          <div className="text-lg font-semibold text-slate-900">{titleText}</div>
+          <div>
+            <div className="text-lg font-semibold text-slate-900">{titleText}</div>
+            <div className="text-xs text-slate-500">Uploaded {formatDateTime(current.latestDesignDate)}</div>
+          </div>
           <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
-        </div>
-
-        <div className="px-6 pt-2 pb-6">
-          <div className="text-xs text-slate-500 mb-4">Uploaded {formatDateTime(current.latestDesignDate)}</div>
         </div>
 
         <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-8">
