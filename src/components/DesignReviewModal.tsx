@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Contact } from '../types';
 import PdfThumbnail from './PdfThumbnail';
 import { AirtableService } from '../services/airtable';
@@ -34,6 +35,20 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     const files = current.designFiles || [];
     return files[0] || null;
   }, [current]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
   if (!current) {
@@ -99,7 +114,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     }
   };
 
-  return (
+  const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6" onClick={(e)=>e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
@@ -175,6 +190,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       </div>
     </div>
   );
+  return createPortal(modal, document.body);
 };
 
 export default DesignReviewModal;
