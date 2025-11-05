@@ -22,6 +22,15 @@ const formatDateTime = (dateString?: string) => {
   }
 };
 
+const formatFileSize = (bytes?: number) => {
+  if (!bytes && bytes !== 0) return '';
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+};
+
 const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, contacts, onAdvance }) => {
   const [index, setIndex] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -129,7 +138,11 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <div className="border border-slate-200 rounded-lg p-3 flex items-center justify-center bg-slate-50">
+            <div
+              className="border border-slate-200 rounded-lg p-3 flex items-center justify-center bg-slate-50 cursor-zoom-in"
+              onClick={() => design && setIsPreviewOpen(true)}
+              title={design ? 'Click to preview larger' : undefined}
+            >
               {design ? (
                 design.type?.startsWith('image/') ? (
                   <img src={design.url} alt={design.filename} className="max-h-[520px] object-contain" />
@@ -148,6 +161,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                   </a>
                 </div>
                 <div>Uploaded {formatDateTime(current.latestDesignDate)}</div>
+                {typeof design.size === 'number' && (
+                  <div>Size {formatFileSize(design.size)}</div>
+                )}
                 <button type="button" className="text-blue-600 hover:underline" onClick={() => setIsPreviewOpen(true)}>Preview</button>
               </div>
             )}
