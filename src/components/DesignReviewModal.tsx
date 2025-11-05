@@ -167,7 +167,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
-        <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="px-6 pb-6 mt-3 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div
               className="rounded-lg flex items-center justify-center cursor-zoom-in"
@@ -176,9 +176,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             >
               {design ? (
                 design.type?.startsWith('image/') ? (
-                  <img src={design.url} alt={design.filename} className="max-h-[640px] object-contain" />
+                  <img src={design.url} alt={design.filename} className="max-h-[540px] object-contain" />
                 ) : (
-                  <PdfThumbnail url={design.url} className="h-[640px]" heightPx={640} />
+                  <PdfThumbnail url={design.url} className="h-[540px]" heightPx={540} />
                 )
               ) : (
                 <div className="text-sm text-slate-500">No design file</div>
@@ -198,18 +198,21 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                 <ThumbsDown className="h-8 w-8 text-rose-700" />
               </button>
             </div>
-
-            <div className="text-sm font-medium mb-2">Please provide feedback</div>
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              className={`w-full min-h-[160px] border border-slate-300 rounded-md p-3 text-sm ${hasRejected ? 'text-slate-900 bg-white' : 'text-slate-500 bg-slate-50'} disabled:bg-slate-50`}
-              placeholder="Feedback enabled after clicking Reject"
-              disabled={!hasRejected || saving}
-            />
-            <div className="mt-3 flex justify-end">
-              <button disabled={saving || !hasRejected || !feedback} onClick={reject} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save Feedback</button>
-            </div>
+            {hasRejected && (
+              <>
+                <div className="text-sm font-medium mb-2">Please provide feedback</div>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  className="w-full min-h-[160px] border border-slate-300 rounded-md p-3 text-sm text-slate-900 bg-white disabled:bg-slate-50"
+                  placeholder="Share why the design needs changes"
+                  disabled={saving}
+                />
+                <div className="mt-3 flex justify-end">
+                  <button disabled={saving || !feedback} onClick={reject} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save Feedback</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
