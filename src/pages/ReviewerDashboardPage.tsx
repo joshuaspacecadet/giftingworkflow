@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AirtableService } from '../services/airtable';
 import { Contact, Project, SpecificStage } from '../types';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
-import { Loader2, FileText, Images, MapPin, Users as UsersIcon, Package, UserPlus } from 'lucide-react';
+import { Loader2, FileText, Images, MapPin, Users as UsersIcon, Package, UserPlus, AlertTriangle } from 'lucide-react';
 import PdfThumbnail from '../components/PdfThumbnail';
 import ContactModal from '../components/ContactModal';
 
@@ -424,7 +424,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
                       </button>
                       {(!c.streetLine1 || !c.city || !c.countryCode) && (
-                        <span className="ml-1 text-[9px] text-amber-400 bg-amber-400/10 rounded px-1 py-px whitespace-nowrap">no addr</span>
+                        <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -486,7 +486,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
                       </button>
                       {(!c.streetLine1 || !c.city || !c.countryCode) && (
-                        <span className="ml-1 text-[9px] text-amber-400 bg-amber-400/10 rounded px-1 py-px whitespace-nowrap">no addr</span>
+                        <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
                     </div>
                     <button
@@ -546,7 +546,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
                       </button>
                       {(!c.streetLine1 || !c.city || !c.countryCode) && (
-                        <span className="ml-1 text-[9px] text-amber-400 bg-amber-400/10 rounded px-1 py-px whitespace-nowrap">no addr</span>
+                        <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
                     </div>
                     <button
