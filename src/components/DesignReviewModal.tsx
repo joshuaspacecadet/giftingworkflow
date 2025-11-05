@@ -50,6 +50,16 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     );
   }
 
+  const titleText = useMemo(() => {
+    const full = (current.name || '').trim();
+    if (!full) return `Design Review`;
+    const parts = full.split(/\s+/);
+    let first = parts[0] || '';
+    let last = parts.length > 1 ? parts[parts.length - 1] : '';
+    const nameDisplay = [first, last].filter(Boolean).join(' ');
+    return `Design Review: ${nameDisplay}${current.company ? `, ${current.company}` : ''}`;
+  }, [current]);
+
   const goNext = () => {
     if (index < contacts.length - 1) {
       setFeedback('');
@@ -93,7 +103,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6" onClick={(e)=>e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold">Design Review: {current.name}{current.company ? `, ${current.company}` : ''}</div>
+          <div className="text-sm font-semibold">{titleText}</div>
           <button className="text-slate-500" onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
 
