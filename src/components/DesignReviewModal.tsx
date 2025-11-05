@@ -36,6 +36,19 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     return files[0] || null;
   }, [current]);
 
+  // Build the title text BEFORE any early returns so hooks are consistent
+  const titleText = useMemo(() => {
+    const c = current;
+    if (!c) return 'Design Review';
+    const full = (c.name || '').trim();
+    if (!full) return 'Design Review';
+    const parts = full.split(/\s+/);
+    const first = parts[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1] : '';
+    const nameDisplay = [first, last].filter(Boolean).join(' ');
+    return `Design Review: ${nameDisplay}${c.company ? `, ${c.company}` : ''}`;
+  }, [current]);
+
   useEffect(() => {
     if (!isOpen) return;
     const html = document.documentElement;
@@ -65,15 +78,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     );
   }
 
-  const titleText = useMemo(() => {
-    const full = (current.name || '').trim();
-    if (!full) return `Design Review`;
-    const parts = full.split(/\s+/);
-    let first = parts[0] || '';
-    let last = parts.length > 1 ? parts[parts.length - 1] : '';
-    const nameDisplay = [first, last].filter(Boolean).join(' ');
-    return `Design Review: ${nameDisplay}${current.company ? `, ${current.company}` : ''}`;
-  }, [current]);
+  // (titleText already computed above)
 
   const goNext = () => {
     if (index < contacts.length - 1) {
