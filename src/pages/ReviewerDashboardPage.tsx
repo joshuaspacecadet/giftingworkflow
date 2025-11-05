@@ -179,15 +179,21 @@ const ReviewerDashboardPage: React.FC = () => {
     setIsSaving(true);
     try {
       const draftOrderItems = ((contactData as any).draftOrderItems || []) as string[];
-      const specificStage = draftOrderItems.length > 0 ? ('Approved to receive gift' as any) : (null as any);
+      // Compute next Specific Stage based on existing state: do not overwrite if already in pipeline (and not "Approved...")
+      let specificStage: any = draftOrderItems.length > 0 ? ('Approved to receive gift' as any) : (null as any);
       let saved: Contact | null = null;
       if ((contactData as any).id) {
         // Update existing contact
-        saved = await AirtableService.updateContact((contactData as any).id, {
+        const existing = contacts.find((c) => c.id === (contactData as any).id);
+        const allowStageChange = !existing?.specificStage || existing?.specificStage === 'Approved to receive gift';
+        const updatePayload: any = {
           ...contactData,
           contactAddedBy: creator,
-          specificStage,
-        } as any);
+        };
+        if (allowStageChange) {
+          updatePayload.specificStage = specificStage;
+        }
+        saved = await AirtableService.updateContact((contactData as any).id, updatePayload);
       } else {
         // Create new contact
         saved = await AirtableService.createContact({
@@ -197,7 +203,11 @@ const ReviewerDashboardPage: React.FC = () => {
         } as any);
       }
       if (saved) {
-        setContacts(prev => [saved, ...prev]);
+        setContacts((prev) => {
+          const exists = prev.some((c) => c.id === saved!.id);
+          return exists ? prev.map((c) => (c.id === saved!.id ? saved! : c)) : [saved!, ...prev];
+        });
+        setIsCreateOpen(false);
       }
       return saved;
     } finally {
