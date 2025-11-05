@@ -36,6 +36,7 @@ const ReviewerDashboardPage: React.FC = () => {
 
   // Create Recipient modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | undefined>(undefined);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -208,6 +209,7 @@ const ReviewerDashboardPage: React.FC = () => {
           return exists ? prev.map((c) => (c.id === saved!.id ? saved! : c)) : [saved!, ...prev];
         });
         setIsCreateOpen(false);
+        setEditingContact(undefined);
       }
       return saved;
     } finally {
@@ -411,7 +413,14 @@ const ReviewerDashboardPage: React.FC = () => {
                 approvedRecipients.slice(0, 50).map(c => (
                   <li key={c.id} className="flex items-center gap-2 truncate">
                     <span className="text-slate-500">•</span>
-                    <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                    <button
+                      type="button"
+                      className="truncate hover:underline text-left"
+                      onClick={() => { setEditingContact(c); setIsCreateOpen(true); }}
+                      title="Edit recipient"
+                    >
+                      {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
+                    </button>
                   </li>
                 ))
               )}
@@ -459,11 +468,12 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Create Recipient Modal */}
       <ContactModal
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => { setIsCreateOpen(false); setEditingContact(undefined); }}
         onSave={handleCreateSave}
         isLoading={isSaving}
         availableCreators={PREDEFINED_CONTACT_CREATORS}
         lockedCreator={creator}
+        contact={editingContact}
       />
 
       {/* Add Existing Recipient Modal (dashboard) */}
