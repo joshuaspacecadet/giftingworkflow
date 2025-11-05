@@ -471,9 +471,48 @@ const ReviewerDashboardPage: React.FC = () => {
                 <li className="italic text-slate-500">None yet</li>
               ) : (
                 inDesign.slice(0, 50).map(c => (
-                  <li key={c.id} className="flex items-center gap-2 truncate">
-                    <span className="text-slate-500">•</span>
-                    <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                  <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-slate-500">•</span>
+                      <button
+                        type="button"
+                        className="truncate hover:underline text-left"
+                        onClick={() => { setEditingContact(c); setIsCreateOpen(true); }}
+                        title="Edit recipient"
+                      >
+                        {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-slate-400 hover:text-red-400 px-1"
+                      aria-label="Remove from pipeline"
+                      onClick={() => setConfirmUnapproveId(c.id)}
+                    >
+                      ×
+                    </button>
+                    {confirmUnapproveId === c.id && (
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-[#0F1012] border border-[#27282B] rounded-md px-2 py-1 text-[11px] text-slate-200 shadow-sm flex items-center gap-2">
+                        <span>Really?</span>
+                        <button
+                          className="text-red-400 hover:text-red-300"
+                          onClick={async () => {
+                            try {
+                              const updated = await AirtableService.updateContact(c.id, {
+                                specificStage: null as any,
+                                draftOrderItems: [] as any,
+                              } as any);
+                              if (updated) {
+                                setContacts(prev => prev.map(pc => pc.id === c.id ? updated : pc));
+                                setAllContactsDataset(prev => prev.map(pc => pc.id === c.id ? updated : pc));
+                              }
+                            } catch (e) { console.error('Unapprove failed', e); }
+                            setConfirmUnapproveId(null);
+                          }}
+                        >Yes</button>
+                        <button className="text-slate-400 hover:text-slate-200" onClick={() => setConfirmUnapproveId(null)}>No</button>
+                      </div>
+                    )}
                   </li>
                 ))
               )}
@@ -489,9 +528,48 @@ const ReviewerDashboardPage: React.FC = () => {
                 <li className="italic text-slate-500">None yet</li>
               ) : (
                 fulfillment.slice(0, 50).map(c => (
-                  <li key={c.id} className="flex items-center gap-2 truncate">
-                    <span className="text-slate-500">•</span>
-                    <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                  <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-slate-500">•</span>
+                      <button
+                        type="button"
+                        className="truncate hover:underline text-left"
+                        onClick={() => { setEditingContact(c); setIsCreateOpen(true); }}
+                        title="Edit recipient"
+                      >
+                        {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-slate-400 hover:text-red-400 px-1"
+                      aria-label="Remove from pipeline"
+                      onClick={() => setConfirmUnapproveId(c.id)}
+                    >
+                      ×
+                    </button>
+                    {confirmUnapproveId === c.id && (
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-[#0F1012] border border-[#27282B] rounded-md px-2 py-1 text-[11px] text-slate-200 shadow-sm flex items-center gap-2">
+                        <span>Really?</span>
+                        <button
+                          className="text-red-400 hover:text-red-300"
+                          onClick={async () => {
+                            try {
+                              const updated = await AirtableService.updateContact(c.id, {
+                                specificStage: null as any,
+                                draftOrderItems: [] as any,
+                              } as any);
+                              if (updated) {
+                                setContacts(prev => prev.map(pc => pc.id === c.id ? updated : pc));
+                                setAllContactsDataset(prev => prev.map(pc => pc.id === c.id ? updated : pc));
+                              }
+                            } catch (e) { console.error('Unapprove failed', e); }
+                            setConfirmUnapproveId(null);
+                          }}
+                        >Yes</button>
+                        <button className="text-slate-400 hover:text-slate-200" onClick={() => setConfirmUnapproveId(null)}>No</button>
+                      </div>
+                    )}
                   </li>
                 ))
               )}
