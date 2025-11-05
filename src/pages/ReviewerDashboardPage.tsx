@@ -424,7 +424,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
                       </button>
                       {(!c.streetLine1 || !c.city || !c.countryCode) && (
-                        <span className="ml-2 text-[10px] text-amber-400 border border-amber-400/30 rounded px-1 py-0.5 whitespace-nowrap">no address</span>
+                        <span className="ml-1 text-[9px] text-amber-400 bg-amber-400/10 rounded px-1 py-px whitespace-nowrap">no addr</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -486,7 +486,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
                       </button>
                       {(!c.streetLine1 || !c.city || !c.countryCode) && (
-                        <span className="ml-2 text-[10px] text-amber-400 border border-amber-400/30 rounded px-1 py-0.5 whitespace-nowrap">no address</span>
+                        <span className="ml-1 text-[9px] text-amber-400 bg-amber-400/10 rounded px-1 py-px whitespace-nowrap">no addr</span>
                       )}
                     </div>
                     <button
@@ -546,7 +546,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
                       </button>
                       {(!c.streetLine1 || !c.city || !c.countryCode) && (
-                        <span className="ml-2 text-[10px] text-amber-400 border border-amber-400/30 rounded px-1 py-0.5 whitespace-nowrap">no address</span>
+                        <span className="ml-1 text-[9px] text-amber-400 bg-amber-400/10 rounded px-1 py-px whitespace-nowrap">no addr</span>
                       )}
                     </div>
                     <button
