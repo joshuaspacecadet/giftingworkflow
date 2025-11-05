@@ -128,6 +128,8 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     }
   };
 
+  const isPdf = !!(design && ((design.type && /pdf/i.test(design.type)) || /\.pdf(\?|$)/i.test(design.filename || design.url)));
+
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
@@ -202,9 +204,18 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
               <div className="flex justify-end mb-2"><button className="text-slate-500" onClick={() => setIsPreviewOpen(false)}><X className="h-5 w-5" /></button></div>
               {design.type?.startsWith('image/') ? (
                 <img src={design.url} alt={design.filename} className="max-h-[80vh] max-w-[85vw] object-contain" />
+              ) : isPdf ? (
+                <iframe
+                  src={design.url}
+                  title={design.filename || 'Design PDF'}
+                  className="w-[85vw] h-[80vh] rounded border border-slate-200"
+                />
               ) : (
                 <PdfThumbnail url={design.url} className="h-[80vh]" />
               )}
+              <div className="mt-2 text-right text-xs">
+                <a href={design.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">Open in new tab</a>
+              </div>
             </div>
           </div>
         )}
