@@ -596,6 +596,7 @@ const ReviewerDashboardPage: React.FC = () => {
         availableCreators={PREDEFINED_CONTACT_CREATORS}
         lockedCreator={creator}
         contact={editingContact}
+        lockCoreFields={editingContact ? (!!editingContact.specificStage && (IN_DESIGN_STAGES.includes(editingContact.specificStage as any) || editingContact.specificStage === 'Fulfillment')) : false}
       />
 
       {/* Add Existing Recipient Modal (dashboard) */}

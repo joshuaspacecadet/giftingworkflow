@@ -24,6 +24,7 @@ interface ContactModalProps {
   availableCreators: string[];
   currentProjectId?: string;
   lockedCreator?: string;
+  lockCoreFields?: boolean; // disable core edits in specific pipeline stages
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({
@@ -35,6 +36,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   availableCreators,
   currentProjectId,
   lockedCreator,
+  lockCoreFields = false,
 }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -592,7 +594,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   Full Name *
                 </label>
                 <div className="relative">
-                  <input
+                <input
                     ref={nameInputRef}
                     type="text"
                     required
@@ -608,7 +610,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                       // Delay to allow click on suggestion
                       setTimeout(() => setShowNameSuggestions(false), 150);
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${lockCoreFields ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500'}`}
+                  disabled={lockCoreFields}
                     placeholder="Enter full name"
                     aria-autocomplete="list"
                     aria-expanded={showNameSuggestions}
@@ -710,7 +713,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, company: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${lockCoreFields ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500'}`}
+                  disabled={lockCoreFields}
                   placeholder="Company name"
                 />
               </div>
@@ -888,7 +892,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     isDragOverHeadshots
                       ? "border-blue-500 bg-blue-50"
                       : "border-slate-300 hover:border-slate-400"
-                  } ${isUploadingHeadshots ? "opacity-50 pointer-events-none" : ""}`}
+                  } ${(isUploadingHeadshots || lockCoreFields) ? "opacity-50 pointer-events-none" : ""}`}
                   onDragOver={(e) => handleDragOver(e, "headshot")}
                   onDragLeave={(e) => handleDragLeave(e, "headshot")}
                   onDrop={(e) => handleDrop(e, "headshot")}
@@ -900,7 +904,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     onChange={handleHeadshotSelect}
                     className="hidden"
                     id="headshot-upload"
-                    disabled={isUploadingHeadshots}
+                    disabled={isUploadingHeadshots || lockCoreFields}
                     onClick={() => console.log("Headshot file input clicked")}
                   />
                   <label
@@ -945,7 +949,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                               onClick={() =>
                                 handleRemoveFile(index, "headshot")
                               }
-                              className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                              className={`bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors ${lockCoreFields ? 'opacity-50 pointer-events-none' : ''}`}
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -977,7 +981,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     isDragOverLogos
                       ? "border-blue-500 bg-blue-50"
                       : "border-slate-300 hover:border-slate-400"
-                  } ${isUploadingLogos ? "opacity-50 pointer-events-none" : ""}`}
+                  } ${(isUploadingLogos || lockCoreFields) ? "opacity-50 pointer-events-none" : ""}`}
                   onDragOver={(e) => handleDragOver(e, "logo")}
                   onDragLeave={(e) => handleDragLeave(e, "logo")}
                   onDrop={(e) => handleDrop(e, "logo")}
@@ -989,7 +993,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     onChange={handleLogoSelect}
                     className="hidden"
                     id="logo-upload"
-                    disabled={isUploadingLogos}
+                    disabled={isUploadingLogos || lockCoreFields}
                     onClick={() => console.log("Logo file input clicked")}
                   />
                   <label
@@ -1160,11 +1164,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   type="url"
                   value={formData.linkedinUrl}
                   onChange={(e) => handleLinkedInUrlChange(e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
-                    linkedinUrlError
-                      ? "border-red-300 focus:ring-red-500"
-                      : "border-slate-300 focus:ring-blue-500"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${linkedinUrlError ? 'border-red-300 focus:ring-red-500' : (lockCoreFields ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500')}`}
+                  disabled={lockCoreFields}
                   placeholder="https://linkedin.com/in/username"
                 />
                 {linkedinUrlError && (
@@ -1205,7 +1206,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   })
                 }
                 rows={3}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${lockCoreFields ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500'}`}
+                disabled={lockCoreFields}
                 placeholder="loves to surf, lives bi-coastal, training for a marathon"
               />
             </div>
