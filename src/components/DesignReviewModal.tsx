@@ -25,6 +25,8 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const [index, setIndex] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
+  const [hasRejected, setHasRejected] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const current = contacts[index];
 
   const design = useMemo(() => {
@@ -95,14 +97,14 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           <button className="text-slate-500" onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div className="border border-slate-200 rounded-lg p-3 flex items-center justify-center bg-slate-50">
               {design ? (
                 design.type?.startsWith('image/') ? (
-                  <img src={design.url} alt={design.filename} className="max-h-[420px] object-contain" />
+                  <img src={design.url} alt={design.filename} className="max-h-[520px] object-contain" />
                 ) : (
-                  <PdfThumbnail url={design.url} className="h-[420px]" />
+                  <PdfThumbnail url={design.url} className="h-[520px]" />
                 )
               ) : (
                 <div className="text-sm text-slate-500">No design file</div>
@@ -116,6 +118,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                   </a>
                 </div>
                 <div>Uploaded {formatDateTime(current.latestDesignDate)}</div>
+                <button type="button" className="text-blue-600 hover:underline" onClick={() => setIsPreviewOpen(true)}>Preview</button>
               </div>
             )}
           </div>
@@ -123,10 +126,10 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           <div>
             <div className="text-sm font-medium mb-3">Do you approve this design?</div>
             <div className="flex items-center gap-6 mb-4">
-              <button disabled={saving} onClick={approve} className="h-16 w-16 rounded-full bg-green-200 flex items-center justify-center hover:bg-green-300 disabled:opacity-50">
+              <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300'}`}>
                 <ThumbsUp className="h-8 w-8 text-green-700" />
               </button>
-              <button disabled={saving} onClick={() => { /* enable feedback first; action on Save Feedback */ }} className="h-16 w-16 rounded-full bg-rose-200 flex items-center justify-center hover:bg-rose-300 disabled:opacity-50">
+              <button disabled={saving} onClick={() => setHasRejected(true)} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-rose-300' : 'bg-rose-200 hover:bg-rose-300'}`}>
                 <ThumbsDown className="h-8 w-8 text-rose-700" />
               </button>
             </div>
@@ -135,17 +138,30 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             <textarea
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              className="w-full min-h-[160px] border border-slate-300 rounded-md p-3 text-sm disabled:bg-slate-50"
+              className={`w-full min-h-[160px] border border-slate-300 rounded-md p-3 text-sm ${hasRejected ? 'text-slate-900 bg-white' : 'text-slate-500 bg-slate-50'} disabled:bg-slate-50`}
               placeholder="Feedback enabled after clicking Reject"
-              disabled={saving}
+              disabled={!hasRejected || saving}
             />
             <div className="mt-3 flex justify-end">
-              <button disabled={saving || !feedback} onClick={reject} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save Feedback</button>
+              <button disabled={saving || !hasRejected || !feedback} onClick={reject} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save Feedback</button>
             </div>
           </div>
         </div>
 
         <div className="mt-4 text-xs text-slate-500">{index + 1} of {contacts.length}</div>
+
+        {isPreviewOpen && design && (
+          <div className="fixed inset-0 bg-black/80 z-[3100] flex items-center justify-center p-4" onClick={() => setIsPreviewOpen(false)}>
+            <div className="bg-white rounded-xl shadow-xl max-w-[90vw] max-h-[90vh] p-3" onClick={(e)=>e.stopPropagation()}>
+              <div className="flex justify-end mb-2"><button className="text-slate-500" onClick={() => setIsPreviewOpen(false)}><X className="h-5 w-5" /></button></div>
+              {design.type?.startsWith('image/') ? (
+                <img src={design.url} alt={design.filename} className="max-h-[80vh] max-w-[85vw] object-contain" />
+              ) : (
+                <PdfThumbnail url={design.url} className="h-[80vh]" />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
