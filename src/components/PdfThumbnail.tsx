@@ -11,9 +11,10 @@ interface PdfThumbnailProps {
   url: string;
   className?: string;
   alt?: string;
+  heightPx?: number; // desired CSS height for the rendered thumbnail
 }
 
-const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
+const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt, heightPx }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -42,7 +43,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
         if (!canvas || !ctx) return;
 
         const DPR = Math.max(window.devicePixelRatio || 1, 1);
-        const targetCssHeight = 100; // px
+        const targetCssHeight = typeof heightPx === 'number' ? heightPx : 100; // px
         const viewport1 = page.getViewport({ scale: 1 });
         const scale = (targetCssHeight * DPR) / viewport1.height;
         const viewport = page.getViewport({ scale });
@@ -68,7 +69,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
     return (
       <div
         className={`rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center ${className || ''}`}
-        style={{ height: 100, width: 70 }}
+        style={{ height: heightPx ?? 100, width: heightPx ? Math.round((heightPx * 0.7)) : 70 }}
         role="img"
         aria-label={alt || 'PDF'}
         title={alt || 'PDF'}
@@ -82,7 +83,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt }) => {
     <canvas
       ref={canvasRef}
       className={`rounded-md border border-[#27282B] bg-[#141518] ${className || ''}`}
-      style={{ height: 100 }}
+      style={{ height: heightPx ?? 100 }}
       role="img"
       aria-label={alt || 'PDF'}
       title={alt || 'PDF'}

@@ -147,9 +147,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             >
               {design ? (
                 design.type?.startsWith('image/') ? (
-                  <img src={design.url} alt={design.filename} className="max-h-[520px] object-contain" />
+                  <img src={design.url} alt={design.filename} className="max-h-[640px] object-contain" />
                 ) : (
-                  <PdfThumbnail url={design.url} className="h-[520px]" />
+                  <PdfThumbnail url={design.url} className="h-[640px]" heightPx={640} />
                 )
               ) : (
                 <div className="text-sm text-slate-500">No design file</div>
