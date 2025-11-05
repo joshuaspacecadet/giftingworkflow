@@ -73,6 +73,8 @@ export interface Contact {
   contactReviewFeedback?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Dashboard-only: staging selections for upcoming order
+  draftOrderItems?: string[]; // Airtable "Draft Order Items" multi-select
 }
 
 export interface AirtableAttachment {

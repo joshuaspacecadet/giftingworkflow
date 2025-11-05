@@ -57,6 +57,7 @@ const transformAirtableContact = (record: any): Contact => {
     additionalContactContext: fields["Additional Contact Context"] || "",
     contactAddedBy: fields["Contact Added By"] || "", // ADD THIS LINE
     specificStage: (fields["Specific Stage"] as SpecificStage) || undefined,
+    draftOrderItems: fields["Draft Order Items"] || [],
     designFiles: fields["Design File"] || [],
     magicCardsProjects: (fields["Magic Cards"] || []) as string[],
     sfsBookProjects: (fields["SFS Book"] || []) as string[],

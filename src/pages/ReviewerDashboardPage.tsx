@@ -73,6 +73,19 @@ const ReviewerDashboardPage: React.FC = () => {
         const all = await AirtableService.getContacts();
         const sorted = [...all].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         setAllContactsDataset(sorted);
+        // Initialize checkbox states from existing Draft Order Items for approved contacts
+        const initial: Record<string, { magic: boolean; sfs: boolean; golden: boolean }> = {};
+        sorted.forEach((c) => {
+          if (c.specificStage === 'Approved to receive gift') {
+            const doi = ((c as any).draftOrderItems || []) as string[];
+            initial[c.id] = {
+              magic: doi.includes('Magic Cards'),
+              sfs: doi.includes('SFS Book'),
+              golden: doi.includes('Golden Record'),
+            };
+          }
+        });
+        setSelectedItemsByContact((prev) => ({ ...initial, ...prev }));
       } finally {
         setIsLoadingAllContacts(false);
       }
@@ -494,7 +507,18 @@ const ReviewerDashboardPage: React.FC = () => {
                       return true;
                     })
                     .slice(0, visibleExistingCount)
-                    .map((c) => (
+                    .map((c) => {
+                      const savedDraft: string[] = ((c as any).draftOrderItems || []) as string[];
+                      const selected = selectedItemsByContact[c.id] || { magic: false, sfs: false, golden: false };
+                      const currentDraft = [
+                        ...(selected.magic ? ['Magic Cards'] : []),
+                        ...(selected.sfs ? ['SFS Book'] : []),
+                        ...(selected.golden ? ['Golden Record'] : []),
+                      ];
+                      const setEq = (a: string[], b: string[]) => a.length === b.length && a.every(v => b.includes(v));
+                      const isDirty = !setEq(currentDraft, savedDraft);
+                      const nextStageEmpty = currentDraft.length === 0;
+                      return (
                       <li key={c.id} className="p-2 rounded-md border border-slate-200 bg-white">
                         <div className="flex items-center justify-between gap-3">
                           <div className="truncate">
@@ -507,16 +531,11 @@ const ReviewerDashboardPage: React.FC = () => {
                             <button
                               onClick={async ()=>{
                                 try {
-                                  const selected = selectedItemsByContact[c.id] || { magic: false, sfs: false, golden: false };
-                                  const draftOrderItems: string[] = [];
-                                  if (selected.magic) draftOrderItems.push('Magic Cards');
-                                  if (selected.sfs) draftOrderItems.push('SFS Book');
-                                  if (selected.golden) draftOrderItems.push('Golden Record');
-
+                                  const draftOrderItems = currentDraft;
                                   const updated = await AirtableService.updateContact(c.id, {
                                     contactAddedBy: creator,
-                                    specificStage: 'Approved to receive gift' as any,
-                                    ...(draftOrderItems.length > 0 ? { draftOrderItems } : {}),
+                                    specificStage: (draftOrderItems.length > 0 ? 'Approved to receive gift' : null) as any,
+                                    draftOrderItems,
                                   } as any);
                                   if (updated) {
                                     setContacts(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
@@ -524,9 +543,9 @@ const ReviewerDashboardPage: React.FC = () => {
                                   }
                                 } catch(e) { console.error('Add selected failed', e); }
                               }}
-                              className="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50"
+                              className={`text-xs px-2 py-1 rounded border ${isDirty ? 'border-blue-400 text-blue-700' : 'border-slate-300'} hover:bg-slate-50`}
                             >
-                              Add Selected
+                              {isDirty ? 'Save Changes' : 'Add Selected'}
                             </button>
                           </div>
                         </div>
@@ -555,7 +574,7 @@ const ReviewerDashboardPage: React.FC = () => {
                           </span>
                         </div>
                       </li>
-                    ))}
+                    )})}
                 </ul>
               )}
             </div>
