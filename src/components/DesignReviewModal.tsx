@@ -138,7 +138,11 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
 
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="px-6 pt-2 pb-6">
+          <div className="text-xs text-slate-500 mb-4">Uploaded {formatDateTime(current.latestDesignDate)}</div>
+        </div>
+
+        <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div
               className="border border-slate-200 rounded-lg p-3 flex items-center justify-center bg-slate-50 cursor-zoom-in"
