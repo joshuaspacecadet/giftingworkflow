@@ -121,13 +121,13 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
 
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl p-6" onClick={(e)=>e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold">{titleText}</div>
-          <button className="text-slate-500" onClick={onClose}><X className="h-5 w-5" /></button>
+      <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
+          <div className="text-lg font-semibold text-slate-900">{titleText}</div>
+          <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div className="border border-slate-200 rounded-lg p-3 flex items-center justify-center bg-slate-50">
               {design ? (
@@ -178,7 +178,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
-        <div className="mt-4 text-xs text-slate-500">{index + 1} of {contacts.length}</div>
+        <div className="px-6 pb-6 text-xs text-slate-500">{index + 1} of {contacts.length}</div>
 
         {isPreviewOpen && design && (
           <div className="fixed inset-0 bg-black/80 z-[3100] flex items-center justify-center p-4" onClick={() => setIsPreviewOpen(false)}>
