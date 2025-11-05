@@ -59,6 +59,8 @@ const transformAirtableContact = (record: any): Contact => {
     specificStage: (fields["Specific Stage"] as SpecificStage) || undefined,
     draftOrderItems: fields["Draft Order Items"] || [],
     designFiles: fields["Design File"] || [],
+    latestDesignDate: fields["Latest Design Date"] || "",
+    latestDesignFeedback: fields["Latest Design Feedback"] || "",
     magicCardsProjects: (fields["Magic Cards"] || []) as string[],
     sfsBookProjects: (fields["SFS Book"] || []) as string[],
     goldenRecordProjects: (fields["Golden Record"] || []) as string[],
@@ -458,6 +460,8 @@ export class AirtableService {
         updateFields["Specific Stage"] = (updates as any).specificStage;
       if ((updates as any).draftOrderItems !== undefined)
         updateFields["Draft Order Items"] = (updates as any).draftOrderItems;
+      if ((updates as any).latestDesignFeedback !== undefined)
+        updateFields["Latest Design Feedback"] = (updates as any).latestDesignFeedback;
       if (updates.contactAddedBy !== undefined && updates.contactAddedBy !== "")
         updateFields["Contact Added By"] = updates.contactAddedBy;
       if ((updates as any).magicCardsProjects !== undefined)

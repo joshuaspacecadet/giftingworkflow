@@ -5,6 +5,7 @@ import { Contact, Project, SpecificStage } from '../types';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
 import { Loader2, FileText, Images, MapPin, Users as UsersIcon, Package, UserPlus, AlertTriangle } from 'lucide-react';
 import PdfThumbnail from '../components/PdfThumbnail';
+import DesignReviewModal from '../components/DesignReviewModal';
 import ContactModal from '../components/ContactModal';
 
 type NameParam = 'wiz' | 'john' | 'daniel';
@@ -38,6 +39,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | undefined>(undefined);
   const [confirmUnapproveId, setConfirmUnapproveId] = useState<string | null>(null);
+  const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -287,7 +289,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 </div>
               )}
               <div className="mt-auto pt-3">
-                <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Open review →</button>
+                <button onClick={() => setIsDesignReviewOpen(true)} className="text-xs bg-white text-black rounded-md px-3 py-1.5">Open review →</button>
               </div>
             </div>
 
@@ -597,6 +599,16 @@ const ReviewerDashboardPage: React.FC = () => {
         lockedCreator={creator}
         contact={editingContact}
         lockCoreFields={editingContact ? (!!editingContact.specificStage && (IN_DESIGN_STAGES.includes(editingContact.specificStage as any) || editingContact.specificStage === 'Fulfillment')) : false}
+      />
+
+      {/* Design Review Modal */}
+      <DesignReviewModal
+        isOpen={isDesignReviewOpen}
+        onClose={() => setIsDesignReviewOpen(false)}
+        contacts={designsReady}
+        onAdvance={(updated) => {
+          setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+        }}
       />
 
       {/* Add Existing Recipient Modal (dashboard) */}

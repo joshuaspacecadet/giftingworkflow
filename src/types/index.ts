@@ -21,6 +21,7 @@ export type SpecificStage =
   | 'Drafting copy'
   | 'In design'
   | 'Design review'
+  | 'Design rejected'
   | 'Design approved'
   | 'Fulfillment'
   | 'Shipped';
@@ -75,6 +76,9 @@ export interface Contact {
   updatedAt?: string;
   // Dashboard-only: staging selections for upcoming order
   draftOrderItems?: string[]; // Airtable "Draft Order Items" multi-select
+  // Design review metadata
+  latestDesignDate?: string;
+  latestDesignFeedback?: string;
 }
 
 export interface AirtableAttachment {
