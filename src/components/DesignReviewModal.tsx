@@ -36,6 +36,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
   const [hasRejected, setHasRejected] = useState(false);
+  const [hasApproved, setHasApproved] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   // Snapshot the list at open time so cards remain in-session even after approval/rejection
   const [sessionContacts, setSessionContacts] = useState<Contact[]>([]);
@@ -72,6 +73,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   useEffect(() => {
     if (!current) return;
     setHasRejected(current.specificStage === 'Design rejected');
+    setHasApproved(current.specificStage === 'Design approved');
     setFeedback(current.latestDesignFeedback || '');
   }, [current]);
 
@@ -160,6 +162,8 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       if (updated) {
         onAdvance(updated);
         setSessionContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setHasApproved(true);
+        setHasRejected(false);
       }
       goNext();
     } finally {
@@ -239,7 +243,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           <div>
             <div className="text-lg font-semibold mb-4">Do you approve this design?</div>
             <div className="flex items-center gap-6 mb-4">
-              <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300'}`}>
+              <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasApproved ? 'bg-green-500 ring-2 ring-green-600' : (hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300')}`} title="Approve">
                 <ThumbsUp className="h-8 w-8 text-green-700" />
               </button>
               <button disabled={saving} onClick={() => setHasRejected(true)} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-rose-300' : 'bg-rose-200 hover:bg-rose-300'}`}>
