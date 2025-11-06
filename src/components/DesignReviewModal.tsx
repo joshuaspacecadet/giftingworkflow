@@ -189,7 +189,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </div>
 
           <div>
-            <div className="text-lg font-semibold text-center mb-4">Do you approve this design?</div>
+            <div className="text-lg font-semibold mb-4">Do you approve this design?</div>
             <div className="flex items-center gap-6 mb-4">
               <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300'}`}>
                 <ThumbsUp className="h-8 w-8 text-green-700" />
@@ -200,7 +200,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             </div>
             {hasRejected && (
               <>
-                <div className="text-sm font-medium mb-2">Please provide feedback</div>
+                <div className="mt-6 text-sm font-medium mb-2">Please provide feedback and click save.</div>
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
@@ -209,7 +209,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                   disabled={saving}
                 />
                 <div className="mt-3 flex justify-end">
-                  <button disabled={saving || !feedback} onClick={reject} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save Feedback</button>
+                  <button disabled={saving || !feedback} onClick={reject} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save</button>
                 </div>
               </>
             )}
