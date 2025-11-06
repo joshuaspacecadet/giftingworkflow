@@ -272,40 +272,42 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-              <button
-            type="button"
-                onClick={goPrev}
-            disabled={index === 0 || saving}
-            className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-            title="Previous"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div className="flex-1 text-center">
-            <div className="text-lg font-semibold text-slate-900">{titleText}</div>
-            <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
-          </div>
-          <div className="flex items-center gap-2">
-              <button
+        {!isPreloading && (
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
+            <button
               type="button"
-                onClick={goNext}
-              disabled={index >= contacts.length - 1 || saving}
+              onClick={goPrev}
+              disabled={index === 0 || saving}
               className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-              title="Next"
+              title="Previous"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
-            <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
+            <div className="flex-1 text-center">
+              <div className="text-lg font-semibold text-slate-900">{titleText}</div>
+              <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={index >= contacts.length - 1 || saving}
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                title="Next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
+            </div>
           </div>
-        </div>
+        )}
 
         {isPreloading ? (
-          <div className="px-6 py-20 text-center">
-            <div className="text-lg font-semibold mb-2">Entering the design review portal…</div>
-            <div className="text-slate-600 text-sm mb-4">Summoning high‑res previews ({preloadProgress}%)</div>
-            <div className="mx-auto w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500" style={{ width: `${preloadProgress}%` }} />
+          <div className="px-6 py-36 text-center">
+            <div className="text-2xl font-bold mb-3">Entering the design review portal…</div>
+            <div className="text-slate-600 text-base mb-6">Summoning high‑res previews ({preloadProgress}%)</div>
+            <div className="mx-auto w-80 h-3 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-full bg-indigo-500 transition-all" style={{ width: `${preloadProgress}%` }} />
             </div>
           </div>
         ) : (
