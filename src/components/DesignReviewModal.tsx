@@ -167,7 +167,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
-        <div className="px-6 pb-6 mt-3 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="px-6 pb-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div
               className="rounded-lg flex items-center justify-center cursor-zoom-in"
@@ -185,11 +185,11 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
               )}
             </div>
             {/* Show uploaded timestamp below the preview */}
-            <div className="mt-3 text-xs text-slate-500">Uploaded {formatDateTime(current.latestDesignDate)}</div>
+            <div className="mt-3 text-xs text-slate-500 text-center">Uploaded {formatDateTime(current.latestDesignDate)}</div>
           </div>
 
           <div>
-            <div className="text-sm font-medium mb-3">Do you approve this design?</div>
+            <div className="text-lg font-semibold text-center mb-4">Do you approve this design?</div>
             <div className="flex items-center gap-6 mb-4">
               <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300'}`}>
                 <ThumbsUp className="h-8 w-8 text-green-700" />
