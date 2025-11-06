@@ -92,6 +92,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const goNext = () => {
     if (index < contacts.length - 1) {
       setFeedback('');
+      setHasRejected(false);
       setIndex(index + 1);
     } else {
       onClose();
@@ -100,6 +101,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const goPrev = () => {
     if (index > 0) {
       setFeedback('');
+      setHasRejected(false);
       setIndex(index - 1);
     }
   };
@@ -200,7 +202,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             </div>
             {hasRejected && (
               <>
-                <div className="mt-6 text-sm font-medium mb-2">Please provide feedback and click save.</div>
+                <div className="mt-6 text-sm font-medium mb-2">Please provide feedback and click save to reject this design.</div>
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
