@@ -4,6 +4,12 @@ import { Contact } from '../types';
 import PdfThumbnail from './PdfThumbnail';
 import { AirtableService } from '../services/airtable';
 import { X, ThumbsUp, ThumbsDown, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import workerUrl from 'pdfjs-dist/build/pdf.worker?url';
+
+GlobalWorkerOptions.workerSrc = workerUrl as string;
 
 interface DesignReviewModalProps {
   isOpen: boolean;
@@ -38,6 +44,8 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const [hasRejected, setHasRejected] = useState(false);
   const [hasApproved, setHasApproved] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState(0);
   // Snapshot the list at open time so cards remain in-session even after approval/rejection
   const [sessionContacts, setSessionContacts] = useState<Contact[]>([]);
   const current = sessionContacts[index];
@@ -68,6 +76,79 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       setIndex(0);
     }
   }, [isOpen]);
+
+  // Preload thumbnails for all designs to make navigation instant
+  useEffect(() => {
+    if (!isOpen) return;
+    const files = contacts
+      .map(c => (c.designFiles || [])[0])
+      .filter(Boolean) as any[];
+    if (files.length === 0) return;
+    let cancelled = false;
+    const height = 540; // match modal preview height
+
+    const preloadPdf = async (url: string) => {
+      try {
+        const key = `${url}|${height}`;
+        const cache = (window as any).__pdfThumbCache as Map<string, { dataUrl: string; w: number; h: number }>;
+        if (cache && cache.get(key)) return; // already cached
+        const fetchUrl = url.includes('dl=') ? url : `${url}${url.includes('?') ? '&' : '?'}dl=1`;
+        const res = await fetch(fetchUrl, { mode: 'cors', cache: 'force-cache' });
+        if (!res.ok) return;
+        const data = await res.arrayBuffer();
+        const loadingTask = getDocument({ data, disableFontFace: true, useSystemFonts: true });
+        const pdf = await loadingTask.promise;
+        if (cancelled) return;
+        const page = await pdf.getPage(1);
+        const DPR = Math.min(Math.max(window.devicePixelRatio || 1, 1), 1.5);
+        const viewport1 = page.getViewport({ scale: 1 });
+        const scale = (height * DPR) / viewport1.height;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          (window as any).__pdfThumbCache = (window as any).__pdfThumbCache || new Map();
+          (window as any).__pdfThumbCache.set(key, { dataUrl, w: canvas.width, h: canvas.height });
+        } catch {}
+      } catch {}
+    };
+
+    const preloadImage = async (url: string) => {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = url;
+        });
+      } catch {}
+    };
+
+    (async () => {
+      setIsPreloading(true);
+      setPreloadProgress(0);
+      let done = 0;
+      for (const f of files) {
+        if (cancelled) break;
+        const isPdf = (f.type && /pdf/i.test(f.type)) || /\.pdf(\?|$)/i.test(f.filename || f.url);
+        if (isPdf) {
+          await preloadPdf(f.url);
+        } else {
+          await preloadImage(f.url);
+        }
+        done += 1;
+        setPreloadProgress(Math.round((done / files.length) * 100));
+      }
+      if (!cancelled) setIsPreloading(false);
+    })();
+
+    return () => { cancelled = true; };
+  }, [isOpen, contacts]);
 
   // Initialize local UI state from the current contact so edits persist when navigating
   useEffect(() => {
@@ -219,6 +300,15 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
+        {isPreloading ? (
+          <div className="px-6 py-20 text-center">
+            <div className="text-lg font-semibold mb-2">Entering the design review portal…</div>
+            <div className="text-slate-600 text-sm mb-4">Summoning high‑res previews ({preloadProgress}%)</div>
+            <div className="mx-auto w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-full bg-indigo-500" style={{ width: `${preloadProgress}%` }} />
+            </div>
+          </div>
+        ) : (
         <div className="px-6 pb-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div
@@ -272,6 +362,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             )}
           </div>
         </div>
+        )}
 
         {/* Moved pager above approval section */}
 
