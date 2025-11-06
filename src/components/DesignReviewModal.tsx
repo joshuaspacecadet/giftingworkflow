@@ -37,7 +37,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   const [saving, setSaving] = useState(false);
   const [hasRejected, setHasRejected] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const current = contacts[index];
+  // Snapshot the list at open time so cards remain in-session even after approval/rejection
+  const [sessionContacts, setSessionContacts] = useState<Contact[]>([]);
+  const current = sessionContacts[index];
 
   const design = useMemo(() => {
     if (!current) return null;
@@ -57,6 +59,14 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     const nameDisplay = [first, last].filter(Boolean).join(' ');
     return `Design Review: ${nameDisplay}${c.company ? `, ${c.company}` : ''}`;
   }, [current]);
+
+  // Take a snapshot of incoming contacts when opening the modal
+  useEffect(() => {
+    if (isOpen) {
+      setSessionContacts(contacts);
+      setIndex(0);
+    }
+  }, [isOpen]);
 
   // Initialize local UI state from the current contact so edits persist when navigating
   useEffect(() => {
@@ -108,7 +118,11 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             specificStage: 'Design rejected' as any,
             latestDesignFeedback: feedback,
           } as any);
-          if (updated) onAdvance(updated);
+          if (updated) {
+            onAdvance(updated);
+            // Update session snapshot so edits are reflected when navigating back
+            setSessionContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+          }
         } finally {
           setSaving(false);
         }
@@ -118,7 +132,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
 
   const goNext = async () => {
     await saveIfDirty();
-    if (index < contacts.length - 1) {
+    if (index < sessionContacts.length - 1) {
       setFeedback('');
       setHasRejected(false);
       setIndex(index + 1);
@@ -143,7 +157,10 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
         specificStage: 'Design approved' as any,
         latestDesignFeedback: '',
       } as any);
-      if (updated) onAdvance(updated);
+      if (updated) {
+        onAdvance(updated);
+        setSessionContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+      }
       goNext();
     } finally {
       setSaving(false);
@@ -182,7 +199,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           </button>
           <div className="flex-1 text-center">
             <div className="text-lg font-semibold text-slate-900">{titleText}</div>
-            <div className="text-xs text-slate-500">{index + 1} of {contacts.length}</div>
+            <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
           </div>
           <div className="flex items-center gap-2">
               <button
