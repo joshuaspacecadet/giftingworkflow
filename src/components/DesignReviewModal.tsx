@@ -89,7 +89,34 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
 
   // (titleText already computed above)
 
-  const goNext = () => {
+  // Initialize local state from the current contact so edits are possible when navigating back/forward
+  useEffect(() => {
+    if (!current) return;
+    setHasRejected(current.specificStage === 'Design rejected');
+    setFeedback(current.latestDesignFeedback || '');
+  }, [current]);
+
+  const saveIfDirty = async () => {
+    if (!current) return;
+    // If user has chosen to reject and provided feedback, persist if changed
+    if (hasRejected && feedback) {
+      if (current.specificStage !== 'Design rejected' || (current.latestDesignFeedback || '') !== feedback) {
+        setSaving(true);
+        try {
+          const updated = await AirtableService.updateContact(current.id, {
+            specificStage: 'Design rejected' as any,
+            latestDesignFeedback: feedback,
+          } as any);
+          if (updated) onAdvance(updated);
+        } finally {
+          setSaving(false);
+        }
+      }
+    }
+  };
+
+  const goNext = async () => {
+    await saveIfDirty();
     if (index < contacts.length - 1) {
       setFeedback('');
       setHasRejected(false);
@@ -98,7 +125,8 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       onClose();
     }
   };
-  const goPrev = () => {
+  const goPrev = async () => {
+    await saveIfDirty();
     if (index > 0) {
       setFeedback('');
       setHasRejected(false);
@@ -142,9 +170,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-          <button
+              <button
             type="button"
-            onClick={goPrev}
+                onClick={goPrev}
             disabled={index === 0 || saving}
             className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
             title="Previous"
@@ -156,9 +184,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             <div className="text-xs text-slate-500">{index + 1} of {contacts.length}</div>
           </div>
           <div className="flex items-center gap-2">
-            <button
+              <button
               type="button"
-              onClick={goNext}
+                onClick={goNext}
               disabled={index >= contacts.length - 1 || saving}
               className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
               title="Next"
@@ -202,7 +230,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             </div>
             {hasRejected && (
               <>
-                <div className="mt-6 text-sm font-medium mb-2">Please provide feedback and click save to reject this design.</div>
+                <div className="mt-6 text-sm font-medium mb-2">Required: provide feedback and click save to reject this design.</div>
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
