@@ -58,6 +58,13 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     return `Design Review: ${nameDisplay}${c.company ? `, ${c.company}` : ''}`;
   }, [current]);
 
+  // Initialize local UI state from the current contact so edits persist when navigating
+  useEffect(() => {
+    if (!current) return;
+    setHasRejected(current.specificStage === 'Design rejected');
+    setFeedback(current.latestDesignFeedback || '');
+  }, [current]);
+
   useEffect(() => {
     if (!isOpen) return;
     const html = document.documentElement;
@@ -89,12 +96,6 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
 
   // (titleText already computed above)
 
-  // Initialize local state from the current contact so edits are possible when navigating back/forward
-  useEffect(() => {
-    if (!current) return;
-    setHasRejected(current.specificStage === 'Design rejected');
-    setFeedback(current.latestDesignFeedback || '');
-  }, [current]);
 
   const saveIfDirty = async () => {
     if (!current) return;
