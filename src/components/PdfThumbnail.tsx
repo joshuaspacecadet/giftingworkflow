@@ -68,7 +68,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt, height
   if (failed) {
     return (
       <div
-        className={`rounded-md border border-[#27282B] bg-[#141518] flex items-center justify-center ${className || ''}`}
+        className={`rounded-md flex items-center justify-center ${className || ''}`}
         style={{ height: heightPx ?? 100, width: heightPx ? Math.round((heightPx * 0.7)) : 70 }}
         role="img"
         aria-label={alt || 'PDF'}
@@ -82,7 +82,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt, height
   return (
     <canvas
       ref={canvasRef}
-      className={`rounded-md border border-[#27282B] bg-[#141518] ${className || ''}`}
+      className={`rounded-md ${className || ''}`}
       style={{ height: heightPx ?? 100 }}
       role="img"
       aria-label={alt || 'PDF'}
