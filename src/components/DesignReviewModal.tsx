@@ -307,7 +307,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
             <div className="text-2xl font-bold mb-3">Entering the design review portal…</div>
             <div className="text-slate-600 text-base mb-6">Summoning high‑res previews ({preloadProgress}%)</div>
             <div className="mx-auto w-80 h-3 bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 transition-all" style={{ width: `${preloadProgress}%` }} />
+              <div className="h-full bg-[#FF5C00] transition-all" style={{ width: `${preloadProgress}%` }} />
             </div>
           </div>
         ) : (
