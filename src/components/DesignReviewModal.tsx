@@ -246,7 +246,12 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
               <button disabled={saving} onClick={approve} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasApproved ? 'bg-green-500 ring-2 ring-green-600' : (hasRejected ? 'bg-green-100' : 'bg-green-200 hover:bg-green-300')}`} title="Approve">
                 <ThumbsUp className="h-8 w-8 text-green-700" />
               </button>
-              <button disabled={saving} onClick={() => setHasRejected(true)} className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-rose-300' : 'bg-rose-200 hover:bg-rose-300'}`}>
+              <button
+                disabled={saving}
+                onClick={() => { setHasRejected(true); setHasApproved(false); }}
+                className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-rose-500 ring-2 ring-rose-600' : 'bg-rose-200 hover:bg-rose-300'}`}
+                title="Reject"
+              >
                 <ThumbsDown className="h-8 w-8 text-rose-700" />
               </button>
             </div>
