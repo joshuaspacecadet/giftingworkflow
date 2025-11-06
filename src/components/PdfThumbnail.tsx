@@ -24,7 +24,7 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt, height
       try {
         // Fetch bytes to avoid CORS/XHR complications inside pdf.js
         const fetchUrl = url.includes('dl=') ? url : `${url}${url.includes('?') ? '&' : '?'}dl=1`;
-        const res = await fetch(fetchUrl, { mode: 'cors' });
+        const res = await fetch(fetchUrl, { mode: 'cors', cache: 'force-cache' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.arrayBuffer();
 
@@ -42,7 +42,8 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt, height
         const ctx = canvas?.getContext('2d');
         if (!canvas || !ctx) return;
 
-        const DPR = Math.max(window.devicePixelRatio || 1, 1);
+        // Cap DPR a bit for performance while keeping sharpness
+        const DPR = Math.min(Math.max(window.devicePixelRatio || 1, 1), 1.5);
         const targetCssHeight = typeof heightPx === 'number' ? heightPx : 100; // px
         const viewport1 = page.getViewport({ scale: 1 });
         const scale = (targetCssHeight * DPR) / viewport1.height;
@@ -54,16 +55,50 @@ const PdfThumbnail: React.FC<PdfThumbnailProps> = ({ url, className, alt, height
         canvas.style.width = `${Math.round(viewport.width / DPR)}px`;
 
         await page.render({ canvasContext: ctx, viewport }).promise;
+
+        // Cache rendered image
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          const key = `${url}|${targetCssHeight}`;
+          (window as any).__pdfThumbCache = (window as any).__pdfThumbCache || new Map();
+          (window as any).__pdfThumbCache.set(key, { dataUrl, w: canvas.width, h: canvas.height });
+        } catch {}
       } catch (e) {
         console.warn('PDF thumbnail render failed:', e);
         if (!cancelled) setFailed(true);
       }
     };
+
+    // Simple in-memory cache: reuse rendered thumbnail for same URL/height
+    try {
+      const key = `${url}|${typeof heightPx === 'number' ? heightPx : 100}`;
+      const cache = (window as any).__pdfThumbCache as Map<string, { dataUrl: string; w: number; h: number }>;
+      const cached = cache && cache.get(key);
+      if (cached && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const img = new Image();
+          img.onload = () => {
+            canvas.width = cached.w;
+            canvas.height = cached.h;
+            canvas.style.height = `${typeof heightPx === 'number' ? heightPx : 100}px`;
+            const ar = cached.w / cached.h;
+            const cssW = Math.round((typeof heightPx === 'number' ? heightPx : 100) * ar);
+            canvas.style.width = `${cssW}px`;
+            ctx.drawImage(img, 0, 0);
+          };
+          img.src = cached.dataUrl;
+          return () => { cancelled = true; };
+        }
+      }
+    } catch {}
+
     load();
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, heightPx]);
 
   if (failed) {
     return (
