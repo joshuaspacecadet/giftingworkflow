@@ -52,6 +52,10 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
 
   const design = useMemo(() => {
     if (!current) return null;
+    // Hide design if not set to receive Magic Cards
+    const items = (current as any).draftOrderItems as string[] | undefined;
+    const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
+    if (!hasMagicCards) return null;
     const files = current.designFiles || [];
     return files[0] || null;
   }, [current]);

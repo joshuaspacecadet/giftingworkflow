@@ -135,7 +135,11 @@ const ReviewerDashboardPage: React.FC = () => {
   );
 
   // Quick action datasets
-  const designsReady = filtered.filter(c => c.specificStage === 'Design review');
+  const designsReady = filtered.filter(c => {
+    const items = (c as any).draftOrderItems as string[] | undefined;
+    const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
+    return c.specificStage === 'Design review' && hasMagicCards;
+  });
   const designPreviewAttachments = useMemo(() => {
     const previews: { id?: string; url: string; filename?: string; type?: string }[] = [];
     for (const c of designsReady) {
