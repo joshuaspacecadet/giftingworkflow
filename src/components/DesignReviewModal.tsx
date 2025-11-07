@@ -278,15 +278,26 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
         {!isPreloading && (
           <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-            <button
-              type="button"
-              onClick={goPrev}
-              disabled={index === 0 || saving}
-              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-              title="Previous"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={index === 0 || saving}
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                title="Previous"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={index === 0 || saving}
+                className="text-xs text-slate-600 disabled:opacity-40"
+                title="Previous"
+              >
+                Back
+              </button>
+            </div>
             <div className="flex-1 text-center">
               <div className="text-lg font-semibold text-slate-900">{titleText}</div>
               <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
@@ -300,6 +311,15 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                 title="Next"
               >
                 <ChevronRight className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={index >= contacts.length - 1 || saving}
+                className="text-xs text-slate-600 disabled:opacity-40"
+                title="Next"
+              >
+                Next
               </button>
               <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
             </div>

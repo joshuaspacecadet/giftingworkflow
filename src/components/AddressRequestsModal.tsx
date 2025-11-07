@@ -58,14 +58,14 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
   // Build the title text BEFORE any early returns so hook order stays consistent
   const titleText = useMemo(() => {
     const c = current;
-    if (!c) return 'Address Requests';
+    if (!c) return 'Address Request';
     const full = (c.name || '').trim();
-    if (!full) return 'Address Requests';
+    if (!full) return 'Address Request';
     const parts = full.split(/\s+/);
     const first = parts[0] || '';
     const last = parts.length > 1 ? parts[parts.length - 1] : '';
     const nameDisplay = [first, last].filter(Boolean).join(' ');
-    return `Address Requests: ${nameDisplay}${c.company ? `, ${c.company}` : ''}`;
+    return `Address Request: ${nameDisplay}${c.company ? `, ${c.company}` : ''}`;
   }, [current]);
 
   useEffect(() => {
@@ -188,15 +188,26 @@ Excited for you to receive!
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-          <button
-            type="button"
-            onClick={goPrev}
-            disabled={index === 0}
-            className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-            title="Previous"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={index === 0}
+              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+              title="Previous"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={index === 0}
+              className="text-xs text-slate-600 disabled:opacity-40"
+              title="Previous"
+            >
+              Back
+            </button>
+          </div>
           <div className="flex-1 text-center">
             <div className="text-lg font-semibold text-slate-900">{titleText}</div>
             <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
@@ -210,6 +221,15 @@ Excited for you to receive!
               title="Next"
             >
               <ChevronRight className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={index >= sessionContacts.length - 1}
+              className="text-xs text-slate-600 disabled:opacity-40"
+              title="Next"
+            >
+              Next
             </button>
             <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
           </div>
