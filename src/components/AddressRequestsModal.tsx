@@ -176,6 +176,8 @@ Excited for you to receive!
       if (updated) {
         onAdvance(updated);
         setSessionContacts(prev => prev.map(c => (c.id === updated.id ? updated : c)));
+        // After saving, advance to the next contact (lineup stays stable until modal closes)
+        goNext();
       }
     } finally {
       setSaving(false);
