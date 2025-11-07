@@ -70,9 +70,10 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    // Snapshot the contacts only when opening the modal to keep lineup stable during the session
     setSessionContacts(contacts);
     setIndex(0);
-  }, [isOpen, contacts]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!current) return;
