@@ -50,6 +50,19 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
     return files[0] || null;
   }, [current]);
 
+  // Build the title text BEFORE any early returns so hook order stays consistent
+  const titleText = useMemo(() => {
+    const c = current;
+    if (!c) return 'Address Requests';
+    const full = (c.name || '').trim();
+    if (!full) return 'Address Requests';
+    const parts = full.split(/\s+/);
+    const first = parts[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1] : '';
+    const nameDisplay = [first, last].filter(Boolean).join(' ');
+    return `Address Requests: ${nameDisplay}${c.company ? `, ${c.company}` : ''}`;
+  }, [current]);
+
   useEffect(() => {
     if (!isOpen) return;
     setSessionContacts(contacts);
@@ -97,15 +110,6 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
       document.body
     );
   }
-
-  const titleText = useMemo(() => {
-    const full = (current.name || '').trim();
-    const parts = full.split(/\s+/);
-    const first = parts[0] || '';
-    const last = parts.length > 1 ? parts[parts.length - 1] : '';
-    const nameDisplay = [first, last].filter(Boolean).join(' ');
-    return `Address Requests: ${nameDisplay}${current.company ? `, ${current.company}` : ''}`;
-  }, [current]);
 
   const goNext = () => {
     if (index < sessionContacts.length - 1) {
