@@ -6,6 +6,7 @@ import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
 import { Loader2, FileText, Images, MapPin, Users as UsersIcon, Package, UserPlus, AlertTriangle } from 'lucide-react';
 import PdfThumbnail from '../components/PdfThumbnail';
 import DesignReviewModal from '../components/DesignReviewModal';
+import AddressRequestsModal from '../components/AddressRequestsModal';
 import ContactModal from '../components/ContactModal';
 
 type NameParam = 'wiz' | 'john' | 'daniel';
@@ -40,6 +41,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [editingContact, setEditingContact] = useState<Contact | undefined>(undefined);
   const [confirmUnapproveId, setConfirmUnapproveId] = useState<string | null>(null);
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
+  const [isAddressRequestsOpen, setIsAddressRequestsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -315,7 +317,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 )}
               </ul>
               <div className="mt-auto pt-3">
-                <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Start address requests →</button>
+                <button onClick={() => setIsAddressRequestsOpen(true)} className="text-xs bg-white text-black rounded-md px-3 py-1.5">Start address requests →</button>
               </div>
             </div>
 
@@ -606,6 +608,17 @@ const ReviewerDashboardPage: React.FC = () => {
         isOpen={isDesignReviewOpen}
         onClose={() => setIsDesignReviewOpen(false)}
         contacts={designsReady}
+        onAdvance={(updated) => {
+          setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+        }}
+      />
+
+      {/* Address Requests Modal */}
+      <AddressRequestsModal
+        isOpen={isAddressRequestsOpen}
+        onClose={() => setIsAddressRequestsOpen(false)}
+        contacts={designApprovedMissingAddress}
+        signerName={creator}
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }}
