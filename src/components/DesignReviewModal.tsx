@@ -328,8 +328,10 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                 <div className="text-sm text-slate-500">No design file</div>
               )}
             </div>
-            {/* Show uploaded timestamp below the preview */}
-            <div className="mt-3 text-xs text-slate-500 text-center">Uploaded {formatDateTime(current.latestDesignDate)}</div>
+            {/* Show selected Draft Order Items below the preview */}
+            <div className="mt-3 text-xs text-slate-500 text-center">
+              Set to receive: {((current.draftOrderItems || []).length > 0 ? (current.draftOrderItems || []).join(', ') : '—')}
+            </div>
           </div>
 
           <div>

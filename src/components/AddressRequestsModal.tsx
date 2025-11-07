@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Contact } from '../types';
 import PdfThumbnail from './PdfThumbnail';
 import { AirtableService } from '../services/airtable';
-import { X, ChevronLeft, ChevronRight, Copy, ExternalLink } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Copy, ExternalLink, Link2 } from 'lucide-react';
 
 interface AddressRequestsModalProps {
   isOpen: boolean;
@@ -34,6 +34,7 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
   const [sessionContacts, setSessionContacts] = useState<Contact[]>([]);
   const current = sessionContacts[index];
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [addr, setAddr] = useState({
     streetLine1: '',
     streetLine2: '',
@@ -145,6 +146,16 @@ Excited for you to receive!
     }
   };
 
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(addressLink || '');
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 1500);
+    } catch {
+      setCopiedLink(false);
+    }
+  };
+
   const saveAddress = async () => {
     if (!current) return;
     setSaving(true);
@@ -210,7 +221,9 @@ Excited for you to receive!
                 <div className="text-sm text-slate-500">No design file</div>
               )}
             </div>
-            <div className="mt-3 text-xs text-slate-500 text-center">Uploaded {formatDateTime(current.latestDesignDate)}</div>
+            <div className="mt-3 text-xs text-slate-500 text-center">
+              Set to receive: {((current.draftOrderItems || []).length > 0 ? (current.draftOrderItems || []).join(', ') : '—')}
+            </div>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -222,6 +235,9 @@ Excited for you to receive!
               <div className="mt-2 flex items-center gap-2">
                 <button onClick={copyEmail} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
                   <Copy className="h-3.5 w-3.5" /> {copied ? 'Copied!' : 'Copy email'}
+                </button>
+                <button onClick={copyLink} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+                  <Link2 className="h-3.5 w-3.5" /> {copiedLink ? 'Copied!' : 'Copy link'}
                 </button>
                 <a href={mailto} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
                   Open draft <ExternalLink className="h-3.5 w-3.5" />
