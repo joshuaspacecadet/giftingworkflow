@@ -4,6 +4,12 @@ import { Contact } from '../types';
 import PdfThumbnail from './PdfThumbnail';
 import { AirtableService } from '../services/airtable';
 import { X, ChevronLeft, ChevronRight, Copy, ExternalLink, Link2 } from 'lucide-react';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import workerUrl from 'pdfjs-dist/build/pdf.worker?url';
+
+GlobalWorkerOptions.workerSrc = workerUrl as string;
 
 interface AddressRequestsModalProps {
   isOpen: boolean;
@@ -44,6 +50,8 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
     countryCode: '',
   });
   const [saving, setSaving] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState(0);
 
   const design = useMemo(() => {
     if (!current) return null;
@@ -74,6 +82,91 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
     setSessionContacts(contacts);
     setIndex(0);
   }, [isOpen]);
+
+  // Preload previews (images/pdfs) for faster navigation, show portal loader
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    // Use incoming contacts for preload; we snapshot separately for session list
+    const files = contacts
+      .map(c => {
+        const items = (c as any).draftOrderItems as string[] | undefined;
+        const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
+        if (!hasMagicCards) return null;
+        return (c.designFiles || [])[0] || null;
+      })
+      .filter(Boolean) as Array<{ url: string; type?: string; filename?: string }>;
+
+    if (files.length === 0) {
+      setIsPreloading(false);
+      setPreloadProgress(0);
+      return;
+    }
+
+    const height = 540;
+
+    const preloadPdf = async (url: string) => {
+      try {
+        const key = `${url}|${height}`;
+        const cache = (window as any).__pdfThumbCache as Map<string, { dataUrl: string; w: number; h: number }>;
+        if (cache && cache.get(key)) return; // already cached
+        const fetchUrl = url.includes('dl=') ? url : `${url}${url.includes('?') ? '&' : '?'}dl=1`;
+        const res = await fetch(fetchUrl, { mode: 'cors', cache: 'force-cache' });
+        if (!res.ok) return;
+        const data = await res.arrayBuffer();
+        const loadingTask = getDocument({ data, disableFontFace: true, useSystemFonts: true });
+        const pdf = await loadingTask.promise;
+        if (cancelled) return;
+        const page = await pdf.getPage(1);
+        const DPR = Math.min(Math.max(window.devicePixelRatio || 1, 1), 1.5);
+        const viewport1 = page.getViewport({ scale: 1 });
+        const scale = (height * DPR) / viewport1.height;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        try {
+          const dataUrl = canvas.toDataURL('image/png');
+          (window as any).__pdfThumbCache = (window as any).__pdfThumbCache || new Map();
+          (window as any).__pdfThumbCache.set(key, { dataUrl, w: canvas.width, h: canvas.height });
+        } catch {}
+      } catch {}
+    };
+
+    const preloadImage = async (url: string) => {
+      try {
+        await new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = url;
+        });
+      } catch {}
+    };
+
+    (async () => {
+      setIsPreloading(true);
+      setPreloadProgress(0);
+      let done = 0;
+      for (const f of files) {
+        if (cancelled) break;
+        const isPdf = (f.type && /pdf/i.test(f.type)) || /\.pdf(\?|$)/i.test(f.filename || f.url);
+        if (isPdf) {
+          await preloadPdf(f.url);
+        } else {
+          await preloadImage(f.url);
+        }
+        done += 1;
+        setPreloadProgress(Math.round((done / files.length) * 100));
+      }
+      if (!cancelled) setIsPreloading(false);
+    })();
+
+    return () => { cancelled = true; };
+  }, [isOpen, contacts]);
 
   useEffect(() => {
     if (!current) return;
@@ -187,54 +280,65 @@ Excited for you to receive!
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={goPrev}
-              disabled={index === 0}
-              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-              title="Previous"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={goPrev}
-              disabled={index === 0}
-              className="text-xs text-slate-600 disabled:opacity-40"
-              title="Previous"
-            >
-              Back
-            </button>
+        {!isPreloading && (
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={index === 0}
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                title="Previous"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={index === 0}
+                className="text-xs text-slate-600 disabled:opacity-40"
+                title="Previous"
+              >
+                Back
+              </button>
+            </div>
+            <div className="flex-1 text-center">
+              <div className="text-lg font-semibold text-slate-900">{titleText}</div>
+              <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={index >= sessionContacts.length - 1}
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                title="Next"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={index >= sessionContacts.length - 1}
+                className="text-xs text-slate-600 disabled:opacity-40"
+                title="Next"
+              >
+                Next
+              </button>
+              <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
+            </div>
           </div>
-          <div className="flex-1 text-center">
-            <div className="text-lg font-semibold text-slate-900">{titleText}</div>
-            <div className="text-xs text-slate-500">{index + 1} of {sessionContacts.length}</div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={index >= sessionContacts.length - 1}
-              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-              title="Next"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={index >= sessionContacts.length - 1}
-              className="text-xs text-slate-600 disabled:opacity-40"
-              title="Next"
-            >
-              Next
-            </button>
-            <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
-          </div>
-        </div>
+        )}
 
+        {isPreloading ? (
+          <div className="px-6 py-36 text-center">
+            <div className="text-2xl font-bold mb-3">Entering the address request portal…</div>
+            <div className="text-slate-600 text-base mb-6">Warming up previews ({preloadProgress}%)</div>
+            <div className="mx-auto w-80 h-3 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-full bg-[#FF5C00] transition-all" style={{ width: `${preloadProgress}%` }} />
+            </div>
+          </div>
+        ) : (
         <div className="px-6 pb-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div className="rounded-lg flex items-center justify-center">
@@ -292,6 +396,7 @@ Excited for you to receive!
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
