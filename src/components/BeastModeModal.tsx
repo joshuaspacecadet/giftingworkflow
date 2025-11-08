@@ -59,6 +59,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const current = queue[index]?.contact;
   const currentType = queue[index]?.type;
   const total = queue.length;
+  const [justShuffled, setJustShuffled] = useState(false);
 
   // Initialize queue when opened or lists change
   useEffect(() => {
@@ -186,10 +187,21 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     setQueue(prev => {
       const head = prev.slice(0, index + 1); // keep items up to current (inclusive) in place
       const tail = prev.slice(index + 1);
-      for (let i = tail.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [tail[i], tail[j]] = [tail[j], tail[i]];
+      if (tail.length > 1) {
+        const original = tail.map(t => t.contact.id + ':' + t.type).join('|');
+        for (let i = tail.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [tail[i], tail[j]] = [tail[j], tail[i]];
+        }
+        const shuffled = tail.map(t => t.contact.id + ':' + t.type).join('|');
+        if (shuffled === original) {
+          // Ensure a visible change: swap first two
+          [tail[0], tail[1]] = [tail[1], tail[0]];
+        }
       }
+      // Flash feedback
+      setJustShuffled(true);
+      window.setTimeout(() => setJustShuffled(false), 1200);
       return [...head, ...tail];
     });
   };
@@ -571,6 +583,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
             >
               <Shuffle className="h-3.5 w-3.5" /> Shuffle
             </button>
+            {justShuffled && <span className="text-[11px] text-slate-500">Shuffled</span>}
             <button
               type="button"
               onClick={goNext}
