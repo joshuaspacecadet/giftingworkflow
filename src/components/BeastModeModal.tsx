@@ -299,7 +299,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
                 <PdfThumbnail url={file.url} className="h-[540px]" heightPx={540} />
               )
             ) : (
-              <div className="text-sm text-slate-500">No design file</div>
+              <div className="text-sm text-slate-500">No design file needed for order</div>
             )}
           </div>
           <div className="mt-3 text-xs text-slate-500 text-center">
