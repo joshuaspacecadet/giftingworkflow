@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Contact, SpecificStage } from '../types';
 import { AirtableService } from '../services/airtable';
 import PdfThumbnail from './PdfThumbnail';
-import { X, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Copy, ExternalLink, Link2, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Copy, ExternalLink, Link2, Loader2, Shuffle } from 'lucide-react';
 
 type BeastItemType = 'review' | 'address' | 'design';
 
@@ -53,9 +53,19 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     return list;
   }, [reviewRecipients, addressRequests, designs]);
 
+  // Maintain a mutable queue to support shuffling
+  const [queue, setQueue] = useState<Array<{ type: BeastItemType; contact: Contact }>>([]);
   const [index, setIndex] = useState(0);
-  const current = items[index]?.contact;
-  const currentType = items[index]?.type;
+  const current = queue[index]?.contact;
+  const currentType = queue[index]?.type;
+  const total = queue.length;
+
+  // Initialize queue when opened or lists change
+  useEffect(() => {
+    if (!isOpen) return;
+    setQueue(items);
+    setIndex(0);
+  }, [isOpen, items]);
 
   // Local state for Review Recipient step
   const [hasApprovedReview, setHasApprovedReview] = useState(false);
@@ -133,7 +143,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   if (!isOpen) return null;
   if (!current) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
         <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6" onClick={(e)=>e.stopPropagation()}>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold">Beast Mode</h3>
@@ -146,7 +156,6 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     );
   }
 
-  const total = items.length;
   const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
   const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${current.confirmAddressUrl || ''}\n\nExcited for you to receive!\n\n- ${creator}`;
   const mailto = `mailto:${current.email || ''}?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
@@ -169,6 +178,18 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   };
   const goPrev = () => {
     if (index > 0) setIndex(index - 1);
+  };
+
+  const shuffleRemaining = () => {
+    setQueue(prev => {
+      const head = prev.slice(0, index + 1); // keep items up to current (inclusive) in place
+      const tail = prev.slice(index + 1);
+      for (let i = tail.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tail[i], tail[j]] = [tail[j], tail[i]];
+      }
+      return [...head, ...tail];
+    });
   };
 
   // Handlers shared or per-type
@@ -511,7 +532,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   };
 
   const modal = (
-    <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
           <div className="flex items-center gap-2">
@@ -539,6 +560,15 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
             <div className="text-xs text-slate-500">{index + 1} of {total}</div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={shuffleRemaining}
+              disabled={total - index <= 1}
+              className="inline-flex items-center gap-1 h-7 px-2 rounded border border-slate-300 text-slate-600 text-xs disabled:opacity-40"
+              title="Shuffle remaining"
+            >
+              <Shuffle className="h-3.5 w-3.5" /> Shuffle
+            </button>
             <button
               type="button"
               onClick={goNext}
