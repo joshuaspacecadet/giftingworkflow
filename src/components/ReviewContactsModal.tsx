@@ -329,8 +329,6 @@ Excited for you to receive!
             <ThumbsDown className="h-8 w-8 text-rose-700" />
           </button>
         </div>
-        {hasApproved && <div className="mt-2 text-xs text-green-700">Approved</div>}
-        {hasRejected && <div className="mt-1 text-xs text-rose-600">Rejected</div>}
       </div>
 
       {/* Items */}
@@ -349,12 +347,28 @@ Excited for you to receive!
               <input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} disabled={saving} /> Golden Record
             </label>
           </div>
-          <div className="mt-4 flex justify-end">
-            <button disabled={saving} onClick={saveItems} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Items'}
-            </button>
-          </div>
-          {itemsSaved && <div className="mt-2 text-xs text-green-700">Items saved</div>}
+          {(() => {
+            const selection: string[] = [
+              ...(itemsMagic ? ['Magic Cards'] : []),
+              ...(itemsSfs ? ['SFS Book'] : []),
+              ...(itemsGolden ? ['Golden Record'] : []),
+            ];
+            const saved: string[] = (current.draftOrderItems || []);
+            const setEq = (a: string[], b: string[]) => a.length === b.length && a.every(v => b.includes(v));
+            const isDirty = !setEq(selection, saved);
+            const disabled = saving || !isDirty;
+            return (
+              <div className="mt-4 flex justify-end">
+                <button
+                  disabled={disabled}
+                  onClick={saveItems}
+                  className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                >
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (isDirty ? 'Save Items' : 'Saved')}
+                </button>
+              </div>
+            );
+          })()}
         </div>
       )}
 
