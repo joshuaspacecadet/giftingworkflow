@@ -59,7 +59,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const current = queue[index]?.contact;
   const currentType = queue[index]?.type;
   const total = queue.length;
-  const [justShuffled, setJustShuffled] = useState(false);
+  const [shuffleOn, setShuffleOn] = useState(false);
 
   // Initialize queue when opened or lists change
   useEffect(() => {
@@ -188,22 +188,18 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       const head = prev.slice(0, index + 1); // keep items up to current (inclusive) in place
       const tail = prev.slice(index + 1);
       if (tail.length > 1) {
-        const original = tail.map(t => t.contact.id + ':' + t.type).join('|');
         for (let i = tail.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [tail[i], tail[j]] = [tail[j], tail[i]];
         }
-        const shuffled = tail.map(t => t.contact.id + ':' + t.type).join('|');
-        if (shuffled === original) {
-          // Ensure a visible change: swap first two
+        // Ensure different first element if possible
+        if (prev[index + 1] && tail[0] && (tail[0].contact.id === prev[index + 1].contact.id) && tail.length > 1) {
           [tail[0], tail[1]] = [tail[1], tail[0]];
         }
       }
-      // Flash feedback
-      setJustShuffled(true);
-      window.setTimeout(() => setJustShuffled(false), 1200);
       return [...head, ...tail];
     });
+    setShuffleOn(true);
   };
 
   // Handlers shared or per-type
@@ -548,28 +544,32 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const modal = (
     <div className="fixed inset-0 bg-[#0B0B0C] text-slate-100 z-[3000] flex flex-col" onClick={onClose}>
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#27282B] bg-[#0F1012]" onClick={(e)=>e.stopPropagation()}>
-        <div className="w-24" />
-        <div className="text-center flex-1">
-          <div className="text-lg font-semibold">{titleText}</div>
-          <div className="text-xs text-slate-400">{index + 1} of {total}</div>
-        </div>
-        <div className="w-24 flex items-center justify-end">
-          <button className="text-slate-300 hover:text-white" onClick={onClose}><X className="h-5 w-5" /></button>
+      <div className="px-6 py-4 border-b border-[#27282B] bg-[#0F1012]" onClick={(e)=>e.stopPropagation()}>
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
+          <div className="w-24" />
+          <div className="text-center flex-1">
+            <div className="text-lg font-semibold">{titleText}</div>
+            <div className="text-xs text-slate-400">{index + 1} of {total}</div>
+          </div>
+          <div className="w-24 flex items-center justify-end">
+            <button className="text-slate-300 hover:text-white" onClick={onClose}><X className="h-5 w-5" /></button>
+          </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
-        <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>{renderLeft()}</div>
-          <div>{renderRight()}</div>
+        <div className="px-6 py-6">
+          <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>{renderLeft()}</div>
+            <div>{renderRight()}</div>
+          </div>
         </div>
       </div>
 
       {/* Player-style controls */}
       <div className="px-6 py-4 border-t border-[#27282B] bg-[#0F1012]" onClick={(e)=>e.stopPropagation()}>
-        <div className="max-w-5xl mx-auto flex items-center justify-center gap-4">
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-center gap-4">
           <button
             type="button"
             onClick={goPrev}
@@ -582,13 +582,20 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
           </button>
           <button
             type="button"
-            onClick={shuffleRemaining}
+            onClick={() => {
+              if (shuffleOn) {
+                // turn off shuffle mode label; keep current order
+                setShuffleOn(false);
+              } else {
+                shuffleRemaining();
+              }
+            }}
             disabled={total - index <= 1}
             className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-4 py-2 text-slate-100 disabled:opacity-40"
             title="Shuffle remaining"
           >
             <Shuffle className="h-4 w-4" />
-            <span className="text-xs">{justShuffled ? 'Shuffled' : 'Shuffle'}</span>
+            <span className="text-xs">{shuffleOn ? 'Shuffled' : 'Shuffle'}</span>
           </button>
           <button
             type="button"
