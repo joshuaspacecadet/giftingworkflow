@@ -357,6 +357,11 @@ Excited for you to receive!
             const setEq = (a: string[], b: string[]) => a.length === b.length && a.every(v => b.includes(v));
             const isDirty = !setEq(selection, saved);
             const disabled = saving || !isDirty;
+            const label = saving
+              ? ''
+              : (!itemsSaved
+                  ? (isDirty ? 'Save Items' : 'Select Items')
+                  : (isDirty ? 'Save Items' : 'Saved'));
             return (
               <div className="mt-4 flex justify-end">
                 <button
@@ -364,7 +369,7 @@ Excited for you to receive!
                   onClick={saveItems}
                   className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
                 >
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (isDirty ? 'Save Items' : 'Saved')}
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : label}
                 </button>
               </div>
             );
