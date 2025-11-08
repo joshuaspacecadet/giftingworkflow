@@ -98,7 +98,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const [startTs] = useState<number>(() => Date.now());
   const [elapsedMs, setElapsedMs] = useState(0);
   useEffect(() => {
-    const id = window.setInterval(() => setElapsedMs(Date.now() - startTs), 250);
+    const id = window.setInterval(() => setElapsedMs(Date.now() - startTs), 50);
     return () => window.clearInterval(id);
   }, [startTs]);
   const formatElapsed = (ms: number) => {
@@ -106,8 +106,11 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
+    const millis = ms % 1000;
     const two = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-    return hrs > 0 ? `${hrs}:${two(mins)}:${two(secs)}` : `${two(mins)}:${two(secs)}`;
+    const three = (n: number) => (n < 10 ? `00${n}` : n < 100 ? `0${n}` : `${n}`);
+    const base = hrs > 0 ? `${hrs}:${two(mins)}:${two(secs)}` : `${two(mins)}:${two(secs)}`;
+    return `${base}.${three(millis)}`;
   };
 
   // Initialize per-item state on index change
@@ -559,33 +562,6 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
   const modal = (
     <div className="fixed inset-0 bg-[#0B0B0C] text-slate-100 z-[3000] flex flex-col" onClick={onClose}>
-      {/* Stopwatch + Header */}
-      <div className="pointer-events-none fixed top-4 left-4 z-[3001]">
-        {/* Stopwatch container (pointer events re-enabled inside) */}
-        <div className="pointer-events-auto">
-          <div className="flex items-center gap-2">
-            {showStopwatch && (
-              <div className="rounded-md bg-[#1A1B1E] border border-[#3A3B3F] text-[#FF5C00] px-3 py-1 text-sm font-semibold">
-                ⏱ {formatElapsed(elapsedMs)}
-              </div>
-            )}
-            <button
-              className="rounded-md bg-[#151619] border border-[#3A3B3F] text-xs text-slate-200 px-2 py-1"
-              onClick={(e)=>{ e.stopPropagation(); setShowStopwatch(s=>!s); }}
-              title={showStopwatch ? 'Hide stopwatch' : 'Show stopwatch'}
-            >
-              {showStopwatch ? 'Hide Stopwatch' : 'Show Stopwatch'}
-            </button>
-            <button
-              className="rounded-md bg-[#FF5C00] text-black text-xs px-2 py-1 font-semibold"
-              onClick={(e)=>{ e.stopPropagation(); onClose(); }}
-              title="Done"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      </div>
       {/* Header */}
       <div className="px-6 py-4 border-b border-[#27282B] bg-[#0F1012]" onClick={(e)=>e.stopPropagation()}>
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
@@ -639,6 +615,28 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
           >
             <Shuffle className="h-4 w-4" />
             <span className="text-xs">{shuffleOn ? 'Shuffled' : 'Shuffle'}</span>
+          </button>
+          {/* Stopwatch controls */}
+          {showStopwatch && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-3 py-1.5">
+              <span className="text-xs text-[#FF5C00] font-mono">⏱ {formatElapsed(elapsedMs)}</span>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowStopwatch(s => !s)}
+            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-3 py-1.5 text-slate-100"
+            title={showStopwatch ? 'Hide stopwatch' : 'Show stopwatch'}
+          >
+            <span className="text-xs">{showStopwatch ? 'Hide Stopwatch' : 'Show Stopwatch'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#FF5C00] px-3 py-1.5 text-black font-semibold"
+            title="Done"
+          >
+            <span className="text-xs">Done</span>
           </button>
           <button
             type="button"
