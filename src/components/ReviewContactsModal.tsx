@@ -399,7 +399,7 @@ Excited for you to receive!
                 type="button"
                 disabled={saving || editCompany === 'Individual (No Company)'}
                 onClick={() => setEditCompany('Individual (No Company)')}
-                className={`text-xs ${editCompany === 'Individual (No Company)' ? 'text-slate-400' : 'text-blue-600 hover:text-blue-700'}`}
+                className={`text-[11px] underline ${editCompany === 'Individual (No Company)' ? 'text-slate-400' : 'text-black'}`}
                 title='Use "Individual (No Company)"'
               >
                 Use "Individual (No Company)"
@@ -407,12 +407,29 @@ Excited for you to receive!
             </div>
             <input type="text" disabled={saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
           </div>
-          <div className="mt-4 flex justify-end">
-            <button disabled={saving} onClick={confirmNameCompany} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Name + Company'}
-            </button>
-          </div>
-          {confirmedNameCompany && <div className="mt-2 text-xs text-green-700">Name and company confirmed</div>}
+          {(() => {
+            const savedName = (current.name || '').trim();
+            const editedName = [editFirstName, editLastName].filter(Boolean).join(' ').trim();
+            const savedCompany = current.company || '';
+            const isDirtyNC = (editedName !== savedName) || (editCompany !== savedCompany);
+            const disabled = saving || !isDirtyNC;
+            const label = saving
+              ? ''
+              : (confirmedNameCompany
+                  ? (isDirtyNC ? 'Confirm Name + Company' : 'Saved')
+                  : (isDirtyNC ? 'Confirm Name + Company' : 'Confirm Name + Company'));
+            return (
+              <div className="mt-4 flex justify-end">
+                <button
+                  disabled={disabled}
+                  onClick={confirmNameCompany}
+                  className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                >
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : label}
+                </button>
+              </div>
+            );
+          })()}
         </div>
       )}
 
