@@ -519,19 +519,19 @@ Excited for you to receive!
               type="button"
               onClick={goNext}
               disabled={index >= sessionContacts.length - 1}
-              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+              className="text-xs text-slate-600 disabled:opacity-40"
               title="Next"
             >
-              <ChevronRight className="h-4 w-4" />
+              Next
             </button>
             <button
               type="button"
               onClick={goNext}
               disabled={index >= sessionContacts.length - 1}
-              className="text-xs text-slate-600 disabled:opacity-40"
+              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
               title="Next"
             >
-              Next
+              <ChevronRight className="h-4 w-4" />
             </button>
             <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
           </div>

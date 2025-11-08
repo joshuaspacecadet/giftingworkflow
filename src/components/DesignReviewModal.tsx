@@ -307,19 +307,19 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
                 type="button"
                 onClick={goNext}
                 disabled={index >= contacts.length - 1 || saving}
-                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+                className="text-xs text-slate-600 disabled:opacity-40"
                 title="Next"
               >
-                <ChevronRight className="h-4 w-4" />
+                Next
               </button>
               <button
                 type="button"
                 onClick={goNext}
                 disabled={index >= contacts.length - 1 || saving}
-                className="text-xs text-slate-600 disabled:opacity-40"
+                className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
                 title="Next"
               >
-                Next
+                <ChevronRight className="h-4 w-4" />
               </button>
               <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
             </div>
