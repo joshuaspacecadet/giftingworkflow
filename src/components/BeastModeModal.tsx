@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Contact, SpecificStage } from '../types';
 import { AirtableService } from '../services/airtable';
 import PdfThumbnail from './PdfThumbnail';
-import { X, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Copy, ExternalLink, Link2, Loader2, Shuffle } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Copy, ExternalLink, Link2, Loader2, Shuffle, Square } from 'lucide-react';
 
 type BeastItemType = 'review' | 'address' | 'design';
 
@@ -94,9 +94,10 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const [hasApprovedDesign, setHasApprovedDesign] = useState(false);
   const [designFeedback, setDesignFeedback] = useState('');
   // Stopwatch
-  const [showStopwatch, setShowStopwatch] = useState(true);
   const [startTs] = useState<number>(() => Date.now());
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [isStopped, setIsStopped] = useState(false);
+  const [stoppedElapsedMs, setStoppedElapsedMs] = useState(0);
   useEffect(() => {
     const id = window.setInterval(() => setElapsedMs(Date.now() - startTs), 50);
     return () => window.clearInterval(id);
@@ -111,6 +112,17 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     const three = (n: number) => (n < 10 ? `00${n}` : n < 100 ? `0${n}` : `${n}`);
     const base = hrs > 0 ? `${hrs}:${two(mins)}:${two(secs)}` : `${two(mins)}:${two(secs)}`;
     return `${base}.${three(millis)}`;
+  };
+  const formatHuman = (ms: number) => {
+    const totalSec = Math.floor(ms / 1000);
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const parts: string[] = [];
+    if (hrs > 0) parts.push(`${hrs} ${hrs === 1 ? 'hour' : 'hours'}`);
+    if (mins > 0) parts.push(`${mins} ${mins === 1 ? 'minute' : 'minutes'}`);
+    parts.push(`${secs} ${secs === 1 ? 'second' : 'seconds'}`);
+    return parts.join(' ');
   };
 
   // Initialize per-item state on index change
@@ -616,27 +628,18 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
             <Shuffle className="h-4 w-4" />
             <span className="text-xs">{shuffleOn ? 'Shuffled' : 'Shuffle'}</span>
           </button>
-          {/* Stopwatch controls */}
-          {showStopwatch && (
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-3 py-1.5">
-              <span className="text-xs text-[#FF5C00] font-mono">⏱ {formatElapsed(elapsedMs)}</span>
-            </div>
-          )}
+          {/* Stopwatch readout */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-3 py-1.5">
+            <span className="text-xs text-[#FF5C00] font-mono">⏱ {formatElapsed(elapsedMs)}</span>
+          </div>
+          {/* Stop (end) button styled like player control */}
           <button
             type="button"
-            onClick={() => setShowStopwatch(s => !s)}
-            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-3 py-1.5 text-slate-100"
-            title={showStopwatch ? 'Hide stopwatch' : 'Show stopwatch'}
+            onClick={() => { setStoppedElapsedMs(elapsedMs); setIsStopped(true); }}
+            className="inline-flex items-center justify-center rounded-full border border-[#27282B] bg-[#FF5C00] w-8 h-8 text-black"
+            title="Stop"
           >
-            <span className="text-xs">{showStopwatch ? 'Hide Stopwatch' : 'Show Stopwatch'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#FF5C00] px-3 py-1.5 text-black font-semibold"
-            title="Done"
-          >
-            <span className="text-xs">Done</span>
+            <Square className="h-4 w-4" />
           </button>
           <button
             type="button"
@@ -650,6 +653,24 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
           </button>
         </div>
       </div>
+      {/* Completion overlay */}
+      {isStopped && (
+        <div className="fixed inset-0 z-[3002] bg-black/90 flex items-center justify-center" onClick={(e)=>e.stopPropagation()}>
+          <div className="text-center px-6">
+            <div className="text-3xl md:text-4xl font-semibold text-slate-100 mb-2">You beast.</div>
+            <div className="text-xl md:text-2xl text-[#FF5C00]">You completed in {formatHuman(stoppedElapsedMs)}.</div>
+            <div className="mt-6">
+              <button
+                onClick={onClose}
+                className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#FF5C00] px-4 py-2 text-black font-semibold"
+                title="Close"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
   return createPortal(modal, document.body);
