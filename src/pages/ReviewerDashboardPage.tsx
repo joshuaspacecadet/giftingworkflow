@@ -55,6 +55,8 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isBeastPreloading, setIsBeastPreloading] = useState(false);
   const [beastPreloadProgress, setBeastPreloadProgress] = useState(0);
   const [isBeastOpen, setIsBeastOpen] = useState(false);
+  const [isBeastCountdown, setIsBeastCountdown] = useState(false);
+  const [beastCountdownSec, setBeastCountdownSec] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -462,9 +464,22 @@ const ReviewerDashboardPage: React.FC = () => {
             } finally {
               setIsBeastPreloading(false);
             }
-            // Begin Beast Mode flow in a single modal
+            // Begin Beast Mode flow with a countdown overlay
             setIsBeastModeActive(true);
-            setIsBeastOpen(true);
+            setBeastCountdownSec(3);
+            setIsBeastCountdown(true);
+            // countdown ticks
+            let remaining = 3;
+            const tick = () => {
+              remaining -= 1;
+              setBeastCountdownSec(remaining);
+              if (remaining <= 0) {
+                setIsBeastCountdown(false);
+                setIsBeastOpen(true);
+                window.clearInterval(timer);
+              }
+            };
+            const timer = window.setInterval(tick, 1000);
           }}
           className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5"
         >
@@ -916,6 +931,15 @@ const ReviewerDashboardPage: React.FC = () => {
             <div className="w-full bg-slate-200 rounded-full h-2 mt-4 overflow-hidden">
               <div className="h-full bg-[#FF5C00] transition-all" style={{ width: `${beastPreloadProgress}%` }} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Beast Mode Countdown */}
+      {isBeastCountdown && (
+        <div className="fixed inset-0 z-[2600] bg-black flex items-center justify-center">
+          <div className="text-[22vw] leading-none font-bold text-[#FF5C00] select-none">
+            {beastCountdownSec > 0 ? beastCountdownSec : 0}
           </div>
         </div>
       )}
