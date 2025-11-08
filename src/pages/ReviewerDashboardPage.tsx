@@ -9,6 +9,12 @@ import DesignReviewModal from '../components/DesignReviewModal';
 import AddressRequestsModal from '../components/AddressRequestsModal';
 import ReviewContactsModal from '../components/ReviewContactsModal';
 import ContactModal from '../components/ContactModal';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import workerUrl from 'pdfjs-dist/build/pdf.worker?url';
+
+GlobalWorkerOptions.workerSrc = workerUrl as string;
 
 type NameParam = 'wiz' | 'john' | 'daniel';
 
@@ -44,6 +50,9 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
   const [isAddressRequestsOpen, setIsAddressRequestsOpen] = useState(false);
   const [isReviewContactsOpen, setIsReviewContactsOpen] = useState(false);
+  const [isBeastModeActive, setIsBeastModeActive] = useState(false);
+  const [isBeastPreloading, setIsBeastPreloading] = useState(false);
+  const [beastPreloadProgress, setBeastPreloadProgress] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -389,7 +398,81 @@ const ReviewerDashboardPage: React.FC = () => {
               <img src="/red-star.svg" alt="" className="h-7 w-7" />
               <div className="text-sm">Ready to tackle it all?</div>
             </div>
-            <button className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5">Enter beast mode →</button>
+        <button
+          onClick={async () => {
+            // Start Beast Mode preloader
+            setIsBeastPreloading(true);
+            setBeastPreloadProgress(0);
+            // Preload PDFs/images for designs (for fast navigation later)
+            try {
+              const files = designsReady
+                .map(c => (c.designFiles || [])[0])
+                .filter(Boolean) as Array<{ url: string; type?: string; filename?: string }>;
+              const height = 540;
+              let done = 0;
+              for (const f of files) {
+                const isPdf = (f.type && /pdf/i.test(f.type)) || /\.pdf(\?|$)/i.test(f.filename || f.url);
+                if (isPdf) {
+                  try {
+                    const key = `${f.url}|${height}`;
+                    const cache = (window as any).__pdfThumbCache as Map<string, { dataUrl: string; w: number; h: number }>;
+                    if (!cache || !cache.get(key)) {
+                      const fetchUrl = f.url.includes('dl=') ? f.url : `${f.url}${f.url.includes('?') ? '&' : '?'}dl=1`;
+                      const res = await fetch(fetchUrl, { mode: 'cors', cache: 'force-cache' });
+                      if (res.ok) {
+                        const data = await res.arrayBuffer();
+                        const loadingTask = getDocument({ data, disableFontFace: true, useSystemFonts: true });
+                        const pdf = await loadingTask.promise;
+                        const page = await pdf.getPage(1);
+                        const DPR = Math.min(Math.max(window.devicePixelRatio || 1, 1), 1.5);
+                        const viewport1 = page.getViewport({ scale: 1 });
+                        const scale = (height * DPR) / viewport1.height;
+                        const viewport = page.getViewport({ scale });
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          canvas.width = Math.ceil(viewport.width);
+                          canvas.height = Math.ceil(viewport.height);
+                          await page.render({ canvasContext: ctx, viewport }).promise;
+                          (window as any).__pdfThumbCache = (window as any).__pdfThumbCache || new Map();
+                          (window as any).__pdfThumbCache.set(key, { dataUrl: canvas.toDataURL('image/png'), w: canvas.width, h: canvas.height });
+                        }
+                      }
+                    }
+                  } catch {}
+                } else {
+                  await new Promise<void>((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve();
+                    img.onerror = () => resolve();
+                    img.src = f.url;
+                  });
+                }
+                done += 1;
+                const total = files.length || 1;
+                setBeastPreloadProgress(Math.round((done / total) * 100));
+              }
+            } finally {
+              setIsBeastPreloading(false);
+            }
+            // Begin Beast Mode flow
+            setIsBeastModeActive(true);
+            // Open first available stage
+            if (reviewToReceiveGift.length > 0) {
+              setIsReviewContactsOpen(true);
+            } else if (designApprovedMissingAddress.length > 0) {
+              setIsAddressRequestsOpen(true);
+            } else if (designsReady.length > 0) {
+              setIsDesignReviewOpen(true);
+            } else {
+              // Nothing to review
+              setIsBeastModeActive(false);
+            }
+          }}
+          className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5"
+        >
+          Enter beast mode →
+        </button>
           </div>
         </div>
       </div>
@@ -612,7 +695,13 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Design Review Modal */}
       <DesignReviewModal
         isOpen={isDesignReviewOpen}
-        onClose={() => setIsDesignReviewOpen(false)}
+        onClose={() => {
+          setIsDesignReviewOpen(false);
+          if (isBeastModeActive) {
+            // End of flow
+            setIsBeastModeActive(false);
+          }
+        }}
         contacts={designsReady}
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
@@ -622,7 +711,17 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Address Requests Modal */}
       <AddressRequestsModal
         isOpen={isAddressRequestsOpen}
-        onClose={() => setIsAddressRequestsOpen(false)}
+        onClose={() => {
+          setIsAddressRequestsOpen(false);
+          if (isBeastModeActive) {
+            // Next stage: Design review if available, else end
+            if (designsReady.length > 0) {
+              setIsDesignReviewOpen(true);
+            } else {
+              setIsBeastModeActive(false);
+            }
+          }
+        }}
         contacts={designApprovedMissingAddress}
         signerName={creator}
         onAdvance={(updated) => {
@@ -633,7 +732,19 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Review Contacts Modal */}
       <ReviewContactsModal
         isOpen={isReviewContactsOpen}
-        onClose={() => setIsReviewContactsOpen(false)}
+        onClose={() => {
+          setIsReviewContactsOpen(false);
+          if (isBeastModeActive) {
+            // Next stage: Address requests if available, else design review, else end
+            if (designApprovedMissingAddress.length > 0) {
+              setIsAddressRequestsOpen(true);
+            } else if (designsReady.length > 0) {
+              setIsDesignReviewOpen(true);
+            } else {
+              setIsBeastModeActive(false);
+            }
+          }
+        }}
         contacts={reviewToReceiveGift}
         creator={creator}
         onAdvance={(updated) => {
@@ -776,6 +887,19 @@ const ReviewerDashboardPage: React.FC = () => {
                     )})}
                 </ul>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Beast Mode Preloader */}
+      {isBeastPreloading && (
+        <div className="fixed inset-0 z-[2500] bg-black/70 flex items-center justify-center p-4" onClick={(e)=>e.stopPropagation()}>
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md mx-4 p-8 text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-[#FF5C00] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">Entering beast mode…</h3>
+            <p className="text-sm text-slate-600">{beastPreloadProgress}% loaded</p>
+            <div className="w-full bg-slate-200 rounded-full h-2 mt-4 overflow-hidden">
+              <div className="h-full bg-[#FF5C00] transition-all" style={{ width: `${beastPreloadProgress}%` }} />
             </div>
           </div>
         </div>
