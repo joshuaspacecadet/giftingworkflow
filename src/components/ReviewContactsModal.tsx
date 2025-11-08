@@ -12,8 +12,6 @@ interface ReviewContactsModalProps {
   creator: string;
 }
 
-type Phase = 'decide' | 'items' | 'confirm' | 'final';
-
 const formatDate = (dateString?: string) => {
   if (!dateString) return '';
   try {
@@ -28,8 +26,10 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
   const [index, setIndex] = useState(0);
   const [sessionContacts, setSessionContacts] = useState<Contact[]>([]);
   const current = sessionContacts[index];
-  const [phase, setPhase] = useState<Phase>('decide');
   const [saving, setSaving] = useState(false);
+  const [hasApproved, setHasApproved] = useState(false);
+  const [itemsSaved, setItemsSaved] = useState(false);
+  const [confirmedNameCompany, setConfirmedNameCompany] = useState(false);
 
   // items selection
   const [itemsMagic, setItemsMagic] = useState(false);
@@ -57,7 +57,9 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     if (!isOpen) return;
     setSessionContacts(contacts);
     setIndex(0);
-    setPhase('decide');
+    setHasApproved(false);
+    setItemsSaved(false);
+    setConfirmedNameCompany(false);
   }, [isOpen]);
 
   useEffect(() => {
@@ -81,6 +83,11 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
       postCode: current.postCode || '',
       countryCode: current.countryCode || '',
     });
+    // initialize gates
+    const hasInitialItems = (current.draftOrderItems || []).length > 0;
+    setItemsSaved(hasInitialItems);
+    setHasApproved(hasInitialItems || current.specificStage === 'Approved to receive gift');
+    setConfirmedNameCompany(false);
   }, [current]);
 
   // freeze background scroll
@@ -128,7 +135,9 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
   const goNext = () => {
     if (index < sessionContacts.length - 1) {
       setIndex(index + 1);
-      setPhase('decide');
+      setHasApproved(false);
+      setItemsSaved(false);
+      setConfirmedNameCompany(false);
     } else {
       onClose();
     }
@@ -136,7 +145,9 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
   const goPrev = () => {
     if (index > 0) {
       setIndex(index - 1);
-      setPhase('decide');
+      setHasApproved(false);
+      setItemsSaved(false);
+      setConfirmedNameCompany(false);
     }
   };
 
@@ -170,7 +181,7 @@ Excited for you to receive!
 
   const approve = () => {
     // Do not write to Airtable on approve; proceed to item selection
-    setPhase('items');
+    setHasApproved(true);
   };
   const reject = async () => {
     if (!current) return;
@@ -207,7 +218,7 @@ Excited for you to receive!
         onAdvance(updated);
         setSessionContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
       }
-      setPhase('confirm');
+      setItemsSaved(true);
     } finally {
       setSaving(false);
     }
@@ -231,7 +242,7 @@ Excited for you to receive!
           setSessionContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }
       }
-      setPhase('final');
+      setConfirmedNameCompany(true);
     } finally {
       setSaving(false);
     }
@@ -270,65 +281,87 @@ Excited for you to receive!
       )}
 
       {/* Decision */}
-      {phase === 'decide' && (
-        <div>
-          <div className="text-lg font-semibold mb-4">Would you like to send {firstName} a gift?</div>
-          <div className="flex items-center gap-6">
-            <button disabled={saving} onClick={approve} className="h-16 w-16 rounded-full flex items-center justify-center bg-green-200 hover:bg-green-300 disabled:opacity-50" title="Approve">
-              <ThumbsUp className="h-8 w-8 text-green-700" />
-            </button>
-            <button disabled={saving} onClick={reject} className="h-16 w-16 rounded-full flex items-center justify-center bg-rose-200 hover:bg-rose-300 disabled:opacity-50" title="Reject">
-              <ThumbsDown className="h-8 w-8 text-rose-700" />
-            </button>
-          </div>
+      <div className="mb-6">
+        <div className="text-lg font-semibold mb-3">Would you like to send {firstName} a gift?</div>
+        <div className="flex items-center gap-6">
+          <button
+            disabled={saving}
+            onClick={approve}
+            className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasApproved ? 'bg-green-500 ring-2 ring-green-600' : 'bg-green-200 hover:bg-green-300'}`}
+            title="Approve"
+          >
+            <ThumbsUp className="h-8 w-8 text-green-700" />
+          </button>
+          <button
+            disabled={saving}
+            onClick={reject}
+            className="h-16 w-16 rounded-full flex items-center justify-center bg-rose-200 hover:bg-rose-300 disabled:opacity-50"
+            title="Reject"
+          >
+            <ThumbsDown className="h-8 w-8 text-rose-700" />
+          </button>
         </div>
-      )}
+        {hasApproved && <div className="mt-2 text-xs text-green-700">Approved</div>}
+      </div>
 
       {/* Items */}
-      {phase === 'items' && (
-        <div>
-          <div className="text-sm font-medium mb-2">Select what to send</div>
-          <div className="flex flex-wrap gap-3 text-sm">
-            <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-600" checked={itemsMagic} onChange={(e)=>setItemsMagic(e.target.checked)} /> Magic Cards</label>
-            <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-600" checked={itemsSfs} onChange={(e)=>setItemsSfs(e.target.checked)} /> SFS Book</label>
-            <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} /> Golden Record</label>
-          </div>
-          <div className="mt-4 flex justify-end">
-            <button disabled={saving} onClick={saveItems} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Items'}
-            </button>
-          </div>
+      {/* Items */}
+      <div className="mb-6">
+        <div className="text-sm font-medium mb-2">Select what to send</div>
+        <div className={`flex flex-wrap gap-3 text-sm ${!hasApproved ? 'opacity-60' : ''}`}>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" className="accent-blue-600" checked={itemsMagic} onChange={(e)=>setItemsMagic(e.target.checked)} disabled={!hasApproved || saving} /> Magic Cards
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" className="accent-blue-600" checked={itemsSfs} onChange={(e)=>setItemsSfs(e.target.checked)} disabled={!hasApproved || saving} /> SFS Book
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} disabled={!hasApproved || saving} /> Golden Record
+          </label>
         </div>
-      )}
+        <div className="mt-2 text-xs text-slate-600">
+          Current: {[
+            ...(itemsMagic ? ['Magic Cards'] : []),
+            ...(itemsSfs ? ['SFS Book'] : []),
+            ...(itemsGolden ? ['Golden Record'] : []),
+          ].join(', ') || '—'}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button disabled={!hasApproved || saving} onClick={saveItems} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Items'}
+          </button>
+        </div>
+        {itemsSaved && <div className="mt-2 text-xs text-green-700">Items saved</div>}
+      </div>
 
       {/* Confirm name/company */}
-      {phase === 'confirm' && (
-        <div>
-          <div className="text-sm font-medium mb-3">Confirm recipient details</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">First Name</label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Last Name</label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} />
-            </div>
+      {/* Confirm name/company */}
+      <div className="mb-2">
+        <div className="text-sm font-medium mb-3">Confirm recipient details</div>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${!itemsSaved ? 'opacity-60' : ''}`}>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">First Name</label>
+            <input type="text" disabled={!itemsSaved || saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} />
           </div>
-          <div className="mt-3">
-            <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
-            <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
-          </div>
-          <div className="mt-4 flex justify-end">
-            <button disabled={saving} onClick={confirmNameCompany} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Name + Company'}
-            </button>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Last Name</label>
+            <input type="text" disabled={!itemsSaved || saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} />
           </div>
         </div>
-      )}
+        <div className={`mt-3 ${!itemsSaved ? 'opacity-60' : ''}`}>
+          <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+          <input type="text" disabled={!itemsSaved || saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button disabled={!itemsSaved || saving} onClick={confirmNameCompany} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Name + Company'}
+          </button>
+        </div>
+        {confirmedNameCompany && <div className="mt-2 text-xs text-green-700">Name and company confirmed</div>}
+      </div>
 
       {/* Summary of items */}
-      {(phase === 'confirm' || phase === 'final') && (
+      {(itemsSaved || confirmedNameCompany) && (
         <div className="mt-6 text-xs text-slate-600">
           Set to receive: {[
             ...(itemsMagic ? ['Magic Cards'] : []),
@@ -342,7 +375,7 @@ Excited for you to receive!
 
   const rightContent = (
     <div>
-      {phase !== 'final' ? (
+      {!confirmedNameCompany ? (
         <div className="text-sm text-slate-500">Complete the steps on the left to continue.</div>
       ) : (
         <>
