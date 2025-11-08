@@ -412,7 +412,9 @@ Excited for you to receive!
             const editedName = [editFirstName, editLastName].filter(Boolean).join(' ').trim();
             const savedCompany = current.company || '';
             const isDirtyNC = (editedName !== savedName) || (editCompany !== savedCompany);
-            const disabled = saving || !isDirtyNC;
+            // Button should be enabled initially even if nothing changed.
+            // After confirming, disable until something changes again.
+            const disabled = saving || (confirmedNameCompany && !isDirtyNC);
             const label = saving
               ? ''
               : (confirmedNameCompany
