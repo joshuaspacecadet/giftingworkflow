@@ -390,7 +390,25 @@ Excited for you to receive!
                   <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Country" value={addr.countryCode} onChange={e=>setAddr(a=>({...a, countryCode: e.target.value}))} />
                 </div>
                 <div className="flex justify-end mt-2">
-                  <button disabled={saving} onClick={saveAddress} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save Address</button>
+                  {(() => {
+                    const isAddressDirty =
+                      (addr.streetLine1 || '') !== (current.streetLine1 || '') ||
+                      (addr.streetLine2 || '') !== (current.streetLine2 || '') ||
+                      (addr.city || '') !== (current.city || '') ||
+                      (addr.state || '') !== (current.state || '') ||
+                      (addr.postCode || '') !== (current.postCode || '') ||
+                      (addr.countryCode || '') !== (current.countryCode || '');
+                    const disabled = saving || !isAddressDirty;
+                    return (
+                      <button
+                        disabled={disabled}
+                        onClick={saveAddress}
+                        className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                      >
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Address'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
