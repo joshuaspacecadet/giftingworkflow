@@ -170,6 +170,10 @@ const ReviewerDashboardPage: React.FC = () => {
   );
   const reviewToReceiveGift = filtered.filter(c => c.specificStage === 'Review to receive gift');
 
+  const quickActionsCount = useMemo(() => {
+    return designsReady.length + designApprovedMissingAddress.length + reviewToReceiveGift.length;
+  }, [designsReady.length, designApprovedMissingAddress.length, reviewToReceiveGift.length]);
+
   // Pipeline datasets (toggle between creator-only vs all)
   const pipelineSource = showAllGifts ? contacts : filtered;
   const { approvedRecipients, inDesign, fulfillment } = useMemo(() => {
@@ -265,7 +269,7 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Quick Actions */}
       <div className="max-w-[1200px] mx-auto px-6">
         <div className="bg-[#111214] rounded-2xl border border-[#27282B] p-6">
-          <h2 className="text-sm text-slate-300 mb-4">Quick Actions</h2>
+          <h2 className="text-sm text-slate-300 mb-4">Quick Actions ({quickActionsCount})</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Designs ready for review */}
@@ -399,7 +403,7 @@ const ReviewerDashboardPage: React.FC = () => {
           <div className="mt-5 border border-[#FF5C00] rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/red-star.svg" alt="" className="h-7 w-7" />
-              <div className="text-sm">Ready to tackle it all?</div>
+              <div className="text-sm">Ready to tackle all {quickActionsCount} actions?</div>
             </div>
         <button
           onClick={async () => {
