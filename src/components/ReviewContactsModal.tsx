@@ -393,7 +393,18 @@ Excited for you to receive!
             </div>
           </div>
           <div className="mt-3">
-            <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+              <button
+                type="button"
+                disabled={saving || editCompany === 'Individual (No Company)'}
+                onClick={() => setEditCompany('Individual (No Company)')}
+                className={`text-xs ${editCompany === 'Individual (No Company)' ? 'text-slate-400' : 'text-blue-600 hover:text-blue-700'}`}
+                title='Use "Individual (No Company)"'
+              >
+                Use "Individual (No Company)"
+              </button>
+            </div>
             <input type="text" disabled={saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
           </div>
           <div className="mt-4 flex justify-end">
