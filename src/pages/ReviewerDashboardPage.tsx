@@ -7,6 +7,7 @@ import { Loader2, FileText, Images, MapPin, Users as UsersIcon, Package, UserPlu
 import PdfThumbnail from '../components/PdfThumbnail';
 import DesignReviewModal from '../components/DesignReviewModal';
 import AddressRequestsModal from '../components/AddressRequestsModal';
+import ReviewContactsModal from '../components/ReviewContactsModal';
 import ContactModal from '../components/ContactModal';
 
 type NameParam = 'wiz' | 'john' | 'daniel';
@@ -42,6 +43,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [confirmUnapproveId, setConfirmUnapproveId] = useState<string | null>(null);
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
   const [isAddressRequestsOpen, setIsAddressRequestsOpen] = useState(false);
+  const [isReviewContactsOpen, setIsReviewContactsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -347,7 +349,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 )}
               </ul>
               <div className="mt-auto pt-3">
-                <button className="text-xs bg-white text-black rounded-md px-3 py-1.5">Review contacts →</button>
+                <button onClick={() => setIsReviewContactsOpen(true)} className="text-xs bg-white text-black rounded-md px-3 py-1.5">Review contacts →</button>
               </div>
             </div>
           </div>
@@ -623,6 +625,17 @@ const ReviewerDashboardPage: React.FC = () => {
         onClose={() => setIsAddressRequestsOpen(false)}
         contacts={designApprovedMissingAddress}
         signerName={creator}
+        onAdvance={(updated) => {
+          setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+        }}
+      />
+
+      {/* Review Contacts Modal */}
+      <ReviewContactsModal
+        isOpen={isReviewContactsOpen}
+        onClose={() => setIsReviewContactsOpen(false)}
+        contacts={reviewToReceiveGift}
+        creator={creator}
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }}

@@ -30,6 +30,7 @@ export interface Contact {
   id: string;
   name: string;
   company?: string;
+  firstMetDate?: string;
   email?: string;
   phone?: string;
   streetLine1?: string;

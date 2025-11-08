@@ -42,6 +42,7 @@ const transformAirtableContact = (record: any): Contact => {
     id: record.id,
     name: fields["Recipient Name*"] || "", // FIXED: Added asterisk to match actual field name
     company: fields["Company"] || "",
+    firstMetDate: fields["First Met Date"] || "",
     email: fields["Email"] || "",
     phone: fields["Phone"] || "",
     streetLine1: fields["Street Line 1"] || "",
