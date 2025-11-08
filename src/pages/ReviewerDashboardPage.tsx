@@ -181,11 +181,12 @@ const ReviewerDashboardPage: React.FC = () => {
     };
   }, [pipelineSource]);
 
-  // Total count for header: only stages in design pipeline + Fulfillment (exclude empty)
+  // Total count for header: sum of Approved Recipients + In Design + Fulfillment
   const pipelineCount = useMemo(() => {
-    return pipelineSource.filter(
-      (c) => !!c.specificStage && (IN_DESIGN_STAGES.includes(c.specificStage) || c.specificStage === 'Fulfillment')
-    ).length;
+    const approved = pipelineSource.filter(c => c.specificStage === 'Approved to receive gift').length;
+    const inDesignCount = pipelineSource.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)).length;
+    const fulfillCount = pipelineSource.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped').length;
+    return approved + inDesignCount + fulfillCount;
   }, [pipelineSource]);
 
   const defaultProject = useMemo(
@@ -472,7 +473,7 @@ const ReviewerDashboardPage: React.FC = () => {
       {/* Production Pipeline */}
       <div className="max-w-[1200px] mx-auto px-6 mt-8">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm text-slate-300">Production Pipeline ({pipelineCount})</h3>
+          <h3 className="text-sm text-slate-300">{showAllGifts ? "Spacecadet's Gifting Pipeline" : "Your Gifting Pipeline"} ({pipelineCount})</h3>
           <div className="flex items-center gap-3">
             <span className={`text-xs ${!showAllGifts ? 'text-white' : 'text-slate-400'}`}>{creator}’s Gifts</span>
             <button
