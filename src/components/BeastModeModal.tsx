@@ -140,13 +140,27 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     };
   }, [isOpen]);
 
+  // Build the dynamic title BEFORE any early returns to keep hook order consistent
+  const titleText = useMemo(() => {
+    if (!current) return 'Beast Mode';
+    const full = (current.name || '').trim();
+    const parts = full.split(/\s+/);
+    const first = parts[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1] : '';
+    const nameDisplay = [first, last].filter(Boolean).join(' ');
+    const suffix = `${nameDisplay}${current.company ? `, ${current.company}` : ''}`;
+    if (currentType === 'design') return `Design Review: ${suffix}`;
+    if (currentType === 'address') return `Address Request: ${suffix}`;
+    return `Review Recipient: ${suffix}`;
+  }, [current, currentType]);
+
   if (!isOpen) return null;
   if (!current) {
     return createPortal(
       <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
         <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6" onClick={(e)=>e.stopPropagation()}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Beast Mode</h3>
+            <h3 className="text-sm font-semibold">{titleText}</h3>
             <button className="text-slate-500" onClick={onClose}>×</button>
           </div>
           <div className="text-sm text-slate-600">Nothing to review.</div>
@@ -159,18 +173,6 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
   const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${current.confirmAddressUrl || ''}\n\nExcited for you to receive!\n\n- ${creator}`;
   const mailto = `mailto:${current.email || ''}?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
-
-  const titleText = useMemo(() => {
-    const full = (current.name || '').trim();
-    const parts = full.split(/\s+/);
-    const first = parts[0] || '';
-    const last = parts.length > 1 ? parts[parts.length - 1] : '';
-    const nameDisplay = [first, last].filter(Boolean).join(' ');
-    const suffix = `${nameDisplay}${current.company ? `, ${current.company}` : ''}`;
-    if (currentType === 'design') return `Design Review: ${suffix}`;
-    if (currentType === 'address') return `Address Request: ${suffix}`;
-    return `Review Recipient: ${suffix}`;
-  }, [current, currentType]);
 
   const goNext = () => {
     if (index < total - 1) setIndex(index + 1);
