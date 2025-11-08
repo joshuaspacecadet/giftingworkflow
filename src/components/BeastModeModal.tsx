@@ -489,37 +489,37 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     const canShowRight = currentType === 'address' || confirmedNameCompany;
     if (!canShowRight) return <div className="text-sm text-slate-500">Complete the steps on the left to continue.</div>;
     return (
-      <div>
-        <div className="text-sm font-medium mb-2">Pre-drafted email</div>
-        <div className="text-sm border border-slate-300 bg-white rounded-md p-3 whitespace-pre-wrap">
+        <div>
+          <div className="text-sm font-medium mb-2">Pre-drafted email</div>
+          <div className="text-sm border border-[#27282B] bg-[#151619] rounded-md p-3 whitespace-pre-wrap">
 {emailBody}
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <button onClick={() => navigator.clipboard.writeText(emailBody)} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+          <button onClick={() => navigator.clipboard.writeText(emailBody)} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-[#27282B] bg-[#151619] hover:bg-[#1B1C20]">
             <Copy className="h-3.5 w-3.5" /> Copy email
           </button>
-          <button onClick={() => navigator.clipboard.writeText(current.confirmAddressUrl || '')} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+          <button onClick={() => navigator.clipboard.writeText(current.confirmAddressUrl || '')} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-[#27282B] bg-[#151619] hover:bg-[#1B1C20]">
             <Link2 className="h-3.5 w-3.5" /> Copy link
           </button>
-          <a href={mailto} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+          <a href={mailto} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-[#27282B] bg-[#151619] hover:bg-[#1B1C20]">
             Open draft <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
         <div className="mt-6">
-          <div className="text-sm font-medium mb-2">Or fill in address yourself</div>
-          <div className="grid grid-cols-1 gap-2">
-            <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Street Line 1" value={addr.streetLine1} onChange={e=>setAddr(a=>({...a, streetLine1: e.target.value}))} />
-            <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Street Line 2 (Apt, Suite, Floor, etc.)" value={addr.streetLine2} onChange={e=>setAddr(a=>({...a, streetLine2: e.target.value}))} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="City" value={addr.city} onChange={e=>setAddr(a=>({...a, city: e.target.value}))} />
-              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="State / Province" value={addr.state} onChange={e=>setAddr(a=>({...a, state: e.target.value}))} />
+            <div className="text-sm font-medium mb-2">Or fill in address yourself</div>
+            <div className="grid grid-cols-1 gap-2">
+              <input className="px-3 py-2 text-sm border border-[#27282B] bg-[#111214] text-slate-100 rounded-md placeholder-slate-500" placeholder="Street Line 1" value={addr.streetLine1} onChange={e=>setAddr(a=>({...a, streetLine1: e.target.value}))} />
+              <input className="px-3 py-2 text-sm border border-[#27282B] bg-[#111214] text-slate-100 rounded-md placeholder-slate-500" placeholder="Street Line 2 (Apt, Suite, Floor, etc.)" value={addr.streetLine2} onChange={e=>setAddr(a=>({...a, streetLine2: e.target.value}))} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input className="px-3 py-2 text-sm border border-[#27282B] bg-[#111214] text-slate-100 rounded-md placeholder-slate-500" placeholder="City" value={addr.city} onChange={e=>setAddr(a=>({...a, city: e.target.value}))} />
+                <input className="px-3 py-2 text-sm border border-[#27282B] bg-[#111214] text-slate-100 rounded-md placeholder-slate-500" placeholder="State / Province" value={addr.state} onChange={e=>setAddr(a=>({...a, state: e.target.value}))} />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Postal Code" value={addr.postCode} onChange={e=>setAddr(a=>({...a, postCode: e.target.value}))} />
-              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Country" value={addr.countryCode} onChange={e=>setAddr(a=>({...a, countryCode: e.target.value}))} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input className="px-3 py-2 text-sm border border-[#27282B] bg-[#111214] text-slate-100 rounded-md placeholder-slate-500" placeholder="Postal Code" value={addr.postCode} onChange={e=>setAddr(a=>({...a, postCode: e.target.value}))} />
+                <input className="px-3 py-2 text-sm border border-[#27282B] bg-[#111214] text-slate-100 rounded-md placeholder-slate-500" placeholder="Country" value={addr.countryCode} onChange={e=>setAddr(a=>({...a, countryCode: e.target.value}))} />
             </div>
             <div className="flex justify-end mt-2">
-              {(() => {
+                {(() => {
                 const isAddressDirty =
                   (addr.streetLine1 || '') !== (current.streetLine1 || '') ||
                   (addr.streetLine2 || '') !== (current.streetLine2 || '') ||
@@ -532,7 +532,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
                   <button
                     disabled={disabled}
                     onClick={saveAddress}
-                    className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                      className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-700 text-slate-400' : 'bg-white text-black hover:bg-slate-100'} disabled:opacity-100`}
                   >
                     Save Address
                   </button>
@@ -546,69 +546,60 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   };
 
   const modal = (
-    <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={goPrev}
-              disabled={index === 0}
-              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-              title="Previous"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={goPrev}
-              disabled={index === 0}
-              className="text-xs text-slate-600 disabled:opacity-40"
-              title="Previous"
-            >
-              Back
-            </button>
-          </div>
-          <div className="flex-1 text-center">
-            <div className="text-lg font-semibold text-slate-900">{titleText}</div>
-            <div className="text-xs text-slate-500">{index + 1} of {total}</div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={shuffleRemaining}
-              disabled={total - index <= 1}
-              className="inline-flex items-center gap-1 h-7 px-2 rounded border border-slate-300 text-slate-600 text-xs disabled:opacity-40"
-              title="Shuffle remaining"
-            >
-              <Shuffle className="h-3.5 w-3.5" /> Shuffle
-            </button>
-            {justShuffled && <span className="text-[11px] text-slate-500">Shuffled</span>}
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={index >= total - 1}
-              className="text-xs text-slate-600 disabled:opacity-40"
-              title="Next"
-            >
-              Next
-            </button>
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={index >= total - 1}
-              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
-              title="Next"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
-          </div>
+    <div className="fixed inset-0 bg-[#0B0B0C] text-slate-100 z-[3000] flex flex-col" onClick={onClose}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#27282B] bg-[#0F1012]" onClick={(e)=>e.stopPropagation()}>
+        <div className="w-24" />
+        <div className="text-center flex-1">
+          <div className="text-lg font-semibold">{titleText}</div>
+          <div className="text-xs text-slate-400">{index + 1} of {total}</div>
         </div>
+        <div className="w-24 flex items-center justify-end">
+          <button className="text-slate-300 hover:text-white" onClick={onClose}><X className="h-5 w-5" /></button>
+        </div>
+      </div>
 
-        <div className="px-6 pb-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
+        <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>{renderLeft()}</div>
           <div>{renderRight()}</div>
+        </div>
+      </div>
+
+      {/* Player-style controls */}
+      <div className="px-6 py-4 border-t border-[#27282B] bg-[#0F1012]" onClick={(e)=>e.stopPropagation()}>
+        <div className="max-w-5xl mx-auto flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={goPrev}
+            disabled={index === 0}
+            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-4 py-2 text-slate-100 disabled:opacity-40"
+            title="Previous"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="text-xs">Back</span>
+          </button>
+          <button
+            type="button"
+            onClick={shuffleRemaining}
+            disabled={total - index <= 1}
+            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-4 py-2 text-slate-100 disabled:opacity-40"
+            title="Shuffle remaining"
+          >
+            <Shuffle className="h-4 w-4" />
+            <span className="text-xs">{justShuffled ? 'Shuffled' : 'Shuffle'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            disabled={index >= total - 1}
+            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-4 py-2 text-slate-100 disabled:opacity-40"
+            title="Next"
+          >
+            <span className="text-xs">Next</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>
