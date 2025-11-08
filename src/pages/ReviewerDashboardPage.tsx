@@ -51,6 +51,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
   const [isAddressRequestsOpen, setIsAddressRequestsOpen] = useState(false);
   const [isReviewContactsOpen, setIsReviewContactsOpen] = useState(false);
+  const [addressModalContacts, setAddressModalContacts] = useState<Contact[]>([]);
   const [isBeastModeActive, setIsBeastModeActive] = useState(false);
   const [isBeastPreloading, setIsBeastPreloading] = useState(false);
   const [beastPreloadProgress, setBeastPreloadProgress] = useState(0);
@@ -171,6 +172,10 @@ const ReviewerDashboardPage: React.FC = () => {
     c => c.specificStage === 'Fulfillment' && (!c.streetLine1 || !c.city || !c.countryCode)
   );
   const reviewToReceiveGift = filtered.filter(c => c.specificStage === 'Review to receive gift');
+
+  // Address helpers and modal dataset for address requests
+  const [addressModalContacts, setAddressModalContacts] = useState<Contact[]>([]);
+  const isAddressMissing = useCallback((c: Contact) => (!c.streetLine1 || !c.city || !c.countryCode), []);
 
   const quickActionsCount = useMemo(() => {
     return designsReady.length + designApprovedMissingAddress.length + reviewToReceiveGift.length;
@@ -341,7 +346,7 @@ const ReviewerDashboardPage: React.FC = () => {
                 )}
               </ul>
               <div className="mt-auto pt-3">
-                <button onClick={() => setIsAddressRequestsOpen(true)} className="text-xs bg-white text-black rounded-md px-3 py-1.5">Start address requests →</button>
+                <button onClick={() => { setAddressModalContacts(designApprovedMissingAddress); setIsAddressRequestsOpen(true); }} className="text-xs bg-white text-black rounded-md px-3 py-1.5">Start address requests →</button>
               </div>
             </div>
 
@@ -520,15 +525,19 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-slate-500">•</span>
-                      <button
-                        type="button"
-                        className="truncate hover:underline text-left"
-                        onClick={() => { setEditingContact(c); setIsCreateOpen(true); }}
-                        title="Edit recipient"
-                      >
-                        {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
-                      </button>
-                      {(!c.streetLine1 || !c.city || !c.countryCode) && (
+                      {isAddressMissing(c) ? (
+                        <button
+                          type="button"
+                          className="truncate hover:underline text-left"
+                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
+                          title="Address needed"
+                        >
+                          {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
+                        </button>
+                      ) : (
+                        <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                      )}
+                      {isAddressMissing(c) && (
                         <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
                     </div>
@@ -582,15 +591,19 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-slate-500">•</span>
-                      <button
-                        type="button"
-                        className="truncate hover:underline text-left"
-                        onClick={() => { setEditingContact(c); setIsCreateOpen(true); }}
-                        title="Edit recipient"
-                      >
-                        {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
-                      </button>
-                      {(!c.streetLine1 || !c.city || !c.countryCode) && (
+                      {isAddressMissing(c) ? (
+                        <button
+                          type="button"
+                          className="truncate hover:underline text-left"
+                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
+                          title="Address needed"
+                        >
+                          {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
+                        </button>
+                      ) : (
+                        <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                      )}
+                      {isAddressMissing(c) && (
                         <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
                     </div>
@@ -642,15 +655,19 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-slate-500">•</span>
-                      <button
-                        type="button"
-                        className="truncate hover:underline text-left"
-                        onClick={() => { setEditingContact(c); setIsCreateOpen(true); }}
-                        title="Edit recipient"
-                      >
-                        {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
-                      </button>
-                      {(!c.streetLine1 || !c.city || !c.countryCode) && (
+                      {isAddressMissing(c) ? (
+                        <button
+                          type="button"
+                          className="truncate hover:underline text-left"
+                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
+                          title="Address needed"
+                        >
+                          {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
+                        </button>
+                      ) : (
+                        <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
+                      )}
+                      {isAddressMissing(c) && (
                         <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
                     </div>
@@ -736,7 +753,7 @@ const ReviewerDashboardPage: React.FC = () => {
             }
           }
         }}
-        contacts={designApprovedMissingAddress}
+        contacts={addressModalContacts.length ? addressModalContacts : designApprovedMissingAddress}
         signerName={creator}
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
