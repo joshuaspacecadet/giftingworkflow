@@ -30,6 +30,8 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
   const [hasApproved, setHasApproved] = useState(false);
   const [itemsSaved, setItemsSaved] = useState(false);
   const [confirmedNameCompany, setConfirmedNameCompany] = useState(false);
+  const [hasRejected, setHasRejected] = useState(false);
+  const [rejectedIds, setRejectedIds] = useState<Set<string>>(new Set());
 
   // items selection
   const [itemsMagic, setItemsMagic] = useState(false);
@@ -60,6 +62,7 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     setHasApproved(false);
     setItemsSaved(false);
     setConfirmedNameCompany(false);
+    setHasRejected(false);
   }, [isOpen]);
 
   useEffect(() => {
@@ -88,6 +91,7 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     setItemsSaved(hasInitialItems);
     setHasApproved(hasInitialItems || current.specificStage === 'Approved to receive gift');
     setConfirmedNameCompany(false);
+    setHasRejected(rejectedIds.has(current.id));
   }, [current]);
 
   // freeze background scroll
@@ -138,6 +142,7 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
       setHasApproved(false);
       setItemsSaved(false);
       setConfirmedNameCompany(false);
+      setHasRejected(false);
     } else {
       onClose();
     }
@@ -148,6 +153,7 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
       setHasApproved(false);
       setItemsSaved(false);
       setConfirmedNameCompany(false);
+      // hasRejected will be recalculated from rejectedIds in useEffect on current change
     }
   };
 
@@ -182,6 +188,15 @@ Excited for you to receive!
   const approve = () => {
     // Do not write to Airtable on approve; proceed to item selection
     setHasApproved(true);
+    if (current) {
+      // If previously marked rejected in this session, clear that marker
+      setRejectedIds(prev => {
+        const next = new Set(prev);
+        next.delete(current.id);
+        return next;
+      });
+      setHasRejected(false);
+    }
   };
   const reject = async () => {
     if (!current) return;
@@ -189,11 +204,24 @@ Excited for you to receive!
     try {
       const updated = await AirtableService.updateContact(current.id, {
         specificStage: null as any,
+        draftOrderItems: [] as any,
       } as any);
       if (updated) {
         onAdvance(updated);
         setSessionContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
       }
+      // Clear local selections and mark as rejected in this session
+      setItemsMagic(false);
+      setItemsSfs(false);
+      setItemsGolden(false);
+      setItemsSaved(false);
+      setHasApproved(false);
+      setRejectedIds(prev => {
+        const next = new Set(prev);
+        next.add(current.id);
+        return next;
+      });
+      setHasRejected(true);
       goNext();
     } finally {
       setSaving(false);
@@ -295,13 +323,14 @@ Excited for you to receive!
           <button
             disabled={saving}
             onClick={reject}
-            className="h-16 w-16 rounded-full flex items-center justify-center bg-rose-200 hover:bg-rose-300 disabled:opacity-50"
+            className={`h-16 w-16 rounded-full flex items-center justify-center disabled:opacity-50 ${hasRejected ? 'bg-rose-500 ring-2 ring-rose-600' : 'bg-rose-200 hover:bg-rose-300'}`}
             title="Reject"
           >
             <ThumbsDown className="h-8 w-8 text-rose-700" />
           </button>
         </div>
         {hasApproved && <div className="mt-2 text-xs text-green-700">Approved</div>}
+        {hasRejected && <div className="mt-1 text-xs text-rose-600">Rejected</div>}
       </div>
 
       {/* Items */}
@@ -319,13 +348,6 @@ Excited for you to receive!
             <label className="flex items-center gap-2">
               <input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} disabled={saving} /> Golden Record
             </label>
-          </div>
-          <div className="mt-2 text-xs text-slate-600">
-            Current: {[
-              ...(itemsMagic ? ['Magic Cards'] : []),
-              ...(itemsSfs ? ['SFS Book'] : []),
-              ...(itemsGolden ? ['Golden Record'] : []),
-            ].join(', ') || '—'}
           </div>
           <div className="mt-4 flex justify-end">
             <button disabled={saving} onClick={saveItems} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
@@ -365,15 +387,7 @@ Excited for you to receive!
       )}
 
       {/* Summary of items */}
-      {(itemsSaved || confirmedNameCompany) && (
-        <div className="mt-6 text-xs text-slate-600">
-          Set to receive: {[
-            ...(itemsMagic ? ['Magic Cards'] : []),
-            ...(itemsSfs ? ['SFS Book'] : []),
-            ...(itemsGolden ? ['Golden Record'] : []),
-          ].join(', ') || '—'}
-        </div>
-      )}
+      {/* Removed summary of items */}
     </div>
   );
 
