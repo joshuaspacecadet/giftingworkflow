@@ -51,7 +51,6 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isDesignReviewOpen, setIsDesignReviewOpen] = useState(false);
   const [isAddressRequestsOpen, setIsAddressRequestsOpen] = useState(false);
   const [isReviewContactsOpen, setIsReviewContactsOpen] = useState(false);
-  const [addressModalContacts, setAddressModalContacts] = useState<Contact[]>([]);
   const [isBeastModeActive, setIsBeastModeActive] = useState(false);
   const [isBeastPreloading, setIsBeastPreloading] = useState(false);
   const [beastPreloadProgress, setBeastPreloadProgress] = useState(0);
