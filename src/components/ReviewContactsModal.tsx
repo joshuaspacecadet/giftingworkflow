@@ -305,60 +305,64 @@ Excited for you to receive!
       </div>
 
       {/* Items */}
-      {/* Items */}
-      <div className="mb-6">
-        <div className="text-sm font-medium mb-2">Select what to send</div>
-        <div className={`flex flex-wrap gap-3 text-sm ${!hasApproved ? 'opacity-60' : ''}`}>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="accent-blue-600" checked={itemsMagic} onChange={(e)=>setItemsMagic(e.target.checked)} disabled={!hasApproved || saving} /> Magic Cards
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="accent-blue-600" checked={itemsSfs} onChange={(e)=>setItemsSfs(e.target.checked)} disabled={!hasApproved || saving} /> SFS Book
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} disabled={!hasApproved || saving} /> Golden Record
-          </label>
+      {/* Items (show only after approve) */}
+      {hasApproved && (
+        <div className="mb-6">
+          <div className="text-sm font-medium mb-2">Select what to send</div>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="accent-blue-600" checked={itemsMagic} onChange={(e)=>setItemsMagic(e.target.checked)} disabled={saving} /> Magic Cards
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="accent-blue-600" checked={itemsSfs} onChange={(e)=>setItemsSfs(e.target.checked)} disabled={saving} /> SFS Book
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} disabled={saving} /> Golden Record
+            </label>
+          </div>
+          <div className="mt-2 text-xs text-slate-600">
+            Current: {[
+              ...(itemsMagic ? ['Magic Cards'] : []),
+              ...(itemsSfs ? ['SFS Book'] : []),
+              ...(itemsGolden ? ['Golden Record'] : []),
+            ].join(', ') || '—'}
+          </div>
+          <div className="mt-4 flex justify-end">
+            <button disabled={saving} onClick={saveItems} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Items'}
+            </button>
+          </div>
+          {itemsSaved && <div className="mt-2 text-xs text-green-700">Items saved</div>}
         </div>
-        <div className="mt-2 text-xs text-slate-600">
-          Current: {[
-            ...(itemsMagic ? ['Magic Cards'] : []),
-            ...(itemsSfs ? ['SFS Book'] : []),
-            ...(itemsGolden ? ['Golden Record'] : []),
-          ].join(', ') || '—'}
-        </div>
-        <div className="mt-4 flex justify-end">
-          <button disabled={!hasApproved || saving} onClick={saveItems} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Items'}
-          </button>
-        </div>
-        {itemsSaved && <div className="mt-2 text-xs text-green-700">Items saved</div>}
-      </div>
+      )}
 
       {/* Confirm name/company */}
-      {/* Confirm name/company */}
-      <div className="mb-2">
-        <div className="text-sm font-medium mb-3">Confirm recipient details</div>
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${!itemsSaved ? 'opacity-60' : ''}`}>
-          <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">First Name</label>
-            <input type="text" disabled={!itemsSaved || saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} />
+      {/* Confirm name/company (show only after items saved) */}
+      {itemsSaved && (
+        <div className="mb-2">
+          <div className="text-sm font-medium mb-3">Confirm recipient details</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">First Name</label>
+              <input type="text" disabled={saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Last Name</label>
+              <input type="text" disabled={saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Last Name</label>
-            <input type="text" disabled={!itemsSaved || saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} />
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+            <input type="text" disabled={saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
           </div>
+          <div className="mt-4 flex justify-end">
+            <button disabled={saving} onClick={confirmNameCompany} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Name + Company'}
+            </button>
+          </div>
+          {confirmedNameCompany && <div className="mt-2 text-xs text-green-700">Name and company confirmed</div>}
         </div>
-        <div className={`mt-3 ${!itemsSaved ? 'opacity-60' : ''}`}>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
-          <input type="text" disabled={!itemsSaved || saving} className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
-        </div>
-        <div className="mt-4 flex justify-end">
-          <button disabled={!itemsSaved || saving} onClick={confirmNameCompany} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Name + Company'}
-          </button>
-        </div>
-        {confirmedNameCompany && <div className="mt-2 text-xs text-green-700">Name and company confirmed</div>}
-      </div>
+      )}
 
       {/* Summary of items */}
       {(itemsSaved || confirmedNameCompany) && (
