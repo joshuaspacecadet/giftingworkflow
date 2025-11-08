@@ -622,11 +622,10 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
               }
             }}
             disabled={total - index <= 1}
-            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-4 py-2 text-slate-100 disabled:opacity-40"
+            className={`inline-flex items-center justify-center rounded-full border border-[#27282B] ${shuffleOn ? 'bg-[#FF5C00] text-black' : 'bg-[#151619] text-slate-100'} w-8 h-8 disabled:opacity-40`}
             title="Shuffle remaining"
           >
             <Shuffle className="h-4 w-4" />
-            <span className="text-xs">{shuffleOn ? 'Shuffled' : 'Shuffle'}</span>
           </button>
           {/* Stopwatch readout */}
           <div className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#151619] px-3 py-1.5">
