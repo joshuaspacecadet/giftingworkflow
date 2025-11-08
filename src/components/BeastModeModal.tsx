@@ -1,0 +1,576 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Contact, SpecificStage } from '../types';
+import { AirtableService } from '../services/airtable';
+import PdfThumbnail from './PdfThumbnail';
+import { X, ChevronLeft, ChevronRight, ThumbsUp, ThumbsDown, Copy, ExternalLink, Link2, Loader2 } from 'lucide-react';
+
+type BeastItemType = 'review' | 'address' | 'design';
+
+interface BeastModeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  reviewRecipients: Contact[];
+  addressRequests: Contact[];
+  designs: Contact[];
+  onAdvance: (updated: Contact) => void;
+  creator: string;
+}
+
+interface AddressForm {
+  streetLine1: string;
+  streetLine2: string;
+  city: string;
+  state: string;
+  postCode: string;
+  countryCode: string;
+}
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return '';
+  try {
+    const d = new Date(dateString);
+    return d.toLocaleDateString();
+  } catch {
+    return dateString;
+  }
+};
+
+const BeastModeModal: React.FC<BeastModeModalProps> = ({
+  isOpen,
+  onClose,
+  reviewRecipients,
+  addressRequests,
+  designs,
+  onAdvance,
+  creator,
+}) => {
+  const items = useMemo(() => {
+    const list: Array<{ type: BeastItemType; contact: Contact }> = [];
+    reviewRecipients.forEach(c => list.push({ type: 'review', contact: c }));
+    addressRequests.forEach(c => list.push({ type: 'address', contact: c }));
+    designs.forEach(c => list.push({ type: 'design', contact: c }));
+    return list;
+  }, [reviewRecipients, addressRequests, designs]);
+
+  const [index, setIndex] = useState(0);
+  const current = items[index]?.contact;
+  const currentType = items[index]?.type;
+
+  // Local state for Review Recipient step
+  const [hasApprovedReview, setHasApprovedReview] = useState(false);
+  const [itemsMagic, setItemsMagic] = useState(false);
+  const [itemsSfs, setItemsSfs] = useState(false);
+  const [itemsGolden, setItemsGolden] = useState(false);
+  const [itemsSaved, setItemsSaved] = useState(false);
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editCompany, setEditCompany] = useState('');
+  const [confirmedNameCompany, setConfirmedNameCompany] = useState(false);
+
+  // Local state for Address Requests + right-panel address in review flow
+  const [addr, setAddr] = useState<AddressForm>({
+    streetLine1: '',
+    streetLine2: '',
+    city: '',
+    state: '',
+    postCode: '',
+    countryCode: '',
+  });
+
+  // Local state for Design Review step
+  const [hasRejectedDesign, setHasRejectedDesign] = useState(false);
+  const [hasApprovedDesign, setHasApprovedDesign] = useState(false);
+  const [designFeedback, setDesignFeedback] = useState('');
+
+  // Initialize per-item state on index change
+  useEffect(() => {
+    if (!current) return;
+    // Review recipients initial
+    const draft = (current.draftOrderItems || []);
+    setItemsMagic(draft.includes('Magic Cards'));
+    setItemsSfs(draft.includes('SFS Book'));
+    setItemsGolden(draft.includes('Golden Record'));
+    setItemsSaved(draft.length > 0);
+    const parts = (current.name || '').trim().split(/\s+/);
+    setEditFirstName(parts[0] || '');
+    setEditLastName(parts.length > 1 ? parts[parts.length - 1] : '');
+    setEditCompany(current.company || '');
+    setHasApprovedReview(draft.length > 0 || current.specificStage === 'Approved to receive gift');
+    setConfirmedNameCompany(false);
+
+    // Address initial
+    setAddr({
+      streetLine1: current.streetLine1 || '',
+      streetLine2: current.streetLine2 || '',
+      city: current.city || '',
+      state: current.state || '',
+      postCode: current.postCode || '',
+      countryCode: current.countryCode || '',
+    });
+
+    // Design initial
+    setHasRejectedDesign(current.specificStage === 'Design rejected');
+    setHasApprovedDesign(current.specificStage === 'Design approved');
+    setDesignFeedback(current.latestDesignFeedback || '');
+  }, [index, current]);
+
+  // Freeze background scroll
+  useEffect(() => {
+    if (!isOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+  if (!current) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6" onClick={(e)=>e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold">Beast Mode</h3>
+            <button className="text-slate-500" onClick={onClose}>×</button>
+          </div>
+          <div className="text-sm text-slate-600">Nothing to review.</div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  const total = items.length;
+  const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
+  const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${current.confirmAddressUrl || ''}\n\nExcited for you to receive!\n\n- ${creator}`;
+  const mailto = `mailto:${current.email || ''}?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
+
+  const titleText = useMemo(() => {
+    const full = (current.name || '').trim();
+    const parts = full.split(/\s+/);
+    const first = parts[0] || '';
+    const last = parts.length > 1 ? parts[parts.length - 1] : '';
+    const nameDisplay = [first, last].filter(Boolean).join(' ');
+    const suffix = `${nameDisplay}${current.company ? `, ${current.company}` : ''}`;
+    if (currentType === 'design') return `Design Review: ${suffix}`;
+    if (currentType === 'address') return `Address Request: ${suffix}`;
+    return `Review Recipient: ${suffix}`;
+  }, [current, currentType]);
+
+  const goNext = () => {
+    if (index < total - 1) setIndex(index + 1);
+    else onClose();
+  };
+  const goPrev = () => {
+    if (index > 0) setIndex(index - 1);
+  };
+
+  // Handlers shared or per-type
+  const approveDesign = async () => {
+    const updated = await AirtableService.updateContact(current.id, {
+      specificStage: 'Design approved' as SpecificStage,
+      latestDesignFeedback: '',
+    } as any);
+    if (updated) {
+      onAdvance(updated);
+      setHasApprovedDesign(true);
+      setHasRejectedDesign(false);
+      goNext();
+    }
+  };
+  const rejectDesign = async () => {
+    const updated = await AirtableService.updateContact(current.id, {
+      specificStage: 'Design rejected' as SpecificStage,
+      latestDesignFeedback: designFeedback || '',
+    } as any);
+    if (updated) {
+      onAdvance(updated);
+      goNext();
+    }
+  };
+
+  const approveReview = () => {
+    setHasApprovedReview(true);
+  };
+  const rejectReview = async () => {
+    const updated = await AirtableService.updateContact(current.id, {
+      specificStage: null as any,
+      draftOrderItems: [] as any,
+    } as any);
+    if (updated) {
+      onAdvance(updated);
+      goNext();
+    }
+  };
+  const saveItems = async () => {
+    const draft: string[] = [
+      ...(itemsMagic ? ['Magic Cards'] : []),
+      ...(itemsSfs ? ['SFS Book'] : []),
+      ...(itemsGolden ? ['Golden Record'] : []),
+    ];
+    const updated = await AirtableService.updateContact(current.id, {
+      contactAddedBy: creator,
+      draftOrderItems: draft,
+      specificStage: (draft.length > 0 ? 'Approved to receive gift' : null) as any,
+    } as any);
+    if (updated) {
+      onAdvance(updated);
+      setItemsSaved(true);
+    }
+  };
+  const confirmNameCompany = async () => {
+    const fullName = [editFirstName, editLastName].filter(Boolean).join(' ').trim();
+    const shouldUpdate =
+      (fullName && fullName !== (current.name || '').trim()) ||
+      (editCompany !== (current.company || ''));
+    if (shouldUpdate) {
+      const updated = await AirtableService.updateContact(current.id, {
+        name: fullName || current.name,
+        company: editCompany,
+      });
+      if (updated) onAdvance(updated);
+    }
+    setConfirmedNameCompany(true);
+  };
+  const saveAddress = async () => {
+    const updated = await AirtableService.updateContact(current.id, {
+      streetLine1: addr.streetLine1,
+      streetLine2: addr.streetLine2,
+      city: addr.city,
+      state: addr.state,
+      postCode: addr.postCode,
+      countryCode: addr.countryCode,
+    });
+    if (updated) {
+      onAdvance(updated);
+      goNext();
+    }
+  };
+
+  // Per-type content
+  const renderLeft = () => {
+    if (currentType === 'design') {
+      const file = (current.designFiles || [])[0];
+      const isImage = file && file.type?.startsWith('image/');
+      return (
+        <div>
+          <div className="rounded-lg flex items-center justify-center">
+            {file ? (
+              isImage ? (
+                <img src={file.url} alt={file.filename} className="max-h-[540px] object-contain" />
+              ) : (
+                <PdfThumbnail url={file.url} className="h-[540px]" heightPx={540} />
+              )
+            ) : (
+              <div className="text-sm text-slate-500">No design file</div>
+            )}
+          </div>
+          <div className="mt-3 text-xs text-slate-500 text-center">
+            Set to receive: {((current.draftOrderItems || []).length > 0 ? (current.draftOrderItems || []).join(', ') : '—')}
+          </div>
+        </div>
+      );
+    }
+    if (currentType === 'address') {
+      const file = (current.designFiles || [])[0];
+      const isImage = file && file.type?.startsWith('image/');
+      return (
+        <div>
+          <div className="rounded-lg flex items-center justify-center">
+            {file ? (
+              isImage ? (
+                <img src={file.url} alt={file.filename} className="max-h-[540px] object-contain" />
+              ) : (
+                <PdfThumbnail url={file.url} className="h-[540px]" heightPx={540} />
+              )
+            ) : (
+              <div className="text-sm text-slate-500">No design file</div>
+            )}
+          </div>
+          <div className="mt-3 text-xs text-slate-500 text-center">
+            Set to receive: {((current.draftOrderItems || []).length > 0 ? (current.draftOrderItems || []).join(', ') : '—')}
+          </div>
+        </div>
+      );
+    }
+    // review
+    return (
+      <div>
+        {!!current.firstMetDate && (
+          <div className="mb-4 text-sm text-slate-700">
+            You met {firstName} on {formatDate(current.firstMetDate)}.
+          </div>
+        )}
+        <div className="mb-6">
+          <div className="text-lg font-semibold mb-3">Would you like to send {firstName} a gift?</div>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={approveReview}
+              className={`h-16 w-16 rounded-full flex items-center justify-center ${hasApprovedReview ? 'bg-green-500 ring-2 ring-green-600' : 'bg-green-200 hover:bg-green-300'}`}
+              title="Approve"
+            >
+              <ThumbsUp className="h-8 w-8 text-green-700" />
+            </button>
+            <button
+              onClick={rejectReview}
+              className="h-16 w-16 rounded-full flex items-center justify-center bg-rose-200 hover:bg-rose-300"
+              title="Reject"
+            >
+              <ThumbsDown className="h-8 w-8 text-rose-700" />
+            </button>
+          </div>
+        </div>
+        {hasApprovedReview && (
+          <>
+            <div className="mb-6">
+              <div className="text-sm font-medium mb-2">Select what to send</div>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="accent-blue-600" checked={itemsMagic} onChange={(e)=>setItemsMagic(e.target.checked)} /> Magic Cards
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="accent-blue-600" checked={itemsSfs} onChange={(e)=>setItemsSfs(e.target.checked)} /> SFS Book
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="accent-blue-600" checked={itemsGolden} onChange={(e)=>setItemsGolden(e.target.checked)} /> Golden Record
+                </label>
+              </div>
+              {(() => {
+                const selection: string[] = [
+                  ...(itemsMagic ? ['Magic Cards'] : []),
+                  ...(itemsSfs ? ['SFS Book'] : []),
+                  ...(itemsGolden ? ['Golden Record'] : []),
+                ];
+                const saved: string[] = (current.draftOrderItems || []);
+                const setEq = (a: string[], b: string[]) => a.length === b.length && a.every(v => b.includes(v));
+                const isDirty = !setEq(selection, saved);
+                const disabled = !isDirty;
+                const label = !itemsSaved ? (isDirty ? 'Save Items' : 'Select Items') : (isDirty ? 'Save Items' : 'Saved');
+                return (
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      disabled={disabled}
+                      onClick={saveItems}
+                      className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                    >
+                      {label}
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+            {itemsSaved && (
+              <div className="mb-2">
+                <div className="text-sm font-medium mb-3">Confirm recipient details</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">First Name</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editFirstName} onChange={(e)=>setEditFirstName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Last Name</label>
+                    <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editLastName} onChange={(e)=>setEditLastName(e.target.value)} />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+                    <button
+                      type="button"
+                      onClick={() => setEditCompany('Individual (No Company)')}
+                      className={`text-[11px] underline ${editCompany === 'Individual (No Company)' ? 'text-slate-400' : 'text-black'}`}
+                      title='Use "Individual (No Company)"'
+                      disabled={editCompany === 'Individual (No Company)'}
+                    >
+                      Use "Individual (No Company)"
+                    </button>
+                  </div>
+                  <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm" value={editCompany} onChange={(e)=>setEditCompany(e.target.value)} />
+                </div>
+                {(() => {
+                  const savedName = (current.name || '').trim();
+                  const editedName = [editFirstName, editLastName].filter(Boolean).join(' ').trim();
+                  const savedCompany = current.company || '';
+                  const isDirtyNC = (editedName !== savedName) || (editCompany !== savedCompany);
+                  const disabled = (confirmedNameCompany && !isDirtyNC);
+                  const label = confirmedNameCompany ? (isDirtyNC ? 'Confirm Name + Company' : 'Saved') : 'Confirm Name + Company';
+                  return (
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        disabled={disabled}
+                        onClick={confirmNameCompany}
+                        className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                      >
+                        {label}
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const renderRight = () => {
+    if (currentType === 'design') {
+      return (
+        <div>
+          <div className="text-lg font-semibold mb-4">Do you approve this design?</div>
+          <div className="flex items-center gap-6 mb-4">
+            <button onClick={approveDesign} className={`h-16 w-16 rounded-full flex items-center justify-center ${hasApprovedDesign ? 'bg-green-500 ring-2 ring-green-600' : 'bg-green-200 hover:bg-green-300'}`} title="Approve">
+              <ThumbsUp className="h-8 w-8 text-green-700" />
+            </button>
+            <button onClick={() => { setHasRejectedDesign(true); setHasApprovedDesign(false); }} className={`h-16 w-16 rounded-full flex items-center justify-center ${hasRejectedDesign ? 'bg-rose-500 ring-2 ring-rose-600' : 'bg-rose-200 hover:bg-rose-300'}`} title="Reject">
+              <ThumbsDown className="h-8 w-8 text-rose-700" />
+            </button>
+          </div>
+          {hasRejectedDesign && (
+            <div className="mt-6">
+              <div className="text-sm font-medium mb-2">Required: provide feedback and click save to reject this design.</div>
+              <textarea
+                value={designFeedback}
+                onChange={(e) => setDesignFeedback(e.target.value)}
+                className="w-full min-h-[160px] border border-slate-300 rounded-md p-3 text-sm text-slate-900 bg-white"
+                placeholder="Share why the design needs changes"
+              />
+              <div className="mt-3 flex justify-end">
+                <button disabled={!designFeedback} onClick={rejectDesign} className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white disabled:opacity-50">Save</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    // Address or (Review after confirm) right content: email + address entry
+    const canShowRight = currentType === 'address' || confirmedNameCompany;
+    if (!canShowRight) return <div className="text-sm text-slate-500">Complete the steps on the left to continue.</div>;
+    return (
+      <div>
+        <div className="text-sm font-medium mb-2">Pre-drafted email</div>
+        <div className="text-sm border border-slate-300 bg-white rounded-md p-3 whitespace-pre-wrap">
+{emailBody}
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <button onClick={() => navigator.clipboard.writeText(emailBody)} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+            <Copy className="h-3.5 w-3.5" /> Copy email
+          </button>
+          <button onClick={() => navigator.clipboard.writeText(current.confirmAddressUrl || '')} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+            <Link2 className="h-3.5 w-3.5" /> Copy link
+          </button>
+          <a href={mailto} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+            Open draft <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+        <div className="mt-6">
+          <div className="text-sm font-medium mb-2">Or fill in address yourself</div>
+          <div className="grid grid-cols-1 gap-2">
+            <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Street Line 1" value={addr.streetLine1} onChange={e=>setAddr(a=>({...a, streetLine1: e.target.value}))} />
+            <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Street Line 2 (Apt, Suite, Floor, etc.)" value={addr.streetLine2} onChange={e=>setAddr(a=>({...a, streetLine2: e.target.value}))} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="City" value={addr.city} onChange={e=>setAddr(a=>({...a, city: e.target.value}))} />
+              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="State / Province" value={addr.state} onChange={e=>setAddr(a=>({...a, state: e.target.value}))} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Postal Code" value={addr.postCode} onChange={e=>setAddr(a=>({...a, postCode: e.target.value}))} />
+              <input className="px-3 py-2 text-sm border border-slate-300 rounded-md" placeholder="Country" value={addr.countryCode} onChange={e=>setAddr(a=>({...a, countryCode: e.target.value}))} />
+            </div>
+            <div className="flex justify-end mt-2">
+              {(() => {
+                const isAddressDirty =
+                  (addr.streetLine1 || '') !== (current.streetLine1 || '') ||
+                  (addr.streetLine2 || '') !== (current.streetLine2 || '') ||
+                  (addr.city || '') !== (current.city || '') ||
+                  (addr.state || '') !== (current.state || '') ||
+                  (addr.postCode || '') !== (current.postCode || '') ||
+                  (addr.countryCode || '') !== (current.countryCode || '');
+                const disabled = !isAddressDirty;
+                return (
+                  <button
+                    disabled={disabled}
+                    onClick={saveAddress}
+                    className={`px-4 py-2 text-sm rounded-md ${disabled ? 'bg-slate-200 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-100`}
+                  >
+                    Save Address
+                  </button>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const modal = (
+    <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white z-20">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={index === 0}
+              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+              title="Previous"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={index === 0}
+              className="text-xs text-slate-600 disabled:opacity-40"
+              title="Previous"
+            >
+              Back
+            </button>
+          </div>
+          <div className="flex-1 text-center">
+            <div className="text-lg font-semibold text-slate-900">{titleText}</div>
+            <div className="text-xs text-slate-500">{index + 1} of {total}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={index >= total - 1}
+              className="text-xs text-slate-600 disabled:opacity-40"
+              title="Next"
+            >
+              Next
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={index >= total - 1}
+              className="inline-flex items-center justify-center h-7 w-7 rounded border border-slate-300 text-slate-600 disabled:opacity-40"
+              title="Next"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <button className="text-slate-500 hover:text-slate-700" onClick={onClose}><X className="h-5 w-5" /></button>
+          </div>
+        </div>
+
+        <div className="px-6 pb-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>{renderLeft()}</div>
+          <div>{renderRight()}</div>
+        </div>
+      </div>
+    </div>
+  );
+  return createPortal(modal, document.body);
+};
+
+export default BeastModeModal;
+
+

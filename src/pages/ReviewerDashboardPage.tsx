@@ -8,6 +8,7 @@ import PdfThumbnail from '../components/PdfThumbnail';
 import DesignReviewModal from '../components/DesignReviewModal';
 import AddressRequestsModal from '../components/AddressRequestsModal';
 import ReviewContactsModal from '../components/ReviewContactsModal';
+import BeastModeModal from '../components/BeastModeModal';
 import ContactModal from '../components/ContactModal';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -53,6 +54,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isBeastModeActive, setIsBeastModeActive] = useState(false);
   const [isBeastPreloading, setIsBeastPreloading] = useState(false);
   const [beastPreloadProgress, setBeastPreloadProgress] = useState(0);
+  const [isBeastOpen, setIsBeastOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
@@ -455,19 +457,9 @@ const ReviewerDashboardPage: React.FC = () => {
             } finally {
               setIsBeastPreloading(false);
             }
-            // Begin Beast Mode flow
+            // Begin Beast Mode flow in a single modal
             setIsBeastModeActive(true);
-            // Open first available stage
-            if (reviewToReceiveGift.length > 0) {
-              setIsReviewContactsOpen(true);
-            } else if (designApprovedMissingAddress.length > 0) {
-              setIsAddressRequestsOpen(true);
-            } else if (designsReady.length > 0) {
-              setIsDesignReviewOpen(true);
-            } else {
-              // Nothing to review
-              setIsBeastModeActive(false);
-            }
+            setIsBeastOpen(true);
           }}
           className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5"
         >
@@ -693,6 +685,7 @@ const ReviewerDashboardPage: React.FC = () => {
       />
 
       {/* Design Review Modal */}
+      {!isBeastOpen && (
       <DesignReviewModal
         isOpen={isDesignReviewOpen}
         onClose={() => {
@@ -706,9 +699,10 @@ const ReviewerDashboardPage: React.FC = () => {
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }}
-      />
+      />)}
 
       {/* Address Requests Modal */}
+      {!isBeastOpen && (
       <AddressRequestsModal
         isOpen={isAddressRequestsOpen}
         onClose={() => {
@@ -727,9 +721,10 @@ const ReviewerDashboardPage: React.FC = () => {
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }}
-      />
+      />)}
 
       {/* Review Contacts Modal */}
+      {!isBeastOpen && (
       <ReviewContactsModal
         isOpen={isReviewContactsOpen}
         onClose={() => {
@@ -750,7 +745,22 @@ const ReviewerDashboardPage: React.FC = () => {
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }}
-      />
+      />)}
+
+      {/* Beast Mode unified modal */}
+      {isBeastOpen && (
+        <BeastModeModal
+          isOpen={isBeastOpen}
+          onClose={() => { setIsBeastOpen(false); setIsBeastModeActive(false); }}
+          reviewRecipients={reviewToReceiveGift}
+          addressRequests={designApprovedMissingAddress}
+          designs={designsReady}
+          creator={creator}
+          onAdvance={(updated) => {
+            setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+          }}
+        />
+      )}
 
       {/* Add Existing Recipient Modal (dashboard) */}
       {isAddExistingOpen && (
