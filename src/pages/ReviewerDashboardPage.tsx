@@ -58,6 +58,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const [isBeastCountdown, setIsBeastCountdown] = useState(false);
   const [beastCountdownSec, setBeastCountdownSec] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [designReviewContacts, setDesignReviewContacts] = useState<Contact[]>([]);
   const [isAddExistingOpen, setIsAddExistingOpen] = useState(false);
   const [allContactsDataset, setAllContactsDataset] = useState<Contact[]>([]);
   const [isLoadingAllContacts, setIsLoadingAllContacts] = useState(false);
@@ -539,6 +540,23 @@ const ReviewerDashboardPage: React.FC = () => {
                       {isAddressMissing(c) && (
                         <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
+                      {/* Status pill */}
+                      {(['Design approved','Fulfillment'] as SpecificStage[]).includes(c.specificStage as SpecificStage) && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-green-600/30 bg-green-600/20 text-green-400">Approved</span>
+                      )}
+                      {(c.specificStage === 'Design rejected') && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Rejected</span>
+                      )}
+                      {(c.specificStage === 'Design review') && (
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
+                          title="Open design review"
+                        >
+                          In Review
+                        </button>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -605,6 +623,23 @@ const ReviewerDashboardPage: React.FC = () => {
                       {isAddressMissing(c) && (
                         <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
+                      {/* Status pill */}
+                      {(['Design approved','Fulfillment'] as SpecificStage[]).includes(c.specificStage as SpecificStage) && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-green-600/30 bg-green-600/20 text-green-400">Approved</span>
+                      )}
+                      {(c.specificStage === 'Design rejected') && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Rejected</span>
+                      )}
+                      {(c.specificStage === 'Design review') && (
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
+                          title="Open design review"
+                        >
+                          In Review
+                        </button>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -669,6 +704,23 @@ const ReviewerDashboardPage: React.FC = () => {
                       {isAddressMissing(c) && (
                         <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
                       )}
+                      {/* Status pill */}
+                      {(['Design approved','Fulfillment'] as SpecificStage[]).includes(c.specificStage as SpecificStage) && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-green-600/30 bg-green-600/20 text-green-400">Approved</span>
+                      )}
+                      {(c.specificStage === 'Design rejected') && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Rejected</span>
+                      )}
+                      {(c.specificStage === 'Design review') && (
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
+                          title="Open design review"
+                        >
+                          In Review
+                        </button>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -726,12 +778,13 @@ const ReviewerDashboardPage: React.FC = () => {
         isOpen={isDesignReviewOpen}
         onClose={() => {
           setIsDesignReviewOpen(false);
+          setDesignReviewContacts([]);
           if (isBeastModeActive) {
             // End of flow
             setIsBeastModeActive(false);
           }
         }}
-        contacts={designsReady}
+        contacts={designReviewContacts.length ? designReviewContacts : designsReady}
         onAdvance={(updated) => {
           setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
         }}
