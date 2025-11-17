@@ -463,6 +463,10 @@ export class AirtableService {
         updateFields["Draft Order Items"] = (updates as any).draftOrderItems;
       if ((updates as any).latestDesignFeedback !== undefined)
         updateFields["Latest Design Feedback"] = (updates as any).latestDesignFeedback;
+      if ((updates as any).latestDesignDate !== undefined)
+        updateFields["Latest Design Date"] = (updates as any).latestDesignDate;
+      if ((updates as any).designFiles !== undefined)
+        updateFields["Design File"] = (updates as any).designFiles;
       if (updates.contactAddedBy !== undefined && updates.contactAddedBy !== "")
         updateFields["Contact Added By"] = updates.contactAddedBy;
       if ((updates as any).magicCardsProjects !== undefined)
