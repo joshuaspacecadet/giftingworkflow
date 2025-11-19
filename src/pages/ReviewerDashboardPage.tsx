@@ -238,9 +238,20 @@ const ReviewerDashboardPage: React.FC = () => {
         } as any);
       }
       if (saved) {
+        // Ensure critical fields are set for immediate UI update
+        // (Airtable might return the record without these fields if they are not immediately indexed or computed)
+        const optimisticallyUpdated = {
+          ...saved,
+          contactAddedBy: creator,
+          specificStage: saved.specificStage || specificStage,
+          draftOrderItems: saved.draftOrderItems && saved.draftOrderItems.length > 0 ? saved.draftOrderItems : draftOrderItems
+        };
+        
         setContacts((prev) => {
-          const exists = prev.some((c) => c.id === saved!.id);
-          return exists ? prev.map((c) => (c.id === saved!.id ? saved! : c)) : [saved!, ...prev];
+          const exists = prev.some((c) => c.id === optimisticallyUpdated.id);
+          return exists 
+            ? prev.map((c) => (c.id === optimisticallyUpdated.id ? optimisticallyUpdated : c)) 
+            : [optimisticallyUpdated, ...prev];
         });
         setIsCreateOpen(false);
         setEditingContact(undefined);
