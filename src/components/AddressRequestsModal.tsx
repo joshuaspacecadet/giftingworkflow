@@ -381,17 +381,17 @@ Excited for you to receive!
 {emailBody}
               </div>
               <div className="mt-2 flex items-center gap-2 flex-wrap">
-                <button onClick={copyEmail} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
-                  <Copy className="h-3.5 w-3.5" /> {copied ? 'Copied!' : 'Copy message'}
+                <button onClick={copyEmail} className="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-300 hover:bg-slate-50">
+                  <Copy className="h-3 w-3" /> {copied ? 'Copied!' : 'Copy message'}
                 </button>
-                <button onClick={copyEmailAddress} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
-                  <Copy className="h-3.5 w-3.5" /> {copiedEmailAddress ? 'Copied!' : 'Copy email address'}
+                <button onClick={copyEmailAddress} className="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-300 hover:bg-slate-50">
+                  <Copy className="h-3 w-3" /> {copiedEmailAddress ? 'Copied!' : 'Copy email address'}
                 </button>
-                <button onClick={copyLink} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
-                  <Link2 className="h-3.5 w-3.5" /> {copiedLink ? 'Copied!' : 'Copy link'}
+                <button onClick={copyLink} className="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-300 hover:bg-slate-50">
+                  <Link2 className="h-3 w-3" /> {copiedLink ? 'Copied!' : 'Copy link'}
                 </button>
-                <a href={mailto} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
-                  Open draft <ExternalLink className="h-3.5 w-3.5" />
+                <a href={mailto} className="inline-flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-300 hover:bg-slate-50">
+                  Open draft <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
             </div>
