@@ -41,6 +41,7 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
   const current = sessionContacts[index];
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedEmailAddress, setCopiedEmailAddress] = useState(false);
   const [addr, setAddr] = useState({
     streetLine1: '',
     streetLine2: '',
@@ -254,6 +255,16 @@ Excited for you to receive!
     }
   };
 
+  const copyEmailAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(current.email || '');
+      setCopiedEmailAddress(true);
+      setTimeout(() => setCopiedEmailAddress(false), 1500);
+    } catch {
+      setCopiedEmailAddress(false);
+    }
+  };
+
   const saveAddress = async () => {
     if (!current) return;
     setSaving(true);
@@ -369,9 +380,12 @@ Excited for you to receive!
               <div className="text-sm border border-slate-300 bg-white rounded-md p-3 whitespace-pre-wrap">
 {emailBody}
               </div>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <button onClick={copyEmail} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
-                  <Copy className="h-3.5 w-3.5" /> {copied ? 'Copied!' : 'Copy email'}
+                  <Copy className="h-3.5 w-3.5" /> {copied ? 'Copied!' : 'Copy message'}
+                </button>
+                <button onClick={copyEmailAddress} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
+                  <Copy className="h-3.5 w-3.5" /> {copiedEmailAddress ? 'Copied!' : 'Copy email address'}
                 </button>
                 <button onClick={copyLink} className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded border border-slate-300 hover:bg-slate-50">
                   <Link2 className="h-3.5 w-3.5" /> {copiedLink ? 'Copied!' : 'Copy link'}
