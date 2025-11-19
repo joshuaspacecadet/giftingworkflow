@@ -198,6 +198,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
     if (newSelections) setItemsError("");
   }, [formData.magicCards, formData.sfsBook, formData.goldenRecord, selectedExistingContact, currentProjectId]);
 
+  // Clear error for new contacts when an item is selected
+  useEffect(() => {
+    if (selectedExistingContact) return;
+    if (formData.magicCards || formData.sfsBook || formData.goldenRecord) {
+      setItemsError("");
+    }
+  }, [formData.magicCards, formData.sfsBook, formData.goldenRecord, selectedExistingContact]);
+
   // Debounced search for name suggestions
   useEffect(() => {
     const controller = new AbortController();
@@ -482,7 +490,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
       return;
     }
 
-    // Require at least one new item selection if using an existing contact
+    // Require at least one new item selection if using an existing contact or creating a new one
     if (selectedExistingContact) {
       const previouslySent = {
         magicCards: (selectedExistingContact.magicCardsProjects || []).some((id) => id !== (currentProjectId || "")),
@@ -496,6 +504,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
       );
       if (!anyNew) {
         setItemsError("Please select at least one item that has not been previously sent.");
+        return;
+      }
+    } else {
+      // New contact - just require at least one selection
+      if (!formData.magicCards && !formData.sfsBook && !formData.goldenRecord) {
+        setItemsError("Please select at least one item to send.");
         return;
       }
     }
