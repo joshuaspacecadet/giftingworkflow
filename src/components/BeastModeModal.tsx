@@ -330,7 +330,13 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
                 <PdfThumbnail url={file.url} className="h-[540px]" heightPx={540} />
               )
             ) : (
-              <div className="text-sm text-slate-500">No design file needed for order</div>
+              <div className="text-sm text-slate-500">
+                {(() => {
+                  const items = (current.draftOrderItems || []) as string[];
+                  const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
+                  return hasMagicCards ? "Design pending" : "No design file needed for order";
+                })()}
+              </div>
             )}
           </div>
           <div className="mt-3 text-xs text-slate-500 text-center">
@@ -352,7 +358,13 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
                 <PdfThumbnail url={file.url} className="h-[540px]" heightPx={540} />
               )
             ) : (
-              <div className="text-sm text-slate-500">No design file</div>
+              <div className="text-sm text-slate-500">
+                {(() => {
+                  const items = (current.draftOrderItems || []) as string[];
+                  const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
+                  return hasMagicCards ? "Design pending" : "No design file";
+                })()}
+              </div>
             )}
           </div>
           <div className="mt-3 text-xs text-slate-500 text-center">
