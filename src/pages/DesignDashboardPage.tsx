@@ -148,16 +148,7 @@ const DesignDashboardPage: React.FC = () => {
     }
   };
 
-  const AIRTABLE_ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024; // 5MB API limit
-
   const handleUploadFor = async (contact: Contact, file: File) => {
-    if (file.size > AIRTABLE_ATTACHMENT_MAX_BYTES) {
-      setErrById(prev => ({
-        ...prev,
-        [contact.id]: 'File is larger than 5MB (Airtable limit). Please compress it before uploading.',
-      }));
-      return;
-    }
     setErrById(prev => ({ ...prev, [contact.id]: '' }));
     setSuccessById(prev => ({ ...prev, [contact.id]: false }));
     setUploadingById(prev => ({ ...prev, [contact.id]: true }));
