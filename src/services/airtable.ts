@@ -59,7 +59,22 @@ const transformAirtableContact = (record: any): Contact => {
     contactAddedBy: fields["Contact Added By"] || "", // ADD THIS LINE
     specificStage: (fields["Specific Stage"] as SpecificStage) || undefined,
     draftOrderItems: fields["Draft Order Items"] || [],
-    designFiles: fields["Design File"] || [],
+    designFiles: (() => {
+      const designField = fields["Design File"];
+      if (Array.isArray(designField)) return designField;
+      if (typeof designField === "string" && designField.trim()) {
+        return [
+          {
+            id: "design-file-url",
+            url: designField,
+            filename: "Design File",
+            size: 0,
+            type: "",
+          },
+        ];
+      }
+      return [];
+    })(),
     latestDesignDate: fields["Latest Design Date"] || "",
     latestDesignFeedback: fields["Latest Design Feedback"] || "",
     magicCardsProjects: (fields["Magic Cards"] || []) as string[],
@@ -465,8 +480,18 @@ export class AirtableService {
         updateFields["Latest Design Feedback"] = (updates as any).latestDesignFeedback;
       if ((updates as any).latestDesignDate !== undefined)
         updateFields["Latest Design Date"] = (updates as any).latestDesignDate;
-      if ((updates as any).designFiles !== undefined)
-        updateFields["Design File"] = (updates as any).designFiles;
+      if ((updates as any).designFiles !== undefined) {
+        const designPayload = (updates as any).designFiles;
+        if (Array.isArray(designPayload) && designPayload.length > 0) {
+          const first = designPayload[0];
+          const url = typeof first === "string" ? first : first?.url;
+          if (url) {
+            updateFields["Design File"] = url;
+          }
+        } else {
+          updateFields["Design File"] = "";
+        }
+      }
       if (updates.contactAddedBy !== undefined && updates.contactAddedBy !== "")
         updateFields["Contact Added By"] = updates.contactAddedBy;
       if ((updates as any).magicCardsProjects !== undefined)
