@@ -117,9 +117,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
         linkedinUrl: contact.linkedinUrl || "",
         additionalContactContext: contact.additionalContactContext || "",
         contactAddedBy: contact.contactAddedBy || "",
-        magicCards: (contact.magicCardsProjects || []).includes(currentProjectId || ""),
-        sfsBook: (contact.sfsBookProjects || []).includes(currentProjectId || ""),
-        goldenRecord: (contact.goldenRecordProjects || []).includes(currentProjectId || ""),
+        // Prioritize draftOrderItems for current selection state, fallback to project links for backward compat
+        magicCards: (contact.draftOrderItems || []).includes('Magic Cards') || (contact.magicCardsProjects || []).includes(currentProjectId || ""),
+        sfsBook: (contact.draftOrderItems || []).includes('SFS Book') || (contact.sfsBookProjects || []).includes(currentProjectId || ""),
+        goldenRecord: (contact.draftOrderItems || []).includes('Golden Record') || (contact.goldenRecordProjects || []).includes(currentProjectId || ""),
       });
 
       // Convert AirtableAttachment format to internal format
@@ -566,6 +567,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
     if (formData.goldenRecord) draftOrderItems.push('Golden Record');
     (contactData as any).draftOrderItems = draftOrderItems;
 
+    // Update Specific Stage if items are selected and no stage is set (or if we need to clear it)
+    // But respect the parent's desire to potentially not change stage if locked?
+    // Actually, if editing, we should probably keep the stage unless it was previously empty and now has items.
+    // For now, let's ensure draftOrderItems is saved. The Dashboard logic handles stage transitions usually.
+    
     // Save/update contact with all data including files
     console.log("Submitting contactData:", contactData);
     await onSave(contactData as Partial<Contact>);
