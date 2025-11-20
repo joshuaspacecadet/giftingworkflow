@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download, Trash2 } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
@@ -7,6 +7,7 @@ import ContactModal from '../components/ContactModal';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import PdfThumbnail from '../components/PdfThumbnail';
 
 const DesignDashboardPage: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -105,6 +106,7 @@ const DesignDashboardPage: React.FC = () => {
   };
 
   const [isDownloadingById, setIsDownloadingById] = useState<Record<string, boolean>>({});
+  const [isDeletingById, setIsDeletingById] = useState<Record<string, boolean>>({});
 
   const handleDownloadAssets = async (contact: Contact) => {
     setIsDownloadingById(prev => ({ ...prev, [contact.id]: true }));
@@ -180,6 +182,27 @@ const DesignDashboardPage: React.FC = () => {
     }
   };
 
+  const handleDeleteDesignFile = async (contactId: string) => {
+    setIsDeletingById(prev => ({ ...prev, [contactId]: true }));
+    setErrById(prev => ({ ...prev, [contactId]: '' }));
+    try {
+      const updated = await AirtableService.updateContact(contactId, { designFiles: [] as any });
+      if (updated) {
+        setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setSuccessById(prev => {
+          const next = { ...prev };
+          delete next[contactId];
+          return next;
+        });
+      }
+    } catch (e: any) {
+      console.error('Failed to delete design file:', e);
+      setErrById(prev => ({ ...prev, [contactId]: e?.message || 'Failed to delete design file' }));
+    } finally {
+      setIsDeletingById(prev => ({ ...prev, [contactId]: false }));
+    }
+  };
+
   const renderUploadCard = (c: Contact, opts?: { showFeedback?: boolean }) => {
     const uploading = !!uploadingById[c.id];
     const downloading = !!isDownloadingById[c.id];
@@ -188,6 +211,10 @@ const DesignDashboardPage: React.FC = () => {
     const headshot = (c.headshot || [])[0];
     const logo = (c.companyLogo || [])[0];
     const hasAssets = (c.headshot && c.headshot.length > 0) || (c.companyLogo && c.companyLogo.length > 0);
+    const existingDesign = (c.designFiles || [])[0];
+    const designUrl = typeof existingDesign === 'string' ? existingDesign : existingDesign?.url;
+    const designFilename = typeof existingDesign === 'string' ? 'Design File' : existingDesign?.filename || 'Design File';
+    const isPdfDesign = designUrl ? /\.pdf($|\?)/i.test(designUrl) : false;
 
     return (
       <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
@@ -244,31 +271,85 @@ const DesignDashboardPage: React.FC = () => {
           </div>
 
           {/* Right: Actions */}
-          <div className="shrink-0 flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm ${uploading ? 'border-slate-700 text-slate-400 opacity-60 cursor-not-allowed' : 'border-slate-600 text-slate-100 hover:bg-slate-800 cursor-pointer'}`}>
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                <span>{uploading ? 'Uploading…' : 'Upload Design'}</span>
-                <input
-                  type="file"
-                  accept=".pdf,image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleUploadFor(c, file);
-                  }}
+          <div className="shrink-0 flex flex-col gap-3 min-w-[230px]">
+            {designUrl ? (
+              <>
+                <button
+                  type="button"
+                  className="rounded-lg border border-slate-700 bg-slate-900/40 p-2 w-full hover:border-slate-500 transition"
+                  onClick={() => window.open(designUrl, '_blank', 'noopener')}
+                  title="Open full size"
+                >
+                  {isPdfDesign ? (
+                    <PdfThumbnail url={designUrl} heightPx={120} className="w-full" alt={designFilename} />
+                  ) : (
+                    <img src={designUrl} alt={designFilename} className="w-full max-h-40 object-contain rounded-md" />
+                  )}
+                  <div className="text-[10px] text-slate-400 text-center mt-1">Click to open full file</div>
+                </button>
+                <div className="flex items-center gap-2">
+                  <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm flex-1 ${uploading ? 'border-slate-700 text-slate-400 opacity-60 cursor-not-allowed' : 'border-slate-600 text-slate-100 hover:bg-slate-800 cursor-pointer'}`}>
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    <span>{uploading ? 'Uploading…' : 'Replace File'}</span>
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadFor(c, file);
+                      }}
+                      disabled={uploading}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDesignFile(c.id)}
+                    disabled={isDeletingById[c.id]}
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-md border border-rose-600/70 text-rose-300 hover:bg-rose-600/10 disabled:opacity-50 text-sm"
+                    title="Delete design file"
+                  >
+                    {isDeletingById[c.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    <span>Delete</span>
+                  </button>
+                </div>
+                <button
+                  onClick={() => handleReadyForReview(c.id)}
                   disabled={uploading}
-                />
-              </label>
-              <button
-                onClick={() => handleReadyForReview(c.id)}
-                disabled={uploading}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
-              >
-                <ThumbsUp className="h-4 w-4" />
-                <span>Ready for Review</span>
-              </button>
-            </div>
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50 w-full justify-center"
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                  <span>Ready for Review</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm ${uploading ? 'border-slate-700 text-slate-400 opacity-60 cursor-not-allowed' : 'border-slate-600 text-slate-100 hover:bg-slate-800 cursor-pointer'}`}>
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    <span>{uploading ? 'Uploading…' : 'Upload Design'}</span>
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadFor(c, file);
+                      }}
+                      disabled={uploading}
+                    />
+                  </label>
+                  <button
+                    onClick={() => handleReadyForReview(c.id)}
+                    disabled={uploading}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
+                  >
+                    <ThumbsUp className="h-4 w-4" />
+                    <span>Ready for Review</span>
+                  </button>
+                </div>
+              </>
+            )}
             
             {success && (
               <div className="flex items-center gap-1 text-emerald-400 text-sm mt-1 justify-end">
