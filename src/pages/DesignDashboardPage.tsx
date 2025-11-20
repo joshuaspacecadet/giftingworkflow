@@ -223,63 +223,57 @@ const DesignDashboardPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Middle: Assets */}
-          <div className="flex items-center gap-3 flex-1 justify-center border-l border-r border-slate-800/50 px-4">
-            {headshot ? (
-              <img src={headshot.url} alt="Headshot" className="h-16 w-16 rounded-full object-cover border border-slate-700" />
-            ) : (
-              <div className="h-16 w-16 rounded-full border border-slate-800 bg-slate-900/50 flex items-center justify-center text-slate-600 text-[10px] text-center px-1">No Headshot</div>
-            )}
-            {logo ? (
-              <img src={logo.url} alt="Company Logo" className="h-16 w-16 rounded object-contain border border-slate-700 bg-white/5 p-1" />
-            ) : (
-              <div className="h-16 w-16 rounded border border-slate-800 bg-slate-900/50 flex items-center justify-center text-slate-600 text-[10px] text-center px-1">No Logo</div>
-            )}
-          </div>
-
-          {/* Right: Actions */}
-          <div className="shrink-0 flex flex-col gap-2 items-end w-48">
-            {hasAssets && (
+          {/* Middle: Download Assets */}
+          <div className="flex items-center justify-center flex-1 border-l border-r border-slate-800/50 px-4">
+            {hasAssets ? (
               <button
                 onClick={() => handleDownloadAssets(c)}
                 disabled={downloading}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-slate-100 text-sm w-full justify-center"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-slate-100 text-sm"
               >
                 {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 <span>Download assets</span>
               </button>
+            ) : (
+              <div className="text-xs text-slate-500">No assets available</div>
             )}
-            <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border ${uploading ? 'border-slate-700 text-slate-400' : 'border-slate-600 text-slate-100 hover:bg-slate-800'} cursor-pointer w-full justify-center`}>
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              <span>{uploading ? 'Uploading…' : 'Upload Design'}</span>
-              <input
-                type="file"
-                accept=".pdf,image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleUploadFor(c, file);
-                }}
+          </div>
+
+          {/* Right: Actions */}
+          <div className="shrink-0 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm ${uploading ? 'border-slate-700 text-slate-400 opacity-60 cursor-not-allowed' : 'border-slate-600 text-slate-100 hover:bg-slate-800 cursor-pointer'}`}>
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                <span>{uploading ? 'Uploading…' : 'Upload Design'}</span>
+                <input
+                  type="file"
+                  accept=".pdf,image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUploadFor(c, file);
+                  }}
+                  disabled={uploading}
+                />
+              </label>
+              <button
+                onClick={() => handleReadyForReview(c.id)}
                 disabled={uploading}
-              />
-            </label>
-            <button
-              onClick={() => handleReadyForReview(c.id)}
-              disabled={uploading}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50 w-full justify-center"
-            >
-              <ThumbsUp className="h-4 w-4" />
-              <span>Ready for Review</span>
-            </button>
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
+              >
+                <ThumbsUp className="h-4 w-4" />
+                <span>Ready for Review</span>
+              </button>
+            </div>
             
             {success && (
-              <div className="flex items-center gap-1 text-emerald-400 text-sm mt-1 justify-center w-full">
+              <div className="flex items-center gap-1 text-emerald-400 text-sm mt-1 justify-end">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Saved</span>
               </div>
             )}
             {err && (
-              <div className="text-rose-400 text-sm mt-1 text-center w-full">{err}</div>
+              <div className="text-rose-400 text-sm mt-1 text-right">{err}</div>
             )}
           </div>
         </div>
