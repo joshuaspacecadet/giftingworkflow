@@ -171,7 +171,9 @@ const ReviewerDashboardPage: React.FC = () => {
     return previews;
   }, [designsReady]);
   const designApprovedMissingAddress = quickSource.filter(
-    c => c.specificStage === 'Fulfillment' && (!c.streetLine1 || !c.city || !c.countryCode)
+    c =>
+      (c.specificStage === 'Design approved' || c.specificStage === 'Fulfillment') &&
+      (!c.streetLine1 || !c.city || !c.countryCode)
   );
   const reviewToReceiveGift = quickSource.filter(c => c.specificStage === 'Review to receive gift');
 
