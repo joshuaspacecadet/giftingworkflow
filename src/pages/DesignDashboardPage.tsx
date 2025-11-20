@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 import ContactModal from '../components/ContactModal';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const DesignDashboardPage: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -86,6 +88,50 @@ const DesignDashboardPage: React.FC = () => {
     }
   };
 
+  const [isDownloadingById, setIsDownloadingById] = useState<Record<string, boolean>>({});
+
+  const handleDownloadAssets = async (contact: Contact) => {
+    setIsDownloadingById(prev => ({ ...prev, [contact.id]: true }));
+    try {
+      const zip = new JSZip();
+      const folderName = contact.name ? contact.name.trim() : 'Assets';
+      const folder = zip.folder(folderName);
+      
+      const assets = [
+        ...(contact.headshot || []).map(f => ({ ...f, type: 'headshot' })),
+        ...(contact.companyLogo || []).map(f => ({ ...f, type: 'logo' }))
+      ];
+
+      if (assets.length === 0) {
+        throw new Error('No assets to download');
+      }
+
+      if (!folder) throw new Error('Failed to create folder');
+
+      await Promise.all(assets.map(async (asset, idx) => {
+        try {
+          // Fetch blob via proxy or CORS-enabled URL
+          const response = await fetch(asset.url, { mode: 'cors', cache: 'no-cache' });
+          const blob = await response.blob();
+          const ext = asset.filename.split('.').pop() || 'jpg';
+          // Name format: Name_Type_Index.ext or original filename
+          const filename = `${contact.name?.replace(/\s+/g, '_') || 'Asset'}_${asset.type}_${idx + 1}.${ext}`;
+          folder.file(filename, blob);
+        } catch (e) {
+          console.error('Failed to fetch asset', asset.url, e);
+        }
+      }));
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      saveAs(content, `${folderName}.zip`);
+    } catch (e) {
+      console.error('Download failed', e);
+      alert('Failed to download assets. They might be missing or inaccessible.');
+    } finally {
+      setIsDownloadingById(prev => ({ ...prev, [contact.id]: false }));
+    }
+  };
+
   const handleUploadFor = async (contact: Contact, file: File) => {
     setErrById(prev => ({ ...prev, [contact.id]: '' }));
     setSuccessById(prev => ({ ...prev, [contact.id]: false }));
@@ -114,12 +160,13 @@ const DesignDashboardPage: React.FC = () => {
     }
   };
 
-  const renderUploadCard = (c: Contact, opts?: { showFeedback?: boolean }) => {
     const uploading = !!uploadingById[c.id];
+    const downloading = !!isDownloadingById[c.id];
     const success = !!successById[c.id];
     const err = errById[c.id];
     const headshot = (c.headshot || [])[0];
     const logo = (c.companyLogo || [])[0];
+    const hasAssets = (c.headshot && c.headshot.length > 0) || (c.companyLogo && c.companyLogo.length > 0);
 
     return (
       <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
@@ -163,8 +210,18 @@ const DesignDashboardPage: React.FC = () => {
               <div className="mt-2 text-sm text-slate-400">No feedback on record.</div>
             ))}
           </div>
-          <div className="shrink-0">
-            <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border ${uploading ? 'border-slate-700 text-slate-400' : 'border-slate-600 text-slate-100 hover:bg-slate-800'} cursor-pointer`}>
+          <div className="shrink-0 flex flex-col gap-2 items-end">
+            {hasAssets && (
+              <button
+                onClick={() => handleDownloadAssets(c)}
+                disabled={downloading}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-slate-100 text-sm w-full justify-center"
+              >
+                {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                <span>Download assets</span>
+              </button>
+            )}
+            <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border ${uploading ? 'border-slate-700 text-slate-400' : 'border-slate-600 text-slate-100 hover:bg-slate-800'} cursor-pointer w-full justify-center`}>
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               <span>{uploading ? 'Uploading…' : 'Upload design'}</span>
               <input
@@ -179,13 +236,13 @@ const DesignDashboardPage: React.FC = () => {
               />
             </label>
             {success && (
-              <div className="mt-2 flex items-center gap-1 text-emerald-400 text-sm">
+              <div className="flex items-center gap-1 text-emerald-400 text-sm">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Saved as Design Review</span>
               </div>
             )}
             {err && (
-              <div className="mt-2 text-rose-400 text-sm">{err}</div>
+              <div className="text-rose-400 text-sm">{err}</div>
             )}
           </div>
         </div>
