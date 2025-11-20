@@ -159,7 +159,6 @@ const DesignDashboardPage: React.FC = () => {
       const updates: Partial<Contact> = {
         designFiles: attachment as any,
         latestDesignDate: new Date().toISOString(),
-        specificStage: 'Design review' as SpecificStage,
         ...(isRejected ? { latestDesignFeedback: '' } : {})
       } as Partial<Contact>;
       const updated = await AirtableService.updateContact(contact.id, updates);
