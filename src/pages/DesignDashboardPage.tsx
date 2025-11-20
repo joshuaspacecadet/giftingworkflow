@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
@@ -118,11 +118,39 @@ const DesignDashboardPage: React.FC = () => {
     const uploading = !!uploadingById[c.id];
     const success = !!successById[c.id];
     const err = errById[c.id];
+    const headshot = (c.headshot || [])[0];
+    const logo = (c.companyLogo || [])[0];
+
     return (
       <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              {headshot && (
+                <img src={headshot.url} alt="Headshot" className="h-10 w-10 rounded-full object-cover border border-slate-700" />
+              )}
+              {logo && (
+                <img src={logo.url} alt="Company Logo" className="h-10 w-10 rounded object-contain border border-slate-700 bg-white/5 p-0.5" />
+              )}
+              <div>
+                <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
+                {c.linkedinUrl && (
+                  <a href={c.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                    <Linkedin className="h-3 w-3" /> LinkedIn Profile
+                  </a>
+                )}
+              </div>
+            </div>
+            
+            {c.additionalContactContext && (
+              <div className="mb-2 text-xs text-slate-400 bg-slate-800/50 p-2 rounded border border-slate-700/50">
+                <div className="flex items-center gap-1.5 mb-1 text-slate-300">
+                  <Info className="h-3 w-3" /> <span className="font-medium">Context</span>
+                </div>
+                {c.additionalContactContext}
+              </div>
+            )}
+
             {opts?.showFeedback && (c.latestDesignFeedback ? (
               <div className="mt-2 text-sm text-slate-300">
                 <div className="flex items-center gap-2">
