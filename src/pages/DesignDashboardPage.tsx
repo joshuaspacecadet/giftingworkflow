@@ -286,7 +286,13 @@ const DesignDashboardPage: React.FC = () => {
                 input?.click();
               }}
             >
-              {designUrl ? (
+              {uploading ? (
+                <div className="flex flex-col items-center gap-2 text-slate-400">
+                  <Loader2 className="h-8 w-8 animate-spin text-slate-100" />
+                  <div className="text-xs">Uploading design…</div>
+                  <div className="text-[11px] text-slate-500">This can take up to 20 seconds for large files.</div>
+                </div>
+              ) : designUrl ? (
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-full flex items-center justify-center">
                     {isPdfDesign ? (
