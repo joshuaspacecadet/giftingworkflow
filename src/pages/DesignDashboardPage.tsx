@@ -262,22 +262,6 @@ const DesignDashboardPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Middle: Download Assets */}
-          <div className="flex items-center justify-center flex-1 border-l border-r border-slate-800/50 px-4">
-            {hasAssets ? (
-              <button
-                onClick={() => handleDownloadAssets(c)}
-                disabled={downloading}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-slate-100 text-sm"
-              >
-                {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                <span>Download assets</span>
-              </button>
-            ) : (
-              <div className="text-xs text-slate-500">No assets available</div>
-            )}
-          </div>
-
           {/* Right: Actions */}
           <div className="shrink-0 flex flex-col gap-3 min-w-[260px]">
             <div
@@ -304,7 +288,7 @@ const DesignDashboardPage: React.FC = () => {
             >
               {designUrl ? (
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-full flex justify-center">
+                  <div className="w-full flex items-center justify-center">
                     {isPdfDesign ? (
                       <PdfThumbnail url={designUrl} heightPx={140} className="max-w-full" alt={designFilename} />
                     ) : (
