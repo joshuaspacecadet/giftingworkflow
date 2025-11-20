@@ -391,9 +391,6 @@ const DesignDashboardPage: React.FC = () => {
                       <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0">
                           <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
-                          <div className="mt-1 text-xs text-slate-400">
-                            Set to receive: {((c.draftOrderItems || []).length > 0 ? (c.draftOrderItems || []).join(', ') : 'Nothing selected')}
-                          </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <button
