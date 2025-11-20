@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
+import ContactModal from '../components/ContactModal';
+import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
 
 const DesignDashboardPage: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -11,6 +13,10 @@ const DesignDashboardPage: React.FC = () => {
   const [uploadingById, setUploadingById] = useState<Record<string, boolean>>({});
   const [successById, setSuccessById] = useState<Record<string, boolean>>({});
   const [errById, setErrById] = useState<Record<string, string>>({});
+  
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isSavingContact, setIsSavingContact] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -33,6 +39,10 @@ const DesignDashboardPage: React.FC = () => {
     };
   }, []);
 
+  const approvedRecipients = useMemo(() => {
+    return contacts.filter(c => (c.specificStage as SpecificStage) === 'Approved to receive gift');
+  }, [contacts]);
+
   const inDesignNoFile = useMemo(() => {
     return contacts.filter(c => (c.specificStage as SpecificStage) === 'In design' && (!c.designFiles || c.designFiles.length === 0));
   }, [contacts]);
@@ -40,6 +50,25 @@ const DesignDashboardPage: React.FC = () => {
   const designRejected = useMemo(() => {
     return contacts.filter(c => (c.specificStage as SpecificStage) === 'Design rejected');
   }, [contacts]);
+
+  const handleContactSave = async (updatedData: Partial<Contact>) => {
+    setIsSavingContact(true);
+    try {
+      const contactId = (updatedData as any).id;
+      const updated = await AirtableService.updateContact(contactId, updatedData);
+      if (updated) {
+        setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setIsContactModalOpen(false);
+        setSelectedContact(null);
+      }
+      return updated;
+    } catch (e) {
+      console.error('Failed to save contact assets', e);
+      return null;
+    } finally {
+      setIsSavingContact(false);
+    }
+  };
 
   const handleUploadFor = async (contact: Contact, file: File) => {
     setErrById(prev => ({ ...prev, [contact.id]: '' }));
@@ -143,6 +172,38 @@ const DesignDashboardPage: React.FC = () => {
           <>
             <section>
               <div className="flex items-baseline justify-between mb-3">
+                <h2 className="text-base font-semibold text-slate-100">Add Assets for New Approved Recipients</h2>
+                <span className="text-sm text-slate-400">{approvedRecipients.length}</span>
+              </div>
+              {approvedRecipients.length === 0 ? (
+                <div className="text-sm text-slate-400">No approved recipients pending assets.</div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3">
+                  {approvedRecipients.map(c => (
+                    <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
+                          <div className="mt-1 text-xs text-slate-400">
+                            Set to receive: {((c.draftOrderItems || []).length > 0 ? (c.draftOrderItems || []).join(', ') : 'Nothing selected')}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setSelectedContact(c); setIsContactModalOpen(true); }}
+                          className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-600 text-slate-100 hover:bg-slate-800 text-sm"
+                        >
+                          <User className="h-4 w-4" />
+                          <span>View Details</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section>
+              <div className="flex items-baseline justify-between mb-3">
                 <h2 className="text-base font-semibold text-slate-100">Start New Designs</h2>
                 <span className="text-sm text-slate-400">{inDesignNoFile.length}</span>
               </div>
@@ -171,6 +232,15 @@ const DesignDashboardPage: React.FC = () => {
           </>
         )}
       </main>
+
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => { setIsContactModalOpen(false); setSelectedContact(null); }}
+        onSave={handleContactSave}
+        isLoading={isSavingContact}
+        availableCreators={PREDEFINED_CONTACT_CREATORS}
+        contact={selectedContact || undefined}
+      />
     </div>
   );
 };
