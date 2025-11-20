@@ -46,7 +46,7 @@ const DesignDashboardPage: React.FC = () => {
   }, [contacts]);
 
   const inDesignNoFile = useMemo(() => {
-    return contacts.filter(c => (c.specificStage as SpecificStage) === 'In design' && (!c.designFiles || c.designFiles.length === 0));
+    return contacts.filter(c => (c.specificStage as SpecificStage) === 'In design');
   }, [contacts]);
 
   const designRejected = useMemo(() => {
@@ -166,9 +166,11 @@ const DesignDashboardPage: React.FC = () => {
         setContacts(prev => prev.map(c => c.id === contact.id ? updated : c));
         setSuccessById(prev => ({ ...prev, [contact.id]: true }));
       } else {
-        throw new Error('Save failed');
+        console.error('Airtable update returned null for contact:', contact.id);
+        throw new Error('Save failed - Airtable update returned null');
       }
     } catch (e: any) {
+      console.error('Error uploading design file:', e);
       setErrById(prev => ({ ...prev, [contact.id]: e?.message || 'Upload failed' }));
     } finally {
       setUploadingById(prev => ({ ...prev, [contact.id]: false }));
