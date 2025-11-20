@@ -154,7 +154,12 @@ const DesignDashboardPage: React.FC = () => {
     setUploadingById(prev => ({ ...prev, [contact.id]: true }));
     try {
       const url = await uploadToCloudinary(file);
-      const attachment = [{ url, filename: file.name }];
+      const attachment = [{
+        url,
+        filename: file.name,
+        type: file.type || undefined,
+        size: file.size
+      }];
       const isRejected = (contact.specificStage as SpecificStage) === 'Design rejected';
       const updates: Partial<Contact> = {
         designFiles: attachment as any,
