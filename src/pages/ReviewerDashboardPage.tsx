@@ -150,8 +150,10 @@ const ReviewerDashboardPage: React.FC = () => {
     [contacts, creator]
   );
 
-  // Quick action datasets
-  const designsReady = filtered.filter(c => {
+  // Quick action datasets (respect show all toggle)
+  const quickSource = showAllGifts ? contacts : filtered;
+
+  const designsReady = quickSource.filter(c => {
     const items = (c as any).draftOrderItems as string[] | undefined;
     const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
     return c.specificStage === 'Design review' && hasMagicCards;
@@ -168,10 +170,10 @@ const ReviewerDashboardPage: React.FC = () => {
     }
     return previews;
   }, [designsReady]);
-  const designApprovedMissingAddress = filtered.filter(
+  const designApprovedMissingAddress = quickSource.filter(
     c => c.specificStage === 'Fulfillment' && (!c.streetLine1 || !c.city || !c.countryCode)
   );
-  const reviewToReceiveGift = filtered.filter(c => c.specificStage === 'Review to receive gift');
+  const reviewToReceiveGift = quickSource.filter(c => c.specificStage === 'Review to receive gift');
 
   // Address helpers and modal dataset for address requests
   const [addressModalContacts, setAddressModalContacts] = useState<Contact[]>([]);
