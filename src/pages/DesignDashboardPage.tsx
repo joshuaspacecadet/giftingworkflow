@@ -160,6 +160,7 @@ const DesignDashboardPage: React.FC = () => {
     }
   };
 
+  const renderUploadCard = (c: Contact, opts?: { showFeedback?: boolean }) => {
     const uploading = !!uploadingById[c.id];
     const downloading = !!isDownloadingById[c.id];
     const success = !!successById[c.id];
