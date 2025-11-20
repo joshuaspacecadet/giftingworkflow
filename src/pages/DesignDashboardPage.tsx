@@ -88,6 +88,22 @@ const DesignDashboardPage: React.FC = () => {
     }
   };
 
+  const handleReadyForReview = async (contactId: string) => {
+    setUploadingById(prev => ({ ...prev, [contactId]: true }));
+    try {
+      const updated = await AirtableService.updateContact(contactId, {
+        specificStage: 'Design review' as SpecificStage,
+      } as any);
+      if (updated) {
+        setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+      }
+    } catch (e) {
+      console.error('Failed to move to Design review', e);
+    } finally {
+      setUploadingById(prev => ({ ...prev, [contactId]: false }));
+    }
+  };
+
   const [isDownloadingById, setIsDownloadingById] = useState<Record<string, boolean>>({});
 
   const handleDownloadAssets = async (contact: Contact) => {
@@ -171,27 +187,22 @@ const DesignDashboardPage: React.FC = () => {
 
     return (
       <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              {headshot && (
-                <img src={headshot.url} alt="Headshot" className="h-10 w-10 rounded-full object-cover border border-slate-700" />
+        <div className="flex items-start gap-4">
+          {/* Left: Contact Info */}
+          <div className="min-w-0 flex-[2]">
+            <div className="font-medium text-slate-100 truncate text-base">{c.name || 'Unnamed'}</div>
+            {c.company && <div className="text-sm text-slate-400 truncate">{c.company}</div>}
+            
+            <div className="mt-1">
+              {c.linkedinUrl && (
+                <a href={c.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1 w-fit">
+                  <Linkedin className="h-3 w-3" /> LinkedIn
+                </a>
               )}
-              {logo && (
-                <img src={logo.url} alt="Company Logo" className="h-10 w-10 rounded object-contain border border-slate-700 bg-white/5 p-0.5" />
-              )}
-              <div>
-                <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
-                {c.linkedinUrl && (
-                  <a href={c.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1">
-                    <Linkedin className="h-3 w-3" /> LinkedIn Profile
-                  </a>
-                )}
-              </div>
             </div>
             
             {c.additionalContactContext && (
-              <div className="mb-2 text-xs text-slate-400 bg-slate-800/50 p-2 rounded border border-slate-700/50">
+              <div className="mt-3 text-xs text-slate-400 bg-slate-800/50 p-2 rounded border border-slate-700/50">
                 <div className="flex items-center gap-1.5 mb-1 text-slate-300">
                   <Info className="h-3 w-3" /> <span className="font-medium">Context</span>
                 </div>
@@ -200,7 +211,7 @@ const DesignDashboardPage: React.FC = () => {
             )}
 
             {opts?.showFeedback && (c.latestDesignFeedback ? (
-              <div className="mt-2 text-sm text-slate-300">
+              <div className="mt-3 text-sm text-slate-300">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-amber-400" />
                   <span className="font-semibold">Latest feedback</span>
@@ -208,10 +219,26 @@ const DesignDashboardPage: React.FC = () => {
                 <div className="mt-1 whitespace-pre-wrap text-slate-300">{c.latestDesignFeedback}</div>
               </div>
             ) : (
-              <div className="mt-2 text-sm text-slate-400">No feedback on record.</div>
+              <div className="mt-3 text-sm text-slate-400">No feedback on record.</div>
             ))}
           </div>
-          <div className="shrink-0 flex flex-col gap-2 items-end">
+
+          {/* Middle: Assets */}
+          <div className="flex items-center gap-3 flex-1 justify-center border-l border-r border-slate-800/50 px-4">
+            {headshot ? (
+              <img src={headshot.url} alt="Headshot" className="h-16 w-16 rounded-full object-cover border border-slate-700" />
+            ) : (
+              <div className="h-16 w-16 rounded-full border border-slate-800 bg-slate-900/50 flex items-center justify-center text-slate-600 text-[10px] text-center px-1">No Headshot</div>
+            )}
+            {logo ? (
+              <img src={logo.url} alt="Company Logo" className="h-16 w-16 rounded object-contain border border-slate-700 bg-white/5 p-1" />
+            ) : (
+              <div className="h-16 w-16 rounded border border-slate-800 bg-slate-900/50 flex items-center justify-center text-slate-600 text-[10px] text-center px-1">No Logo</div>
+            )}
+          </div>
+
+          {/* Right: Actions */}
+          <div className="shrink-0 flex flex-col gap-2 items-end w-48">
             {hasAssets && (
               <button
                 onClick={() => handleDownloadAssets(c)}
@@ -224,7 +251,7 @@ const DesignDashboardPage: React.FC = () => {
             )}
             <label className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border ${uploading ? 'border-slate-700 text-slate-400' : 'border-slate-600 text-slate-100 hover:bg-slate-800'} cursor-pointer w-full justify-center`}>
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              <span>{uploading ? 'Uploading…' : 'Upload design'}</span>
+              <span>{uploading ? 'Uploading…' : 'Upload Design'}</span>
               <input
                 type="file"
                 accept=".pdf,image/*"
@@ -236,14 +263,23 @@ const DesignDashboardPage: React.FC = () => {
                 disabled={uploading}
               />
             </label>
+            <button
+              onClick={() => handleReadyForReview(c.id)}
+              disabled={uploading}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50 w-full justify-center"
+            >
+              <ThumbsUp className="h-4 w-4" />
+              <span>Ready for Review</span>
+            </button>
+            
             {success && (
-              <div className="flex items-center gap-1 text-emerald-400 text-sm">
+              <div className="flex items-center gap-1 text-emerald-400 text-sm mt-1 justify-center w-full">
                 <CheckCircle2 className="h-4 w-4" />
-                <span>Saved as Design Review</span>
+                <span>Saved</span>
               </div>
             )}
             {err && (
-              <div className="text-rose-400 text-sm">{err}</div>
+              <div className="text-rose-400 text-sm mt-1 text-center w-full">{err}</div>
             )}
           </div>
         </div>
