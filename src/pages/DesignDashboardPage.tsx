@@ -157,8 +157,6 @@ const DesignDashboardPage: React.FC = () => {
       const attachment = [{
         url,
         filename: file.name,
-        type: file.type || undefined,
-        size: file.size
       }];
       const isRejected = (contact.specificStage as SpecificStage) === 'Design rejected';
       const updates: Partial<Contact> = {
