@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User } from 'lucide-react';
+import { Upload, Loader2, CheckCircle2, AlertTriangle, FileText, User, ThumbsUp } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
@@ -67,6 +67,22 @@ const DesignDashboardPage: React.FC = () => {
       return null;
     } finally {
       setIsSavingContact(false);
+    }
+  };
+
+  const handleReadyForDesign = async (contactId: string) => {
+    setUploadingById(prev => ({ ...prev, [contactId]: true }));
+    try {
+      const updated = await AirtableService.updateContact(contactId, {
+        specificStage: 'In design' as SpecificStage,
+      } as any);
+      if (updated) {
+        setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+      }
+    } catch (e) {
+      console.error('Failed to move to In Design', e);
+    } finally {
+      setUploadingById(prev => ({ ...prev, [contactId]: false }));
     }
   };
 
@@ -188,13 +204,23 @@ const DesignDashboardPage: React.FC = () => {
                             Set to receive: {((c.draftOrderItems || []).length > 0 ? (c.draftOrderItems || []).join(', ') : 'Nothing selected')}
                           </div>
                         </div>
-                        <button
-                          onClick={() => { setSelectedContact(c); setIsContactModalOpen(true); }}
-                          className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-600 text-slate-100 hover:bg-slate-800 text-sm"
-                        >
-                          <User className="h-4 w-4" />
-                          <span>View Details</span>
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => { setSelectedContact(c); setIsContactModalOpen(true); }}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-600 text-slate-100 hover:bg-slate-800 text-sm"
+                          >
+                            <User className="h-4 w-4" />
+                            <span>Add Assets</span>
+                          </button>
+                          <button
+                            onClick={() => handleReadyForDesign(c.id)}
+                            disabled={!!uploadingById[c.id]}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
+                          >
+                            {uploadingById[c.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
+                            <span>Ready for Design</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
