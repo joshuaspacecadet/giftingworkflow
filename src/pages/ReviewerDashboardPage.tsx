@@ -215,13 +215,17 @@ const ReviewerDashboardPage: React.FC = () => {
     setIsSaving(true);
     try {
       const draftOrderItems = ((contactData as any).draftOrderItems || []) as string[];
-      // Compute next Specific Stage based on existing state: do not overwrite if already in pipeline (and not "Approved...")
-      let specificStage: any = draftOrderItems.length > 0 ? ('Approved to receive gift' as any) : (null as any);
+      const wantsMagicCards = draftOrderItems.includes('Magic Cards');
+      // Compute next Specific Stage based on selection: Magic Cards -> Approved to receive gift, otherwise Fulfillment
+      let specificStage: any = null;
+      if (draftOrderItems.length > 0) {
+        specificStage = wantsMagicCards ? ('Approved to receive gift' as any) : ('Fulfillment' as any);
+      }
       let saved: Contact | null = null;
       if ((contactData as any).id) {
         // Update existing contact
         const existing = contacts.find((c) => c.id === (contactData as any).id);
-        const allowStageChange = !existing?.specificStage || existing?.specificStage === 'Approved to receive gift';
+        const allowStageChange = !existing?.specificStage || existing?.specificStage === 'Approved to receive gift' || existing?.specificStage === 'Fulfillment';
         const updatePayload: any = {
           ...contactData,
           contactAddedBy: creator,
