@@ -560,17 +560,16 @@ const ContactModal: React.FC<ContactModalProps> = ({
       if (formData.goldenRecord) (contactData as any).goldenRecordProjects = [projectId];
     }
 
-    // Draft Order Items (multi-select): map selected items for dashboard use
     const draftOrderItems: string[] = [];
     if (formData.magicCards) draftOrderItems.push('Magic Cards');
     if (formData.sfsBook) draftOrderItems.push('SFS Book');
     if (formData.goldenRecord) draftOrderItems.push('Golden Record');
     (contactData as any).draftOrderItems = draftOrderItems;
 
-    // Update Specific Stage if items are selected and no stage is set (or if we need to clear it)
-    // But respect the parent's desire to potentially not change stage if locked?
-    // Actually, if editing, we should probably keep the stage unless it was previously empty and now has items.
-    // For now, let's ensure draftOrderItems is saved. The Dashboard logic handles stage transitions usually.
+    // Set fulfillment if no Magic Cards are selected
+    if (!formData.magicCards) {
+      (contactData as any).specificStage = 'Fulfillment';
+    }
     
     // Save/update contact with all data including files
     console.log("Submitting contactData:", contactData);
