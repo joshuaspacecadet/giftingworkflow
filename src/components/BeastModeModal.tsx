@@ -282,7 +282,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       ...(itemsGolden ? ['Golden Record'] : []),
     ];
     const nextStage = draft.includes('Magic Cards')
-      ? (draft.length > 0 ? 'Approved to receive gift' : null)
+      ? (draft.length > 0 ? 'Gathering details' : null)
       : (draft.length > 0 ? 'Fulfillment' : null);
     const updated = await AirtableService.updateContact(current.id, {
       contactAddedBy: creator,

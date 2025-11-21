@@ -16,7 +16,6 @@ export interface Project {
 // Single-select from Airtable "Specific Stage" for reviewer dashboard flows
 export type SpecificStage =
   | 'Review to receive gift'
-  | 'Approved to receive gift'
   | 'Gathering details'
   | 'Drafting copy'
   | 'In design'

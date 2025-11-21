@@ -43,7 +43,7 @@ const DesignDashboardPage: React.FC = () => {
   }, []);
 
   const approvedRecipients = useMemo(() => {
-    return contacts.filter(c => (c.specificStage as SpecificStage) === 'Approved to receive gift');
+    return contacts.filter(c => (c.specificStage as SpecificStage) === 'Gathering details');
   }, [contacts]);
 
   const inDesignNoFile = useMemo(() => {

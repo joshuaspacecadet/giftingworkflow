@@ -216,10 +216,9 @@ const ReviewerDashboardPage: React.FC = () => {
     try {
       const draftOrderItems = ((contactData as any).draftOrderItems || []) as string[];
       const wantsMagicCards = draftOrderItems.includes('Magic Cards');
-      // Compute next Specific Stage based on selection: Magic Cards -> Approved to receive gift, otherwise Fulfillment
       let specificStage: any = null;
       if (draftOrderItems.length > 0) {
-        specificStage = wantsMagicCards ? ('Approved to receive gift' as any) : ('Fulfillment' as any);
+        specificStage = wantsMagicCards ? ('Gathering details' as any) : ('Fulfillment' as any);
       }
       let saved: Contact | null = null;
       if ((contactData as any).id) {
