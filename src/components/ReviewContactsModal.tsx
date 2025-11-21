@@ -69,7 +69,8 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     if (!current) return;
     // seed items from existing Draft Order Items
     const draft = (current.draftOrderItems || []);
-    setItemsMagic(draft.includes('Magic Cards'));
+    const wantsMagicCards = draft.includes('Magic Cards');
+    setItemsMagic(wantsMagicCards);
     setItemsSfs(draft.includes('SFS Book'));
     setItemsGolden(draft.includes('Golden Record'));
     // seed name/company
@@ -87,9 +88,13 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
       countryCode: current.countryCode || '',
     });
     // initialize gates
-    const hasInitialItems = (current.draftOrderItems || []).length > 0;
+    const hasInitialItems = draft.length > 0;
     setItemsSaved(hasInitialItems);
-    setHasApproved(hasInitialItems || current.specificStage === 'Approved to receive gift');
+    setHasApproved(
+      wantsMagicCards
+        ? current.specificStage === 'Fulfillment'
+        : (hasInitialItems || current.specificStage === 'Fulfillment')
+    );
     setConfirmedNameCompany(false);
     setHasRejected(rejectedIds.has(current.id));
   }, [current]);
@@ -237,10 +242,13 @@ Excited for you to receive!
         ...(itemsSfs ? ['SFS Book'] : []),
         ...(itemsGolden ? ['Golden Record'] : []),
       ];
+      const nextStage = draft.includes('Magic Cards')
+        ? 'Approved to receive gift'
+        : (draft.length > 0 ? 'Fulfillment' : null);
       const updated = await AirtableService.updateContact(current.id, {
         contactAddedBy: creator,
         draftOrderItems: draft,
-        specificStage: (draft.length > 0 ? 'Approved to receive gift' : null) as any,
+        specificStage: nextStage as any,
       } as any);
       if (updated) {
         onAdvance(updated);

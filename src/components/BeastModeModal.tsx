@@ -130,7 +130,8 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     if (!current) return;
     // Review recipients initial
     const draft = (current.draftOrderItems || []);
-    setItemsMagic(draft.includes('Magic Cards'));
+    const wantsMagicCards = draft.includes('Magic Cards');
+    setItemsMagic(wantsMagicCards);
     setItemsSfs(draft.includes('SFS Book'));
     setItemsGolden(draft.includes('Golden Record'));
     setItemsSaved(draft.length > 0);
@@ -138,7 +139,11 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     setEditFirstName(parts[0] || '');
     setEditLastName(parts.length > 1 ? parts[parts.length - 1] : '');
     setEditCompany(current.company || '');
-    setHasApprovedReview(draft.length > 0 || current.specificStage === 'Approved to receive gift');
+    setHasApprovedReview(
+      wantsMagicCards
+        ? current.specificStage === 'Fulfillment'
+        : (draft.length > 0 || current.specificStage === 'Fulfillment')
+    );
     setConfirmedNameCompany(false);
 
     // Address initial
@@ -276,10 +281,13 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       ...(itemsSfs ? ['SFS Book'] : []),
       ...(itemsGolden ? ['Golden Record'] : []),
     ];
+    const nextStage = draft.includes('Magic Cards')
+      ? (draft.length > 0 ? 'Approved to receive gift' : null)
+      : (draft.length > 0 ? 'Fulfillment' : null);
     const updated = await AirtableService.updateContact(current.id, {
       contactAddedBy: creator,
       draftOrderItems: draft,
-      specificStage: (draft.length > 0 ? 'Approved to receive gift' : null) as any,
+      specificStage: nextStage as any,
     } as any);
     if (updated) {
       onAdvance(updated);

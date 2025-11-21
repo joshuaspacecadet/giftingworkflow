@@ -566,8 +566,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
     if (formData.goldenRecord) draftOrderItems.push('Golden Record');
     (contactData as any).draftOrderItems = draftOrderItems;
 
-    // Set fulfillment if no Magic Cards are selected
-    if (!formData.magicCards) {
+    if (formData.magicCards) {
+      (contactData as any).specificStage = 'Approved to receive gift';
+    } else {
       (contactData as any).specificStage = 'Fulfillment';
     }
     
