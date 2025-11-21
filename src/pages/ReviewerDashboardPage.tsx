@@ -97,7 +97,7 @@ const ReviewerDashboardPage: React.FC = () => {
         // Initialize checkbox states from existing Draft Order Items for approved contacts
         const initial: Record<string, { magic: boolean; sfs: boolean; golden: boolean }> = {};
         sorted.forEach((c) => {
-          if (c.specificStage === 'Approved to receive gift') {
+          if (c.specificStage === 'Gathering details') {
             const doi = ((c as any).draftOrderItems || []) as string[];
             initial[c.id] = {
               magic: doi.includes('Magic Cards'),
@@ -187,7 +187,7 @@ const ReviewerDashboardPage: React.FC = () => {
   const { approvedRecipients, inDesign, fulfillment } = useMemo(() => {
     const src = pipelineSource;
     return {
-      approvedRecipients: src.filter(c => c.specificStage === 'Approved to receive gift'),
+      approvedRecipients: src.filter(c => c.specificStage === 'Gathering details'),
       inDesign: src.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)),
       fulfillment: src.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped'),
     };
@@ -195,7 +195,7 @@ const ReviewerDashboardPage: React.FC = () => {
 
   // Total count for header: sum of Approved Recipients + In Design + Fulfillment
   const pipelineCount = useMemo(() => {
-    const approved = pipelineSource.filter(c => c.specificStage === 'Approved to receive gift').length;
+    const approved = pipelineSource.filter(c => c.specificStage === 'Gathering details').length;
     const inDesignCount = pipelineSource.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)).length;
     const fulfillCount = pipelineSource.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped').length;
     return approved + inDesignCount + fulfillCount;
@@ -225,7 +225,7 @@ const ReviewerDashboardPage: React.FC = () => {
       if ((contactData as any).id) {
         // Update existing contact
         const existing = contacts.find((c) => c.id === (contactData as any).id);
-        const allowStageChange = !existing?.specificStage || existing?.specificStage === 'Approved to receive gift' || existing?.specificStage === 'Fulfillment';
+        const allowStageChange = !existing?.specificStage || existing?.specificStage === 'Gathering details' || existing?.specificStage === 'Fulfillment';
         const updatePayload: any = {
           ...contactData,
           contactAddedBy: creator,

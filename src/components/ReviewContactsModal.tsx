@@ -92,7 +92,7 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     setItemsSaved(hasInitialItems);
     setHasApproved(
       wantsMagicCards
-        ? current.specificStage === 'Fulfillment'
+        ? current.specificStage === 'Gathering details'
         : (hasInitialItems || current.specificStage === 'Fulfillment')
     );
     setConfirmedNameCompany(false);
@@ -243,7 +243,7 @@ Excited for you to receive!
         ...(itemsGolden ? ['Golden Record'] : []),
       ];
       const nextStage = draft.includes('Magic Cards')
-        ? 'Approved to receive gift'
+        ? 'Gathering details'
         : (draft.length > 0 ? 'Fulfillment' : null);
       const updated = await AirtableService.updateContact(current.id, {
         contactAddedBy: creator,

@@ -567,7 +567,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     (contactData as any).draftOrderItems = draftOrderItems;
 
     if (formData.magicCards) {
-      (contactData as any).specificStage = 'Approved to receive gift';
+      (contactData as any).specificStage = 'Gathering details';
     } else {
       (contactData as any).specificStage = 'Fulfillment';
     }
