@@ -158,7 +158,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   useEffect(() => {
     if (!current) return;
     setHasRejected(current.specificStage === 'Design rejected');
-    setHasApproved(current.specificStage === 'Design approved');
+    setHasApproved(current.specificStage === 'Fulfillment' || current.specificStage === 'Design approved');
     setFeedback(current.latestDesignFeedback || '');
   }, [current]);
 
@@ -241,7 +241,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     setSaving(true);
     try {
       const updated = await AirtableService.updateContact(current.id, {
-        specificStage: 'Design approved' as any,
+        specificStage: 'Fulfillment' as any,
         latestDesignFeedback: '',
       } as any);
       if (updated) {

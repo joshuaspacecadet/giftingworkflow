@@ -153,7 +153,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
     // Design initial
     setHasRejectedDesign(current.specificStage === 'Design rejected');
-    setHasApprovedDesign(current.specificStage === 'Design approved');
+    setHasApprovedDesign(current.specificStage === 'Fulfillment' || current.specificStage === 'Design approved');
     setDesignFeedback(current.latestDesignFeedback || '');
   }, [index, current]);
 
@@ -236,7 +236,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   // Handlers shared or per-type
   const approveDesign = async () => {
     const updated = await AirtableService.updateContact(current.id, {
-      specificStage: 'Design approved' as SpecificStage,
+      specificStage: 'Fulfillment' as SpecificStage,
       latestDesignFeedback: '',
     } as any);
     if (updated) {
