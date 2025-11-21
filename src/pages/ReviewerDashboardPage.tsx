@@ -933,30 +933,33 @@ const ReviewerDashboardPage: React.FC = () => {
                           <div className="truncate">
                             <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-xs">
-                            <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.magic} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: e.target.checked, sfs: !!prev[c.id]?.sfs, golden: !!prev[c.id]?.golden } }))}/> Magic Cards</label>
-                            <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.sfs} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: !!prev[c.id]?.magic, sfs: e.target.checked, golden: !!prev[c.id]?.golden } }))}/> SFS Book</label>
-                            <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.golden} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: !!prev[c.id]?.magic, sfs: !!prev[c.id]?.sfs, golden: e.target.checked } }))}/> Golden Record</label>
-                            <button
-                              onClick={async ()=>{
-                                try {
-                                  const draftOrderItems = currentDraft;
-                                  const updated = await AirtableService.updateContact(c.id, {
-                                    contactAddedBy: creator,
-                                    specificStage: (draftOrderItems.length > 0 ? 'Approved to receive gift' : null) as any,
-                                    draftOrderItems,
-                                  } as any);
-                                  if (updated) {
-                                    setContacts(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
-                                    setAllContactsDataset(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
-                                  }
-                                } catch(e) { console.error('Add selected failed', e); }
-                              }}
-                              className={`text-xs px-2 py-1 rounded border ${isDirty ? 'border-blue-400 text-blue-700' : 'border-slate-300'} hover:bg-slate-50`}
-                            >
-                              {isDirty ? 'Save Changes' : 'Add Selected'}
-                            </button>
-                          </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.magic} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: e.target.checked, sfs: !!prev[c.id]?.sfs, golden: !!prev[c.id]?.golden } }))}/> Magic Cards</label>
+                          <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.sfs} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: !!prev[c.id]?.magic, sfs: e.target.checked, golden: !!prev[c.id]?.golden } }))}/> SFS Book</label>
+                          <label className="flex items-center gap-1"><input type="checkbox" className="accent-blue-500" checked={!!selectedItemsByContact[c.id]?.golden} onChange={(e)=>setSelectedItemsByContact(prev=>({ ...prev, [c.id]: { magic: !!prev[c.id]?.magic, sfs: !!prev[c.id]?.sfs, golden: e.target.checked } }))}/> Golden Record</label>
+                          <button
+                            onClick={async ()=>{
+                              try {
+                                const draftOrderItems = currentDraft;
+                                const nextStage = draftOrderItems.includes('Magic Cards')
+                                  ? (draftOrderItems.length > 0 ? 'Approved to receive gift' : null)
+                                  : (draftOrderItems.length > 0 ? 'Fulfillment' : null);
+                                const updated = await AirtableService.updateContact(c.id, {
+                                  contactAddedBy: creator,
+                                  specificStage: nextStage as any,
+                                  draftOrderItems,
+                                } as any);
+                                if (updated) {
+                                  setContacts(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
+                                  setAllContactsDataset(prev=>prev.map(pc=>pc.id===c.id?updated:pc));
+                                }
+                              } catch(e) { console.error('Add selected failed', e); }
+                            }}
+                            className={`text-xs px-2 py-1 rounded border ${isDirty ? 'border-blue-400 text-blue-700' : 'border-slate-300'} hover:bg-slate-50`}
+                          >
+                            {isDirty ? 'Save Changes' : 'Add Selected'}
+                          </button>
+                        </div>
                         </div>
                         {/* Already sent badges */}
                         <div className="mt-2 pl-4">
