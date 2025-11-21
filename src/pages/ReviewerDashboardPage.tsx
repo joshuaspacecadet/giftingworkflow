@@ -946,7 +946,7 @@ const ReviewerDashboardPage: React.FC = () => {
                               try {
                                 const draftOrderItems = currentDraft;
                                 const nextStage = draftOrderItems.includes('Magic Cards')
-                                  ? (draftOrderItems.length > 0 ? 'Approved to receive gift' : null)
+                                  ? (draftOrderItems.length > 0 ? 'Gathering details' : null)
                                   : (draftOrderItems.length > 0 ? 'Fulfillment' : null);
                                 const updated = await AirtableService.updateContact(c.id, {
                                   contactAddedBy: creator,
