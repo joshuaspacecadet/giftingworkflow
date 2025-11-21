@@ -184,21 +184,19 @@ const ReviewerDashboardPage: React.FC = () => {
 
   // Pipeline datasets (toggle between creator-only vs all)
   const pipelineSource = showAllGifts ? contacts : filtered;
-  const { approvedRecipients, inDesign, fulfillment } = useMemo(() => {
+  const { inDesign, fulfillment } = useMemo(() => {
     const src = pipelineSource;
     return {
-      approvedRecipients: src.filter(c => c.specificStage === 'Gathering details'),
       inDesign: src.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)),
       fulfillment: src.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped'),
     };
   }, [pipelineSource]);
 
-  // Total count for header: sum of Approved Recipients + In Design + Fulfillment
+  // Total count for header: sum of In Design + Fulfillment
   const pipelineCount = useMemo(() => {
-    const approved = pipelineSource.filter(c => c.specificStage === 'Gathering details').length;
     const inDesignCount = pipelineSource.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)).length;
     const fulfillCount = pipelineSource.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped').length;
-    return approved + inDesignCount + fulfillCount;
+    return inDesignCount + fulfillCount;
   }, [pipelineSource]);
 
   const defaultProject = useMemo(
@@ -527,86 +525,7 @@ const ReviewerDashboardPage: React.FC = () => {
             <span className={`text-xs ${showAllGifts ? 'text-white' : 'text-slate-400'}`}>All Gifts</span>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Approved Recipients */}
-          <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-5 flex flex-col min-h-[240px]">
-            <div className="text-[15px] font-semibold mb-1">Approved Recipients ({approvedRecipients.length})</div>
-            <div className="text-xs text-slate-400 mb-3">Selected to receive a gift.</div>
-            <ul className="text-xs text-slate-300 space-y-1.5 flex-1 overflow-auto pr-1">
-              {approvedRecipients.length === 0 ? (
-                <li className="italic text-slate-500">None yet</li>
-              ) : (
-                approvedRecipients.slice(0, 50).map(c => (
-                  <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-slate-500">•</span>
-                      {isAddressMissing(c) ? (
-                        <button
-                          type="button"
-                          className="truncate hover:underline text-left"
-                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
-                          title="Address needed"
-                        >
-                          {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
-                        </button>
-                      ) : (
-                        <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
-                      )}
-                      {isAddressMissing(c) && (
-                        <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
-                      )}
-                      {(c.specificStage === 'Design rejected') && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Rejected</span>
-                      )}
-                      {(c.specificStage === 'Design review') && (
-                        <button
-                          type="button"
-                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
-                          onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
-                          title="Open design review"
-                        >
-                          In Review
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="text-slate-400 hover:text-red-400 px-1"
-                        aria-label="Remove from approved"
-                        onClick={() => setConfirmUnapproveId(c.id)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                    {confirmUnapproveId === c.id && (
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-[#0F1012] border border-[#27282B] rounded-md px-2 py-1 text-[11px] text-slate-200 shadow-sm flex items-center gap-2">
-                        <span>Really?</span>
-                        <button
-                          className="text-red-400 hover:text-red-300"
-                          onClick={async () => {
-                            try {
-                              const updated = await AirtableService.updateContact(c.id, {
-                                specificStage: null as any,
-                                draftOrderItems: [] as any,
-                              } as any);
-                              if (updated) {
-                                setContacts(prev => prev.map(pc => pc.id === c.id ? updated : pc));
-                                setAllContactsDataset(prev => prev.map(pc => pc.id === c.id ? updated : pc));
-                              }
-                            } catch (e) { console.error('Unapprove failed', e); }
-                            setConfirmUnapproveId(null);
-                          }}
-                        >Yes</button>
-                        <button className="text-slate-400 hover:text-slate-200" onClick={() => setConfirmUnapproveId(null)}>No</button>
-                      </div>
-                    )}
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* In Design */}
           <div className="bg-[#0F1012] rounded-xl border border-[#27282B] p-5 flex flex-col min-h-[240px]">
             <div className="text-[15px] font-semibold mb-1">In Design ({inDesign.length})</div>
