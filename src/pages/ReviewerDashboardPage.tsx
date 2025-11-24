@@ -424,7 +424,11 @@ const ReviewerDashboardPage: React.FC = () => {
           <div className="mt-5 border border-[#FF5C00] rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src="/red-star.svg" alt="" className="h-7 w-7" />
-              <div className="text-sm">Ready to tackle all {quickActionsCount} actions?</div>
+              <div className="text-sm">
+                {quickActionsCount === 0
+                  ? "Nothing to review right now. You're on top of it!"
+                  : `Ready to tackle all ${quickActionsCount} actions?`}
+              </div>
             </div>
         <button
           disabled={quickActionsCount === 0}
