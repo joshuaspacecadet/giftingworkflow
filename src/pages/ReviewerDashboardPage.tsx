@@ -564,7 +564,7 @@ const ReviewerDashboardPage: React.FC = () => {
                           onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
                           title="Open design review"
                         >
-                          In Review
+                          Review design
                         </button>
                       )}
                     </div>
@@ -641,7 +641,7 @@ const ReviewerDashboardPage: React.FC = () => {
                           onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
                           title="Open design review"
                         >
-                          In Review
+                          Review design
                         </button>
                       )}
                     </div>
