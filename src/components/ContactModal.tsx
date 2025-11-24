@@ -25,6 +25,7 @@ interface ContactModalProps {
   currentProjectId?: string;
   lockedCreator?: string;
   lockCoreFields?: boolean; // disable core edits in specific pipeline stages
+  allowDesignFieldEditing?: boolean;
 }
 
 const ContactModal: React.FC<ContactModalProps> = ({
@@ -37,6 +38,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   currentProjectId,
   lockedCreator,
   lockCoreFields = false,
+  allowDesignFieldEditing = false,
 }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -97,6 +99,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
     const lockByStage = selectedStage ? stagesToLock.includes(selectedStage) : false;
     return lockCoreFields || lockByStage;
   })();
+
+  const designOverrideEnabled = !!allowDesignFieldEditing;
+  const canEditProfileFields = !isCoreLocked || designOverrideEnabled;
+  const canEditLinkedInField = !isCoreLocked || designOverrideEnabled;
+  const canEditNotesField = !isCoreLocked || designOverrideEnabled;
+  const canEditAssetUploads = !isCoreLocked || designOverrideEnabled;
 
   useEffect(() => {
     console.log("ContactModal useEffect triggered with contact:", contact);
@@ -527,11 +535,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
     };
 
     // If an existing contact was selected via autocomplete, include its id so the caller updates it
-    if (selectedExistingContact) {
-      (contactData as any).id = selectedExistingContact.id;
-      // Clear any prior review status so it doesn't carry into this project
-      (contactData as any).contactReview = null;
-      (contactData as any).contactReviewFeedback = "";
+    const existingContactId = contact?.id || selectedExistingContact?.id;
+    if (existingContactId) {
+      (contactData as any).id = existingContactId;
+      if (!contact) {
+        // Clear any prior review status so it doesn't carry into this project
+        (contactData as any).contactReview = null;
+        (contactData as any).contactReviewFeedback = "";
+      }
     }
 
     // If we have files to upload, handle them first
@@ -636,7 +647,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     value={formData.name}
                     onChange={(e) => {
                       setFormData({ ...formData, name: e.target.value });
-                      setSelectedExistingContact(null);
+                      if (!contact) {
+                        setSelectedExistingContact(null);
+                      }
                     }}
                     onFocus={() => {
                       if (nameSuggestions.length > 0) setShowNameSuggestions(true);
@@ -645,8 +658,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                       // Delay to allow click on suggestion
                       setTimeout(() => setShowNameSuggestions(false), 150);
                     }}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${isCoreLocked ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500'}`}
-                  disabled={isCoreLocked}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${canEditProfileFields ? 'border-slate-300 focus:ring-blue-500' : 'bg-slate-50 border-slate-200'}`}
+                  disabled={!canEditProfileFields}
                     placeholder="Enter full name"
                     aria-autocomplete="list"
                     aria-expanded={showNameSuggestions}
@@ -738,6 +751,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     type="button"
                     onClick={() => setFormData({ ...formData, company: "Individual (No Company)" })}
                     className="text-xs text-slate-500 underline hover:text-blue-600"
+                    disabled={!canEditProfileFields}
                   >
                     Use "Individual (No Company)"
                   </button>
@@ -748,8 +762,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, company: e.target.value })
                   }
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${isCoreLocked ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500'}`}
-                  disabled={isCoreLocked}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${canEditProfileFields ? 'border-slate-300 focus:ring-blue-500' : 'bg-slate-50 border-slate-200'}`}
+                  disabled={!canEditProfileFields}
                   placeholder="Company name"
                 />
               </div>
@@ -927,7 +941,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     isDragOverHeadshots
                       ? "border-blue-500 bg-blue-50"
                       : "border-slate-300 hover:border-slate-400"
-                  } ${(isUploadingHeadshots || isCoreLocked) ? "opacity-50 pointer-events-none" : ""}`}
+                  } ${(isUploadingHeadshots || !canEditAssetUploads) ? "opacity-50 pointer-events-none" : ""}`}
                   onDragOver={(e) => handleDragOver(e, "headshot")}
                   onDragLeave={(e) => handleDragLeave(e, "headshot")}
                   onDrop={(e) => handleDrop(e, "headshot")}
@@ -939,7 +953,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     onChange={handleHeadshotSelect}
                     className="hidden"
                     id="headshot-upload"
-                    disabled={isUploadingHeadshots || isCoreLocked}
+                    disabled={isUploadingHeadshots || !canEditAssetUploads}
                     onClick={() => console.log("Headshot file input clicked")}
                   />
                   <label
@@ -984,7 +998,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                               onClick={() =>
                                 handleRemoveFile(index, "headshot")
                               }
-                              className={`bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors ${isCoreLocked ? 'opacity-50 pointer-events-none' : ''}`}
+                              className={`bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors ${!canEditAssetUploads ? 'opacity-50 pointer-events-none' : ''}`}
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -1016,7 +1030,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     isDragOverLogos
                       ? "border-blue-500 bg-blue-50"
                       : "border-slate-300 hover:border-slate-400"
-                  } ${(isUploadingLogos || isCoreLocked) ? "opacity-50 pointer-events-none" : ""}`}
+                  } ${(isUploadingLogos || !canEditAssetUploads) ? "opacity-50 pointer-events-none" : ""}`}
                   onDragOver={(e) => handleDragOver(e, "logo")}
                   onDragLeave={(e) => handleDragLeave(e, "logo")}
                   onDrop={(e) => handleDrop(e, "logo")}
@@ -1028,7 +1042,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     onChange={handleLogoSelect}
                     className="hidden"
                     id="logo-upload"
-                    disabled={isUploadingLogos || isCoreLocked}
+                    disabled={isUploadingLogos || !canEditAssetUploads}
                     onClick={() => console.log("Logo file input clicked")}
                   />
                   <label
@@ -1199,8 +1213,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   type="url"
                   value={formData.linkedinUrl}
                   onChange={(e) => handleLinkedInUrlChange(e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${linkedinUrlError ? 'border-red-300 focus:ring-red-500' : (isCoreLocked ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500')}`}
-                  disabled={isCoreLocked}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
+                    linkedinUrlError
+                      ? 'border-red-300 focus:ring-red-500'
+                      : (canEditLinkedInField ? 'border-slate-300 focus:ring-blue-500' : 'bg-slate-50 border-slate-200')
+                  }`}
+                  disabled={!canEditLinkedInField}
                   placeholder="https://linkedin.com/in/username"
                 />
                 {linkedinUrlError && (
@@ -1241,8 +1259,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   })
                 }
                 rows={3}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${isCoreLocked ? 'bg-slate-50 border-slate-200' : 'border-slate-300 focus:ring-blue-500'}`}
-                disabled={isCoreLocked}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${canEditNotesField ? 'border-slate-300 focus:ring-blue-500' : 'bg-slate-50 border-slate-200'}`}
+                disabled={!canEditNotesField}
                 placeholder="loves to surf, lives bi-coastal, training for a marathon"
               />
             </div>

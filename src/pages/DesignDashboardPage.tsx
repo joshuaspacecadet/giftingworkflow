@@ -460,6 +460,7 @@ const DesignDashboardPage: React.FC = () => {
         isLoading={isSavingContact}
         availableCreators={PREDEFINED_CONTACT_CREATORS}
         contact={selectedContact || undefined}
+        allowDesignFieldEditing
       />
     </div>
   );
