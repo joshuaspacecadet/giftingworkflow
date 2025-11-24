@@ -247,7 +247,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
   if (!current) {
     return createPortal(
-      hasBooted && (isStopped || total === 0)
+      isStopped
         ? renderCompletionOverlay()
         : (
           <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
