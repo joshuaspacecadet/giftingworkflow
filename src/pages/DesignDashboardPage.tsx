@@ -231,6 +231,9 @@ const DesignDashboardPage: React.FC = () => {
           <div className="min-w-0 flex-[2]">
             <div className="font-medium text-slate-100 truncate text-base">{c.name || 'Unnamed'}</div>
             {c.company && <div className="text-sm text-slate-400 truncate">{c.company}</div>}
+            <div className="text-[11px] uppercase tracking-wide text-slate-500 mt-1">
+              {c.contactAddedBy ? `${c.contactAddedBy}'s contact` : 'Contact owner unknown'}
+            </div>
             
             <div className="mt-1">
               {c.linkedinUrl && (
@@ -397,6 +400,9 @@ const DesignDashboardPage: React.FC = () => {
                       <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0">
                           <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
+                          <div className="text-[11px] uppercase tracking-wide text-slate-500 mt-1">
+                            {c.contactAddedBy ? `${c.contactAddedBy}'s contact` : 'Contact owner unknown'}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <button
