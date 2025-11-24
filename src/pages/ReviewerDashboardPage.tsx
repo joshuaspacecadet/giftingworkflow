@@ -427,7 +427,9 @@ const ReviewerDashboardPage: React.FC = () => {
               <div className="text-sm">Ready to tackle all {quickActionsCount} actions?</div>
             </div>
         <button
+          disabled={quickActionsCount === 0}
           onClick={async () => {
+            if (quickActionsCount === 0) return;
             // Start Beast Mode preloader
             setIsBeastPreloading(true);
             setBeastPreloadProgress(0);
@@ -500,7 +502,7 @@ const ReviewerDashboardPage: React.FC = () => {
             };
             const timer = window.setInterval(tick, 1000);
           }}
-          className="text-xs bg-[#FF5C00] text-black font-semibold rounded-md px-3 py-1.5"
+          className={`text-xs font-semibold rounded-md px-3 py-1.5 ${quickActionsCount === 0 ? 'bg-[#27282B] text-slate-500 cursor-not-allowed' : 'bg-[#FF5C00] text-black'}`}
         >
           Enter beast mode →
         </button>
