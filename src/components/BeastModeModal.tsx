@@ -211,21 +211,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
   if (!isOpen) return null;
 
-  const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
-  const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${current.confirmAddressUrl || ''}\n\nExcited for you to receive!\n\n- ${creator}`;
-  const mailto = `mailto:${current.email || ''}?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
-
-  const goNext = () => {
-    if (index < total - 1) {
-      setIndex(index + 1);
-    } else {
-      handleFinish();
-    }
-  };
-  const goPrev = () => {
-    if (index > 0) setIndex(index - 1);
-  };
-
+  // Define completion overlay early so it can be used in the loading guard
   const renderCompletionOverlay = () => (
     <div className="fixed inset-0 z-[3002] bg-black/90 flex items-center justify-center" onClick={(e)=>e.stopPropagation()}>
       <div className="text-center px-6">
@@ -262,6 +248,21 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       </div>
     );
   }
+
+  const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
+  const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${current.confirmAddressUrl || ''}\n\nExcited for you to receive!\n\n- ${creator}`;
+  const mailto = `mailto:${current.email || ''}?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
+
+  const goNext = () => {
+    if (index < total - 1) {
+      setIndex(index + 1);
+    } else {
+      handleFinish();
+    }
+  };
+  const goPrev = () => {
+    if (index > 0) setIndex(index - 1);
+  };
 
   const shuffleRemaining = () => {
     setQueue(prev => {
