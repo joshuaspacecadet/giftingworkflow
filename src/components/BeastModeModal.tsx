@@ -197,20 +197,6 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   }, [current, currentType]);
 
   if (!isOpen) return null;
-  if (!current) {
-    return createPortal(
-      <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6" onClick={(e)=>e.stopPropagation()}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">{titleText}</h3>
-            <button className="text-slate-500" onClick={onClose}>×</button>
-          </div>
-          <div className="text-sm text-slate-600">Nothing to review.</div>
-        </div>
-      </div>,
-      document.body
-    );
-  }
 
   const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
   const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${current.confirmAddressUrl || ''}\n\nExcited for you to receive!\n\n- ${creator}`;
@@ -226,6 +212,41 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const goPrev = () => {
     if (index > 0) setIndex(index - 1);
   };
+
+  const renderCompletionOverlay = () => (
+    <div className="fixed inset-0 z-[3002] bg-black/90 flex items-center justify-center" onClick={(e)=>e.stopPropagation()}>
+      <div className="text-center px-6">
+        <div className="text-3xl md:text-4xl font-semibold text-slate-100 mb-2">You beast.</div>
+        <div className="text-xl md:text-2xl text-[#FF5C00]">You completed in {formatHuman(stoppedElapsedMs || elapsedMs)}.</div>
+        <div className="mt-6">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#FF5C00] px-4 py-2 text-black font-semibold"
+            title="Close"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!current) {
+    return createPortal(
+      isStopped ? renderCompletionOverlay() : (
+        <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold">Beast Mode</h3>
+              <button className="text-slate-500" onClick={onClose}>×</button>
+            </div>
+            <div className="text-sm text-slate-600">Nothing to review.</div>
+          </div>
+        </div>
+      ),
+      document.body
+    );
+  }
 
   const shuffleRemaining = () => {
     setQueue(prev => {
@@ -683,23 +704,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
         </div>
       </div>
       {/* Completion overlay */}
-      {isStopped && (
-        <div className="fixed inset-0 z-[3002] bg-black/90 flex items-center justify-center" onClick={(e)=>e.stopPropagation()}>
-          <div className="text-center px-6">
-            <div className="text-3xl md:text-4xl font-semibold text-slate-100 mb-2">You beast.</div>
-            <div className="text-xl md:text-2xl text-[#FF5C00]">You completed in {formatHuman(stoppedElapsedMs)}.</div>
-            <div className="mt-6">
-              <button
-                onClick={onClose}
-                className="inline-flex items-center gap-2 rounded-full border border-[#27282B] bg-[#FF5C00] px-4 py-2 text-black font-semibold"
-                title="Close"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {isStopped && renderCompletionOverlay()}
     </div>
   );
   return createPortal(modal, document.body);

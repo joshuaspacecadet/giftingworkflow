@@ -539,9 +539,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
     if (existingContactId) {
       (contactData as any).id = existingContactId;
       if (!contact) {
-        // Clear any prior review status so it doesn't carry into this project
-        (contactData as any).contactReview = null;
-        (contactData as any).contactReviewFeedback = "";
+      // Clear any prior review status so it doesn't carry into this project
+      (contactData as any).contactReview = null;
+      (contactData as any).contactReviewFeedback = "";
       }
     }
 
@@ -582,7 +582,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     } else {
       (contactData as any).specificStage = 'Fulfillment';
     }
-    
+
     // Save/update contact with all data including files
     console.log("Submitting contactData:", contactData);
     await onSave(contactData as Partial<Contact>);
@@ -615,9 +615,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
             <div className="h-7 w-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
               <UserPlus className="h-4 w-4 text-slate-600" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              {contact ? "Edit Contact" : "Add New Contact"}
-            </h2>
+          <h2 className="text-lg font-semibold text-slate-900">
+            {contact ? "Edit Contact" : "Add New Contact"}
+          </h2>
           </div>
           <button
             onClick={onClose}
@@ -640,7 +640,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   Full Name *
                 </label>
                 <div className="relative">
-                <input
+                  <input
                     ref={nameInputRef}
                     type="text"
                     required
@@ -648,7 +648,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     onChange={(e) => {
                       setFormData({ ...formData, name: e.target.value });
                       if (!contact) {
-                        setSelectedExistingContact(null);
+                      setSelectedExistingContact(null);
                       }
                     }}
                     onFocus={() => {
@@ -808,21 +808,21 @@ const ContactModal: React.FC<ContactModalProps> = ({
                     {lockedCreator}
                   </div>
                 ) : (
-                  <select
-                    value={formData.contactAddedBy}
-                    onChange={(e) =>
-                      setFormData({ ...formData, contactAddedBy: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={isLoading}
-                  >
-                    <option value="">Please Select</option>
-                    {availableCreators.map((creator) => (
-                      <option key={creator} value={creator}>
-                        {creator}
-                      </option>
-                    ))}
-                  </select>
+                <select
+                  value={formData.contactAddedBy}
+                  onChange={(e) =>
+                    setFormData({ ...formData, contactAddedBy: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading}
+                >
+                  <option value="">Please Select</option>
+                  {availableCreators.map((creator) => (
+                    <option key={creator} value={creator}>
+                      {creator}
+                    </option>
+                  ))}
+                </select>
                 )}
               </div>
             </div>
