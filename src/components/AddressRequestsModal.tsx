@@ -56,10 +56,12 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
 
   const design = useMemo(() => {
     if (!current) return null;
-    // Hide design if not set to receive Magic Cards
+    const stage = (current.specificStage || '') as string;
+    const shouldHideDesignPreview = stage === 'In design' || stage === 'Design rejected';
+    // Hide design if not set to receive Magic Cards or if still being worked on
     const items = (current as any).draftOrderItems as string[] | undefined;
     const hasMagicCards = Array.isArray(items) && items.includes('Magic Cards');
-    if (!hasMagicCards) return null;
+    if (!hasMagicCards || shouldHideDesignPreview) return null;
     const files = current.designFiles || [];
     return files[0] || null;
   }, [current]);

@@ -354,7 +354,9 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       );
     }
     if (currentType === 'address') {
-      const file = (current.designFiles || [])[0];
+      const stage = current.specificStage as SpecificStage | undefined;
+      const shouldHideDesignPreview = stage === 'In design' || stage === 'Design rejected';
+      const file = shouldHideDesignPreview ? null : (current.designFiles || [])[0];
       const isImage = file && file.type?.startsWith('image/');
       return (
         <div>
