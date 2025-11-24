@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Contact, SpecificStage } from '../types';
 import { AirtableService } from '../services/airtable';
@@ -98,6 +98,11 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const [elapsedMs, setElapsedMs] = useState(0);
   const [isStopped, setIsStopped] = useState(false);
   const [stoppedElapsedMs, setStoppedElapsedMs] = useState(0);
+  const handleFinish = useCallback(() => {
+    if (isStopped) return;
+    setStoppedElapsedMs(elapsedMs);
+    setIsStopped(true);
+  }, [elapsedMs, isStopped]);
   useEffect(() => {
     const id = window.setInterval(() => setElapsedMs(Date.now() - startTs), 50);
     return () => window.clearInterval(id);
@@ -212,8 +217,11 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const mailto = `mailto:${current.email || ''}?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
 
   const goNext = () => {
-    if (index < total - 1) setIndex(index + 1);
-    else onClose();
+    if (index < total - 1) {
+      setIndex(index + 1);
+    } else {
+      handleFinish();
+    }
   };
   const goPrev = () => {
     if (index > 0) setIndex(index - 1);
@@ -656,7 +664,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
           {/* Stop (end) button styled like player control */}
           <button
             type="button"
-            onClick={() => { setStoppedElapsedMs(elapsedMs); setIsStopped(true); }}
+            onClick={handleFinish}
             className="inline-flex items-center justify-center rounded-full border border-[#27282B] bg-[#FF5C00] w-8 h-8 text-black"
             title="Stop"
           >
