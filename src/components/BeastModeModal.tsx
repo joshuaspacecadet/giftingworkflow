@@ -55,6 +55,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
   // Maintain a mutable queue to support shuffling
   const [queue, setQueue] = useState<Array<{ type: BeastItemType; contact: Contact }>>([]);
+  const [hasBooted, setHasBooted] = useState(false);
   const [index, setIndex] = useState(0);
   const current = queue[index]?.contact;
   const currentType = queue[index]?.type;
@@ -63,10 +64,17 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
   // Initialize queue when opened or lists change
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setQueue([]);
+      setIndex(0);
+      setHasBooted(false);
+      return;
+    }
     setQueue(items);
     setIndex(0);
+    setHasBooted(true);
   }, [isOpen, items]);
+
 
   // Local state for Review Recipient step
   const [hasApprovedReview, setHasApprovedReview] = useState(false);
@@ -103,6 +111,12 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
     setStoppedElapsedMs(elapsedMs);
     setIsStopped(true);
   }, [elapsedMs, isStopped]);
+
+  useEffect(() => {
+    if (isOpen && hasBooted && total === 0) {
+      handleFinish();
+    }
+  }, [isOpen, hasBooted, total, handleFinish]);
   useEffect(() => {
     const id = window.setInterval(() => setElapsedMs(Date.now() - startTs), 50);
     return () => window.clearInterval(id);
@@ -233,17 +247,16 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
 
   if (!current) {
     return createPortal(
-      isStopped ? renderCompletionOverlay() : (
-        <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6" onClick={(e)=>e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold">Beast Mode</h3>
-              <button className="text-slate-500" onClick={onClose}>×</button>
+      hasBooted && (isStopped || total === 0)
+        ? renderCompletionOverlay()
+        : (
+          <div className="fixed inset-0 bg-black z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+            <div className="flex flex-col items-center gap-3 text-slate-200" onClick={(e)=>e.stopPropagation()}>
+              <Loader2 className="h-6 w-6 animate-spin text-[#FF5C00]" />
+              <div className="text-sm">Loading Beast Mode…</div>
             </div>
-            <div className="text-sm text-slate-600">Nothing to review.</div>
           </div>
-        </div>
-      ),
+        ),
       document.body
     );
   }
