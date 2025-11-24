@@ -24,6 +24,7 @@ const IN_DESIGN_STAGES: SpecificStage[] = [
   'Drafting copy',
   'In design',
   'Design review',
+  'Design rejected',
 ];
 
 const normalizeCreator = (raw?: string): string => {
