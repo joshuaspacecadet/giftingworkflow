@@ -291,7 +291,7 @@ const ReviewerDashboardPage: React.FC = () => {
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{creator}’s Gifting Dashboard</h1>
-          <p className="text-sm text-slate-400">Get these gifts out the door and make someone smile.</p>
+          <p className="text-sm text-slate-400">Make someone smile :)</p>
         </div>
         <img src="/spacecadet-logo.png" alt="SPACECADET" className="h-5 opacity-90" />
       </div>
@@ -355,7 +355,7 @@ const ReviewerDashboardPage: React.FC = () => {
                   <MapPin className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div className="text-sm text-white">
-                  <span className="font-semibold">{designApprovedMissingAddress.length}</span> gifts are set to ship, but have no address.
+                  <span className="font-semibold">{designApprovedMissingAddress.length}</span> gifts are set to ship, but missing address.
                 </div>
               </div>
               <ul className="text-xs text-slate-300 space-y-1.5 mt-2 flex-1">
