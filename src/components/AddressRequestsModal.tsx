@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Contact } from '../types';
 import PdfThumbnail from './PdfThumbnail';
 import { AirtableService } from '../services/airtable';
-import { X, ChevronLeft, ChevronRight, Copy, ExternalLink, Link2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Copy, ExternalLink, Link2, Loader2 } from 'lucide-react';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
