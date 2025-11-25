@@ -291,7 +291,7 @@ const ReviewerDashboardPage: React.FC = () => {
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{creator}’s Gifting Dashboard</h1>
-          <p className="text-sm text-slate-400">Make someone smile :)</p>
+          <p className="text-sm text-slate-400">Make someone smile with a Spacecadet gift.</p>
         </div>
         <img src="/spacecadet-logo.png" alt="SPACECADET" className="h-5 opacity-90" />
       </div>
