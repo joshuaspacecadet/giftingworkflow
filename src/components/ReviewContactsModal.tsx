@@ -396,7 +396,7 @@ Excited for you to receive!
                   ? 'Save Items'
                   : (isDirty ? 'Save Items' : 'Saved'));
             return (
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex justify-start">
                 <button
                   disabled={disabled}
                   onClick={saveItems}
