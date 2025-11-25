@@ -373,6 +373,20 @@ const DesignDashboardPage: React.FC = () => {
             <FileText className="h-5 w-5 text-orange-400" />
             <h1 className="text-lg font-semibold">Design Dashboard</h1>
           </div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span className="font-medium text-slate-200">{approvedRecipients.length}</span>
+              <span>Approved</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span className="font-medium text-slate-200">{inDesignNoFile.length}</span>
+              <span>Pending Design</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span className="font-medium text-rose-300">{designRejected.length}</span>
+              <span>Rejected</span>
+            </div>
+          </div>
         </div>
       </header>
 
