@@ -321,7 +321,7 @@ const DesignDashboardPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-xs text-slate-400 space-y-2">
-                  <div className="font-medium text-slate-200">Drag & drop the design file here</div>
+                  <div className="font-medium text-slate-200">Drag & drop the final print-ready file here</div>
                   <div>or click to browse</div>
                   <div className="text-slate-500">PDF or image files supported</div>
                 </div>
