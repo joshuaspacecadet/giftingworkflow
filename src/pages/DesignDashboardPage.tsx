@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download, Trash2, RefreshCw } from 'lucide-react';
+import { Upload, Loader2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download, Trash2, RefreshCw, X } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
@@ -108,6 +108,8 @@ const DesignDashboardPage: React.FC = () => {
   const [isDownloadingById, setIsDownloadingById] = useState<Record<string, boolean>>({});
   const [isDeletingById, setIsDeletingById] = useState<Record<string, boolean>>({});
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [previewDesignUrl, setPreviewDesignUrl] = useState<string | null>(null);
+  const [previewDesignType, setPreviewDesignType] = useState<'pdf' | 'image' | null>(null);
 
   const handleDownloadAssets = async (contact: Contact) => {
     setIsDownloadingById(prev => ({ ...prev, [contact.id]: true }));
@@ -310,7 +312,16 @@ const DesignDashboardPage: React.FC = () => {
                     )}
                   </div>
                   <div className="text-[11px] text-slate-400 flex items-center gap-3">
-                    <span className="underline hover:text-slate-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); window.open(designUrl, '_blank', 'noopener'); }}>Open full design</span>
+                    <span 
+                      className="underline hover:text-slate-300 cursor-pointer" 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setPreviewDesignUrl(designUrl);
+                        setPreviewDesignType(isPdfDesign ? 'pdf' : 'image');
+                      }}
+                    >
+                      Open full design
+                    </span>
                     <button
                       className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
                       onClick={(e) => {
@@ -505,6 +516,34 @@ const DesignDashboardPage: React.FC = () => {
         contact={selectedContact || undefined}
         allowDesignFieldEditing
       />
+      
+      {/* Full Page Design Preview Modal */}
+      {previewDesignUrl && (
+        <div className="fixed inset-0 z-[2000] bg-black/90 flex items-center justify-center p-4" onClick={() => setPreviewDesignUrl(null)}>
+          <div className="relative w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            <button 
+              className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 z-10"
+              onClick={() => setPreviewDesignUrl(null)}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {previewDesignType === 'pdf' ? (
+              <iframe 
+                src={previewDesignUrl} 
+                className="w-full h-full rounded-lg bg-white"
+                title="Design Preview"
+              />
+            ) : (
+              <img 
+                src={previewDesignUrl} 
+                alt="Design Preview" 
+                className="max-w-full max-h-full object-contain rounded-lg"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
