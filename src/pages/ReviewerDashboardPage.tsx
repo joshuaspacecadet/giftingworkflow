@@ -589,7 +589,7 @@ const ReviewerDashboardPage: React.FC = () => {
                       {(c.specificStage === 'Design review') && (
                         <button
                           type="button"
-                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-[#FF5C00]/30 bg-[#FF5C00]/20 text-[#FF5C00] hover:underline"
                           onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
                           title="Open design review"
                         >
@@ -674,7 +674,7 @@ const ReviewerDashboardPage: React.FC = () => {
                       {(c.specificStage === 'Design review') && (
                         <button
                           type="button"
-                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-[#FF5C00]/30 bg-[#FF5C00]/20 text-[#FF5C00] hover:underline"
                           onClick={() => { setDesignReviewContacts([c]); setIsDesignReviewOpen(true); }}
                           title="Open design review"
                         >
