@@ -584,7 +584,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         </button>
                       )}
                       {(c.specificStage === 'Design rejected') && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Design rejected</span>
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Pending new design</span>
                       )}
                       {(c.specificStage === 'Design review') && (
                         <button
@@ -669,7 +669,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         </button>
                       )}
                       {(c.specificStage === 'Design rejected') && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Design rejected</span>
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Pending new design</span>
                       )}
                       {(c.specificStage === 'Design review') && (
                         <button
