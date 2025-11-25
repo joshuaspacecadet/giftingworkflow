@@ -139,7 +139,9 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
       let done = 0;
       for (const f of files) {
         if (cancelled) break;
-        const isPdf = (f.type && /pdf/i.test(f.type)) || /\.pdf(\?|$)/i.test(f.filename || f.url);
+        const isPdf = (f.type && f.type.toLowerCase().includes('pdf')) || 
+                      (f.filename && f.filename.toLowerCase().endsWith('.pdf')) || 
+                      (f.url && (f.url.toLowerCase().includes('.pdf') || /\.pdf(\?|$)/i.test(f.url)));
         if (isPdf) {
           await preloadPdf(f.url);
         } else {
@@ -271,8 +273,12 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
     }
   };
 
-  const isPdf = !!(design && ((design.type && /pdf/i.test(design.type)) || /\.pdf(\?|$)/i.test(design.filename || design.url)));
-  const isImage = !isPdf; // Default to image if not PDF (handles random URLs)
+  const isPdf = !!(design && (
+    (design.type && design.type.toLowerCase().includes('pdf')) || 
+    (design.filename && design.filename.toLowerCase().endsWith('.pdf')) || 
+    (design.url && (design.url.toLowerCase().includes('.pdf') || /\.pdf(\?|$)/i.test(design.url)))
+  ));
+  const isImage = !isPdf;
 
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>

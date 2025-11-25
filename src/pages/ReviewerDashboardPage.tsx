@@ -315,8 +315,10 @@ const ReviewerDashboardPage: React.FC = () => {
               {designPreviewAttachments.length > 0 && (
                 <div className="mt-3 flex items-center gap-2">
                   {designPreviewAttachments.map((a, idx) => {
-                    const isPdf = !!(a.type && /pdf/i.test(a.type)) || /\.pdf(\?|$)/i.test(a.filename || a.url || '');
-                    const isImage = !isPdf; // Default to image if not PDF (handles random URLs)
+                    const isPdf = (a.type && a.type.toLowerCase().includes('pdf')) || 
+                                  (a.filename && a.filename.toLowerCase().endsWith('.pdf')) || 
+                                  (a.url && (a.url.toLowerCase().includes('.pdf') || /\.pdf(\?|$)/i.test(a.url)));
+                    const isImage = !isPdf;
                     return isImage ? (
                       <img
                         key={a.id || `${a.url}-${idx}`}
@@ -330,6 +332,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         url={a.url}
                         alt={a.filename || `Design ${idx + 1}`}
                         className="h-[100px] w-[70px] shadow-sm"
+                        heightPx={100}
                       />
                     );
                   })}
@@ -455,7 +458,9 @@ const ReviewerDashboardPage: React.FC = () => {
               const height = 540;
               let done = 0;
               for (const f of files) {
-                const isPdf = (f.type && /pdf/i.test(f.type)) || /\.pdf(\?|$)/i.test(f.filename || f.url);
+                const isPdf = (f.type && f.type.toLowerCase().includes('pdf')) || 
+                              (f.filename && f.filename.toLowerCase().endsWith('.pdf')) || 
+                              (f.url && (f.url.toLowerCase().includes('.pdf') || /\.pdf(\?|$)/i.test(f.url)));
                 if (isPdf) {
                   try {
                     const key = `${f.url}|${height}`;

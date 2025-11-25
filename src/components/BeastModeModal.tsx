@@ -372,7 +372,9 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const renderLeft = () => {
     if (currentType === 'design') {
       const file = (current.designFiles || [])[0];
-      const isPdf = file && ((file.type && /pdf/i.test(file.type)) || /\.pdf(\?|$)/i.test(file.filename || file.url || ''));
+      const isPdf = file && ((file.type && file.type.toLowerCase().includes('pdf')) || 
+                             (file.filename && file.filename.toLowerCase().endsWith('.pdf')) || 
+                             (file.url && (file.url.toLowerCase().includes('.pdf') || /\.pdf(\?|$)/i.test(file.url))));
       const isImage = !isPdf;
       return (
         <div>
@@ -403,7 +405,9 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       const stage = current.specificStage as SpecificStage | undefined;
       const shouldHideDesignPreview = stage === 'In design' || stage === 'Design rejected';
       const file = shouldHideDesignPreview ? null : (current.designFiles || [])[0];
-      const isPdf = file && ((file.type && /pdf/i.test(file.type)) || /\.pdf(\?|$)/i.test(file.filename || file.url || ''));
+      const isPdf = file && ((file.type && file.type.toLowerCase().includes('pdf')) || 
+                             (file.filename && file.filename.toLowerCase().endsWith('.pdf')) || 
+                             (file.url && (file.url.toLowerCase().includes('.pdf') || /\.pdf(\?|$)/i.test(file.url))));
       const isImage = !isPdf;
       return (
         <div>
