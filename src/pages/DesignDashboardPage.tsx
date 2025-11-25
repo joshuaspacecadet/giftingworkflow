@@ -365,8 +365,8 @@ const DesignDashboardPage: React.FC = () => {
               </button>
               <button
                 onClick={() => handleReadyForReview(c.id)}
-                disabled={uploading}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
+                disabled={uploading || !designUrl}
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm disabled:opacity-50 ${!designUrl ? 'border-slate-700 bg-slate-800 text-slate-500' : 'border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20'}`}
               >
                 <ThumbsUp className="h-4 w-4" />
                 <span>Ready for Review</span>
