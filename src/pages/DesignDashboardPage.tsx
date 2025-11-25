@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload, Loader2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download, Trash2 } from 'lucide-react';
+import { Upload, Loader2, AlertTriangle, FileText, User, ThumbsUp, Linkedin, Info, Download, Trash2, RefreshCw } from 'lucide-react';
 import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
@@ -304,10 +304,22 @@ const DesignDashboardPage: React.FC = () => {
                       <img src={designUrl} alt={designFilename} className="max-h-40 rounded-md object-contain" />
                     )}
                   </div>
-                  <div className="text-[11px] text-slate-400 flex items-center gap-2">
-                    <span className="underline" onClick={(e) => { e.stopPropagation(); window.open(designUrl, '_blank', 'noopener'); }}>Open full design</span>
+                  <div className="text-[11px] text-slate-400 flex items-center gap-3">
+                    <span className="underline hover:text-slate-300 cursor-pointer" onClick={(e) => { e.stopPropagation(); window.open(designUrl, '_blank', 'noopener'); }}>Open full design</span>
                     <button
-                      className="text-rose-300 flex items-center gap-1"
+                      className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const input = document.getElementById(`design-upload-${c.id}`) as HTMLInputElement | null;
+                        input?.click();
+                      }}
+                      disabled={isDeletingById[c.id]}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Replace
+                    </button>
+                    <button
+                      className="text-rose-300 hover:text-rose-200 flex items-center gap-1"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteDesignFile(c.id);
