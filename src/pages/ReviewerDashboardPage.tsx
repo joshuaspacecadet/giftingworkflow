@@ -576,7 +576,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                       )}
                       {isAddressMissing(c) && (
-                        <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300" title="Address needed">Missing address</span>
                       )}
                       {(c.specificStage === 'Design rejected') && (
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Design rejected</span>
@@ -661,7 +661,7 @@ const ReviewerDashboardPage: React.FC = () => {
                         <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                       )}
                       {isAddressMissing(c) && (
-                        <AlertTriangle className="ml-1 h-3 w-3 text-amber-400" title="Address needed" />
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300" title="Address needed">Missing address</span>
                       )}
                       {(c.specificStage === 'Design rejected') && (
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Design rejected</span>
