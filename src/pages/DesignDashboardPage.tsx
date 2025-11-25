@@ -401,19 +401,28 @@ const DesignDashboardPage: React.FC = () => {
             <FileText className="h-5 w-5 text-orange-400" />
             <h1 className="text-lg font-semibold">Design Dashboard</h1>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-sm text-slate-400">
+            <div className="flex items-center gap-6">
+            <button 
+              onClick={() => document.getElementById('section-approved')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+            >
               <span className="font-medium text-slate-200">{approvedRecipients.length}</span>
               <span>Approved</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
+            </button>
+            <button 
+              onClick={() => document.getElementById('section-pending')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+            >
               <span className="font-medium text-slate-200">{inDesignNoFile.length}</span>
               <span>Pending Design</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
+            </button>
+            <button 
+              onClick={() => document.getElementById('section-rejected')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+            >
               <span className="font-medium text-rose-300">{designRejected.length}</span>
               <span>Rejected</span>
-            </div>
+            </button>
           </div>
         </div>
       </header>
@@ -428,7 +437,7 @@ const DesignDashboardPage: React.FC = () => {
           <div className="text-rose-400">{error}</div>
         ) : (
           <>
-            <section>
+            <section id="section-approved" className="scroll-mt-20">
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-100">Add Assets for New Approved Recipients</h2>
                 <span className="text-sm text-slate-400 font-medium">{approvedRecipients.length}</span>
@@ -472,7 +481,7 @@ const DesignDashboardPage: React.FC = () => {
               </div>
             </section>
 
-            <section>
+            <section id="section-pending" className="scroll-mt-20">
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-100">Start New Designs</h2>
                 <span className="text-sm text-slate-400 font-medium">{inDesignNoFile.length}</span>
@@ -488,7 +497,7 @@ const DesignDashboardPage: React.FC = () => {
               </div>
             </section>
 
-            <section>
+            <section id="section-rejected" className="scroll-mt-20">
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-100">Revise Rejected Designs</h2>
                 <span className="text-sm text-slate-400 font-medium">{designRejected.length}</span>
