@@ -422,41 +422,43 @@ const DesignDashboardPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-slate-100">Add Assets for New Approved Recipients</h2>
                 <span className="text-sm text-slate-400 font-medium">{approvedRecipients.length}</span>
               </div>
-              {approvedRecipients.length === 0 ? (
-                <div className="text-sm text-slate-400">No approved recipients pending assets.</div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {approvedRecipients.map(c => (
-                    <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
-                          <div className="text-[11px] uppercase tracking-wide text-slate-500 mt-1">
-                            {c.contactAddedBy ? `${c.contactAddedBy}'s contact` : 'Contact owner unknown'}
+              <div className="pl-4">
+                {approvedRecipients.length === 0 ? (
+                  <div className="text-sm text-slate-400">No approved recipients pending assets.</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {approvedRecipients.map(c => (
+                      <div key={c.id} className="border border-slate-700/60 rounded-lg p-4 bg-[#121214]">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="min-w-0">
+                            <div className="font-medium text-slate-100 truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</div>
+                            <div className="text-[11px] uppercase tracking-wide text-slate-500 mt-1">
+                              {c.contactAddedBy ? `${c.contactAddedBy}'s contact` : 'Contact owner unknown'}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() => { setSelectedContact(c); setIsContactModalOpen(true); }}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-600 text-slate-100 hover:bg-slate-800 text-sm"
+                            >
+                              <User className="h-4 w-4" />
+                              <span>Add Assets</span>
+                            </button>
+                            <button
+                              onClick={() => handleReadyForDesign(c.id)}
+                              disabled={!!uploadingById[c.id]}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
+                            >
+                              {uploadingById[c.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
+                              <span>Ready for Design</span>
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => { setSelectedContact(c); setIsContactModalOpen(true); }}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-600 text-slate-100 hover:bg-slate-800 text-sm"
-                          >
-                            <User className="h-4 w-4" />
-                            <span>Add Assets</span>
-                          </button>
-                          <button
-                            onClick={() => handleReadyForDesign(c.id)}
-                            disabled={!!uploadingById[c.id]}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
-                          >
-                            {uploadingById[c.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
-                            <span>Ready for Design</span>
-                          </button>
-                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </section>
 
             <section>
@@ -464,13 +466,15 @@ const DesignDashboardPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-slate-100">Start New Designs</h2>
                 <span className="text-sm text-slate-400 font-medium">{inDesignNoFile.length}</span>
               </div>
-              {inDesignNoFile.length === 0 ? (
-                <div className="text-sm text-slate-400">Nothing to start.</div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {inDesignNoFile.map(c => renderUploadCard(c))}
-                </div>
-              )}
+              <div className="pl-4">
+                {inDesignNoFile.length === 0 ? (
+                  <div className="text-sm text-slate-400">Nothing to start.</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {inDesignNoFile.map(c => renderUploadCard(c))}
+                  </div>
+                )}
+              </div>
             </section>
 
             <section>
@@ -478,13 +482,15 @@ const DesignDashboardPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-slate-100">Revise Rejected Designs</h2>
                 <span className="text-sm text-slate-400 font-medium">{designRejected.length}</span>
               </div>
-              {designRejected.length === 0 ? (
-                <div className="text-sm text-slate-400">No rejected designs pending.</div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {designRejected.map(c => renderUploadCard(c, { showFeedback: true }))}
-                </div>
-              )}
+              <div className="pl-4">
+                {designRejected.length === 0 ? (
+                  <div className="text-sm text-slate-400">No rejected designs pending.</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {designRejected.map(c => renderUploadCard(c, { showFeedback: true }))}
+                  </div>
+                )}
+              </div>
             </section>
           </>
         )}
