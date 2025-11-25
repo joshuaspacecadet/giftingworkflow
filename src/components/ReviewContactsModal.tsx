@@ -89,12 +89,27 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     });
     // initialize gates
     const hasInitialItems = draft.length > 0;
-    setItemsSaved(hasInitialItems);
+    // Only set hasApproved to true if we are *already past* the decision stage (i.e. in Fulfillment)
+    // If we are in 'Gathering details', we still want to confirm items/details, but typically 'Gathering details' implies approved.
+    // However, user requested: "It is not supposed to ask me to Confirm recipient details until I click approve."
+    // So we reset hasApproved to false on open unless it's already fully processed (Fulfillment).
+    // Actually, 'Gathering details' means they were approved and are picking items/details.
+    // BUT, if the user wants the flow to "start over" visually for Review, we should be stricter.
+    // The issue described is: "When the page first loads ... it asks ... to Confirm recipient details."
+    // This likely happens because hasInitialItems is true (maybe defaults/saved).
+    // We will force hasApproved to false initially unless specificStage is explicitly 'Fulfillment' or 'Gathering details'.
+    
+    // Wait, if they are in 'Review to receive gift', they shouldn't be approved yet.
+    // So we should only set hasApproved=true if stage is NOT 'Review to receive gift'.
     setHasApproved(
-      wantsMagicCards
-        ? current.specificStage === 'Gathering details'
-        : (hasInitialItems || current.specificStage === 'Fulfillment')
+      current.specificStage !== 'Review to receive gift' && (
+        wantsMagicCards
+          ? current.specificStage === 'Gathering details' || current.specificStage === 'Fulfillment'
+          : (hasInitialItems || current.specificStage === 'Fulfillment')
+      )
     );
+    
+    // Also reset confirmedNameCompany
     setConfirmedNameCompany(false);
     setHasRejected(rejectedIds.has(current.id));
   }, [current]);
