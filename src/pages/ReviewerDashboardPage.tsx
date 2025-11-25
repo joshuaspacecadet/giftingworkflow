@@ -564,19 +564,19 @@ const ReviewerDashboardPage: React.FC = () => {
                         </div>
                       )}
                       {isAddressMissing(c) ? (
-                        <button
-                          type="button"
-                          className="truncate hover:underline text-left"
-                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
-                          title="Address needed"
-                        >
-                          {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
-                        </button>
+                        <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                       ) : (
                         <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                       )}
                       {isAddressMissing(c) && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300" title="Address needed">Missing address</span>
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          title="Address needed"
+                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
+                        >
+                          Missing address
+                        </button>
                       )}
                       {(c.specificStage === 'Design rejected') && (
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Design rejected</span>
@@ -649,19 +649,19 @@ const ReviewerDashboardPage: React.FC = () => {
                         </div>
                       )}
                       {isAddressMissing(c) ? (
-                        <button
-                          type="button"
-                          className="truncate hover:underline text-left"
-                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
-                          title="Address needed"
-                        >
-                          {c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}
-                        </button>
+                        <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                       ) : (
                         <span className="truncate">{c.name || 'Unnamed'}{c.company ? `, ${c.company}` : ''}</span>
                       )}
                       {isAddressMissing(c) && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300" title="Address needed">Missing address</span>
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-amber-600/30 bg-amber-600/20 text-amber-300 hover:underline"
+                          title="Address needed"
+                          onClick={() => { setAddressModalContacts([c]); setIsAddressRequestsOpen(true); }}
+                        >
+                          Missing address
+                        </button>
                       )}
                       {(c.specificStage === 'Design rejected') && (
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border border-rose-600/30 bg-rose-600/20 text-rose-300">Design rejected</span>
