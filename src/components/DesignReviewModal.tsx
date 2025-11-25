@@ -272,7 +272,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   };
 
   const isPdf = !!(design && ((design.type && /pdf/i.test(design.type)) || /\.pdf(\?|$)/i.test(design.filename || design.url)));
-  const isImage = !!(design && ((design.type && design.type.startsWith('image/')) || /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(design.filename || design.url)));
+  const isImage = !isPdf; // Default to image if not PDF (handles random URLs)
 
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>

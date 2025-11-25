@@ -306,7 +306,8 @@ const ReviewerDashboardPage: React.FC = () => {
               {designPreviewAttachments.length > 0 && (
                 <div className="mt-3 flex items-center gap-2">
                   {designPreviewAttachments.map((a, idx) => {
-                    const isImage = (a.type || '').startsWith('image/');
+                    const isPdf = !!(a.type && /pdf/i.test(a.type)) || /\.pdf(\?|$)/i.test(a.filename || a.url || '');
+                    const isImage = !isPdf; // Default to image if not PDF (handles random URLs)
                     return isImage ? (
                       <img
                         key={a.id || `${a.url}-${idx}`}
