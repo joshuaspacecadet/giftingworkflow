@@ -387,9 +387,9 @@ const DesignDashboardPage: React.FC = () => {
         ) : (
           <>
             <section>
-              <div className="flex items-baseline justify-between mb-3">
-                <h2 className="text-base font-semibold text-slate-100">Add Assets for New Approved Recipients</h2>
-                <span className="text-sm text-slate-400">{approvedRecipients.length}</span>
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-100">Add Assets for New Approved Recipients</h2>
+                <span className="text-sm text-slate-400 font-medium">{approvedRecipients.length}</span>
               </div>
               {approvedRecipients.length === 0 ? (
                 <div className="text-sm text-slate-400">No approved recipients pending assets.</div>
@@ -429,9 +429,9 @@ const DesignDashboardPage: React.FC = () => {
             </section>
 
             <section>
-              <div className="flex items-baseline justify-between mb-3">
-                <h2 className="text-base font-semibold text-slate-100">Start New Designs</h2>
-                <span className="text-sm text-slate-400">{inDesignNoFile.length}</span>
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-100">Start New Designs</h2>
+                <span className="text-sm text-slate-400 font-medium">{inDesignNoFile.length}</span>
               </div>
               {inDesignNoFile.length === 0 ? (
                 <div className="text-sm text-slate-400">Nothing to start.</div>
@@ -443,9 +443,9 @@ const DesignDashboardPage: React.FC = () => {
             </section>
 
             <section>
-              <div className="flex items-baseline justify-between mb-3">
-                <h2 className="text-base font-semibold text-slate-100">Revise Rejected Designs</h2>
-                <span className="text-sm text-slate-400">{designRejected.length}</span>
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-100">Revise Rejected Designs</h2>
+                <span className="text-sm text-slate-400 font-medium">{designRejected.length}</span>
               </div>
               {designRejected.length === 0 ? (
                 <div className="text-sm text-slate-400">No rejected designs pending.</div>
