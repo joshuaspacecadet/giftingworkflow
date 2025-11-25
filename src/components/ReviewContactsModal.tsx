@@ -89,6 +89,12 @@ const ReviewContactsModal: React.FC<ReviewContactsModalProps> = ({ isOpen, onClo
     });
     // initialize gates
     const hasInitialItems = draft.length > 0;
+    // Only set itemsSaved to true if we are *already past* the decision stage (i.e. in Fulfillment or Gathering details)
+    // If we are in 'Review to receive gift', we want the user to explicitly "Save" items to trigger the stage transition.
+    // We assume 'Gathering details' implies items were saved/approved.
+    const isStageProcessed = current.specificStage === 'Gathering details' || current.specificStage === 'Fulfillment';
+    setItemsSaved(hasInitialItems && isStageProcessed);
+
     // Only set hasApproved to true if we are *already past* the decision stage (i.e. in Fulfillment)
     // If we are in 'Gathering details', we still want to confirm items/details, but typically 'Gathering details' implies approved.
     // However, user requested: "It is not supposed to ask me to Confirm recipient details until I click approve."
@@ -379,11 +385,15 @@ Excited for you to receive!
             const saved: string[] = (current.draftOrderItems || []);
             const setEq = (a: string[], b: string[]) => a.length === b.length && a.every(v => b.includes(v));
             const isDirty = !setEq(selection, saved);
-            const disabled = saving || !isDirty;
+            
+            // Enable if there is a selection, unless it's already saved and not dirty.
+            // If itemsSaved is false, we allow saving even if !isDirty (to confirm initial selection and update stage).
+            const disabled = saving || selection.length === 0 || (itemsSaved && !isDirty);
+            
             const label = saving
               ? ''
               : (!itemsSaved
-                  ? (isDirty ? 'Save Items' : 'Select Items')
+                  ? 'Save Items'
                   : (isDirty ? 'Save Items' : 'Saved'));
             return (
               <div className="mt-4 flex justify-end">
