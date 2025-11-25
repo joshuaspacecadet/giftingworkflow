@@ -35,6 +35,15 @@ const normalizeCreator = (raw?: string): string => {
   return PREDEFINED_CONTACT_CREATORS[0] || 'Wiz';
 };
 
+const getInitials = (name?: string): string => {
+  if (!name) return 'W';
+  const n = name.trim().toUpperCase();
+  if (n.startsWith('W')) return 'W';
+  if (n.startsWith('J')) return 'J';
+  if (n.startsWith('D')) return 'D';
+  return n[0] || 'W';
+};
+
 const ReviewerDashboardPage: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const creator = normalizeCreator(name);
@@ -546,6 +555,14 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-slate-500">•</span>
+                      {showAllGifts && (
+                        <div
+                          className="h-5 w-5 min-w-[20px] rounded-full bg-[#1A1B1E] border border-[#3A3B3F] flex items-center justify-center text-[10px] text-slate-300 font-semibold cursor-default"
+                          title={c.contactAddedBy || 'Wiz'}
+                        >
+                          {getInitials(c.contactAddedBy)}
+                        </div>
+                      )}
                       {isAddressMissing(c) ? (
                         <button
                           type="button"
@@ -623,6 +640,14 @@ const ReviewerDashboardPage: React.FC = () => {
                   <li key={c.id} className="flex items-center justify-between gap-2 truncate relative">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-slate-500">•</span>
+                      {showAllGifts && (
+                        <div
+                          className="h-5 w-5 min-w-[20px] rounded-full bg-[#1A1B1E] border border-[#3A3B3F] flex items-center justify-center text-[10px] text-slate-300 font-semibold cursor-default"
+                          title={c.contactAddedBy || 'Wiz'}
+                        >
+                          {getInitials(c.contactAddedBy)}
+                        </div>
+                      )}
                       {isAddressMissing(c) ? (
                         <button
                           type="button"
