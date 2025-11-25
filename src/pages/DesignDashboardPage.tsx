@@ -404,24 +404,24 @@ const DesignDashboardPage: React.FC = () => {
             <div className="flex items-center gap-6">
             <button 
               onClick={() => document.getElementById('section-approved')?.scrollIntoView({ behavior: 'smooth' })}
-              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
             >
               <span className="font-medium text-slate-200">{approvedRecipients.length}</span>
-              <span>Pending Assets</span>
+              <span className="group-hover:underline decoration-slate-500 underline-offset-4">Pending Assets</span>
             </button>
             <button 
               onClick={() => document.getElementById('section-pending')?.scrollIntoView({ behavior: 'smooth' })}
-              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
             >
               <span className="font-medium text-slate-200">{inDesignNoFile.length}</span>
-              <span>Pending Design</span>
+              <span className="group-hover:underline decoration-slate-500 underline-offset-4">Pending Design</span>
             </button>
             <button 
               onClick={() => document.getElementById('section-rejected')?.scrollIntoView({ behavior: 'smooth' })}
-              className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
             >
-              <span className="font-medium text-rose-300">{designRejected.length}</span>
-              <span>Pending Revision</span>
+              <span className="font-medium text-slate-200">{designRejected.length}</span>
+              <span className="group-hover:underline decoration-slate-500 underline-offset-4">Pending Revision</span>
             </button>
           </div>
         </div>
