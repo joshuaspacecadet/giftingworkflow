@@ -372,7 +372,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
   const renderLeft = () => {
     if (currentType === 'design') {
       const file = (current.designFiles || [])[0];
-      const isImage = file && file.type?.startsWith('image/');
+      const isImage = file && ((file.type?.startsWith('image/')) || /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(file.filename || file.url || ''));
       return (
         <div>
           <div className="rounded-lg flex items-center justify-center">
@@ -402,7 +402,7 @@ const BeastModeModal: React.FC<BeastModeModalProps> = ({
       const stage = current.specificStage as SpecificStage | undefined;
       const shouldHideDesignPreview = stage === 'In design' || stage === 'Design rejected';
       const file = shouldHideDesignPreview ? null : (current.designFiles || [])[0];
-      const isImage = file && file.type?.startsWith('image/');
+      const isImage = file && ((file.type?.startsWith('image/')) || /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(file.filename || file.url || ''));
       return (
         <div>
           <div className="rounded-lg flex items-center justify-center">

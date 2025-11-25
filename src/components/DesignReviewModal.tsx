@@ -272,6 +272,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
   };
 
   const isPdf = !!(design && ((design.type && /pdf/i.test(design.type)) || /\.pdf(\?|$)/i.test(design.filename || design.url)));
+  const isImage = !!(design && ((design.type && design.type.startsWith('image/')) || /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(design.filename || design.url)));
 
   const modal = (
     <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4" onClick={onClose}>
@@ -343,7 +344,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
               title={design ? 'Click to preview larger' : undefined}
             >
               {design ? (
-                design.type?.startsWith('image/') ? (
+                isImage ? (
                   <img src={design.url} alt={design.filename} className="max-h-[540px] object-contain" />
                 ) : (
                   <PdfThumbnail url={design.url} className="h-[540px]" heightPx={540} />
@@ -398,7 +399,7 @@ const DesignReviewModal: React.FC<DesignReviewModalProps> = ({ isOpen, onClose, 
           <div className="fixed inset-0 bg-black/80 z-[3100] flex items-center justify-center p-4" onClick={() => setIsPreviewOpen(false)}>
             <div className="bg-white rounded-xl shadow-xl max-w-[90vw] max-h-[90vh] p-3" onClick={(e)=>e.stopPropagation()}>
               <div className="flex justify-end mb-2"><button className="text-slate-500" onClick={() => setIsPreviewOpen(false)}><X className="h-5 w-5" /></button></div>
-              {design.type?.startsWith('image/') ? (
+              {isImage ? (
                 <img src={design.url} alt={design.filename} className="max-h-[80vh] max-w-[85vw] object-contain" />
               ) : isPdf ? (
                 <iframe
