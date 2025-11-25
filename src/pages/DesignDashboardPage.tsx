@@ -407,7 +407,7 @@ const DesignDashboardPage: React.FC = () => {
               className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
             >
               <span className="font-medium text-slate-200">{approvedRecipients.length}</span>
-              <span>Approved</span>
+              <span>Pending Assets</span>
             </button>
             <button 
               onClick={() => document.getElementById('section-pending')?.scrollIntoView({ behavior: 'smooth' })}
@@ -421,7 +421,7 @@ const DesignDashboardPage: React.FC = () => {
               className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
             >
               <span className="font-medium text-rose-300">{designRejected.length}</span>
-              <span>Rejected</span>
+              <span>Pending Revision</span>
             </button>
           </div>
         </div>
