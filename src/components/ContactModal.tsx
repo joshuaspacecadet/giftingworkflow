@@ -545,23 +545,21 @@ const ContactModal: React.FC<ContactModalProps> = ({
       }
     }
 
-    // If we have files to upload, handle them first
-    if (headshots.length > 0 || companyLogos.length > 0) {
-      // Convert our simplified file format to Airtable attachment format (url + filename only)
-      const airtableHeadshots = headshots.map((file) => ({
-        url: file.url,
-        filename: file.filename,
-      }));
+    // Convert our simplified file format to Airtable attachment format (url + filename only)
+    // Always include these fields to ensure deletions are persisted (empty array clears the field)
+    const airtableHeadshots = headshots.map((file) => ({
+      url: file.url,
+      filename: file.filename,
+    }));
 
-      const airtableCompanyLogos = companyLogos.map((file) => ({
-        url: file.url,
-        filename: file.filename,
-      }));
+    const airtableCompanyLogos = companyLogos.map((file) => ({
+      url: file.url,
+      filename: file.filename,
+    }));
 
-      // Add files to contact data
-      contactData.headshot = airtableHeadshots;
-      contactData.companyLogo = airtableCompanyLogos;
-    }
+    // Add files to contact data
+    contactData.headshot = airtableHeadshots;
+    contactData.companyLogo = airtableCompanyLogos;
 
     // Convert selected items to per-project links
     const projectId = currentProjectId || "";
