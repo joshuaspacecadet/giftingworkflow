@@ -5,6 +5,7 @@ import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 import ContactModal from '../components/ContactModal';
 import CopyEditorCard from '../components/CopyEditorCard';
+import DesignRevisionCard from '../components/DesignRevisionCard';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -582,7 +583,25 @@ const DesignDashboardPage: React.FC = () => {
                   <div className="text-sm text-slate-400">No rejected designs pending.</div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
-                    {designRejected.map(c => renderUploadCard(c, { showFeedback: true }))}
+                    {designRejected.map(c => (
+                      <DesignRevisionCard
+                        key={c.id}
+                        contact={c}
+                        onUpdate={(updated) => setContacts(prev => prev.map(p => p.id === updated.id ? updated : p))}
+                        onDownloadAssets={handleDownloadAssets}
+                        onReadyForReview={handleReadyForReview}
+                        onDeleteDesign={handleDeleteDesignFile}
+                        onUploadFile={(file) => handleUploadFor(c, file)}
+                        onPreview={(url, type) => {
+                          setPreviewDesignUrl(url);
+                          setPreviewDesignType(type);
+                        }}
+                        isUploading={!!uploadingById[c.id]}
+                        isDownloading={!!isDownloadingById[c.id]}
+                        isDeleting={!!isDeletingById[c.id]}
+                        uploadError={errById[c.id]}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
