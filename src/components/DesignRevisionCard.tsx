@@ -157,7 +157,7 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
                   className="text-xs flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
                 >
                   <Edit3 className="h-3 w-3" />
-                  Request New Copy
+                  Request Copy Changes
                 </button>
               )}
               {contact.copyStatus === 'New copy done' && (
@@ -225,13 +225,16 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : contact.copyStatus === 'New copy done' ? (
               <div className="space-y-1 text-sm text-slate-400 pl-6 border-l-2 border-slate-800">
                  {contact.headline && <div><span className="text-slate-500 text-xs uppercase mr-2">Headline:</span> <span className="text-slate-300">{contact.headline}</span></div>}
                  {contact.subheadline && <div><span className="text-slate-500 text-xs uppercase mr-2">Subhead:</span> <span className="text-slate-300">{contact.subheadline}</span></div>}
                  {contact.flavorText && <div><span className="text-slate-500 text-xs uppercase mr-2">Flavor:</span> <span className="text-slate-300">{contact.flavorText}</span></div>}
-                 {(!contact.headline && !contact.subheadline && !contact.flavorText) && <div className="italic text-slate-600">No copy content yet.</div>}
               </div>
+            ) : (
+               <div className="text-xs text-slate-500 italic">
+                  Copy hidden until requested.
+               </div>
             )}
           </div>
         </div>
