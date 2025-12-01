@@ -79,6 +79,10 @@ export interface Contact {
   // Design review metadata
   latestDesignDate?: string;
   latestDesignFeedback?: string;
+  // New copy fields
+  headline?: string;
+  subheadline?: string;
+  flavorText?: string;
 }
 
 export interface AirtableAttachment {

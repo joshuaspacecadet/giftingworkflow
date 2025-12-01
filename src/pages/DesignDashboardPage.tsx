@@ -4,6 +4,7 @@ import { AirtableService } from '../services/airtable';
 import { Contact, SpecificStage } from '../types';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 import ContactModal from '../components/ContactModal';
+import CopyEditorCard from '../components/CopyEditorCard';
 import { PREDEFINED_CONTACT_CREATORS } from '../config/airtable';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -46,6 +47,10 @@ const DesignDashboardPage: React.FC = () => {
     return contacts.filter(c => (c.specificStage as SpecificStage) === 'Gathering details');
   }, [contacts]);
 
+  const draftingCopy = useMemo(() => {
+    return contacts.filter(c => (c.specificStage as SpecificStage) === 'Drafting copy');
+  }, [contacts]);
+
   const inDesignNoFile = useMemo(() => {
     return contacts.filter(c => (c.specificStage as SpecificStage) === 'In design');
   }, [contacts]);
@@ -70,6 +75,22 @@ const DesignDashboardPage: React.FC = () => {
       return null;
     } finally {
       setIsSavingContact(false);
+    }
+  };
+
+  const handleReadyForCopy = async (contactId: string) => {
+    setUploadingById(prev => ({ ...prev, [contactId]: true }));
+    try {
+      const updated = await AirtableService.updateContact(contactId, {
+        specificStage: 'Drafting copy' as SpecificStage,
+      } as any);
+      if (updated) {
+        setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+      }
+    } catch (e) {
+      console.error('Failed to move to Drafting copy', e);
+    } finally {
+      setUploadingById(prev => ({ ...prev, [contactId]: false }));
     }
   };
 
@@ -259,6 +280,29 @@ const DesignDashboardPage: React.FC = () => {
               </div>
             )}
 
+            {(c.headline || c.subheadline || c.flavorText) && (
+              <div className="mt-3 border-t border-slate-800 pt-3 space-y-2">
+                 {c.headline && (
+                   <div>
+                     <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Headline</div>
+                     <div className="text-sm text-slate-200 font-medium">{c.headline}</div>
+                   </div>
+                 )}
+                 {c.subheadline && (
+                   <div>
+                     <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Subheadline</div>
+                     <div className="text-sm text-slate-300">{c.subheadline}</div>
+                   </div>
+                 )}
+                 {c.flavorText && (
+                   <div>
+                     <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Flavor Text</div>
+                     <div className="text-sm text-slate-400 italic">{c.flavorText}</div>
+                   </div>
+                 )}
+              </div>
+            )}
+
             {opts?.showFeedback && (c.latestDesignFeedback ? (
               <div className="mt-3 text-sm text-slate-300">
                 <div className="flex items-center gap-2">
@@ -410,6 +454,13 @@ const DesignDashboardPage: React.FC = () => {
               <span className="group-hover:underline decoration-slate-500 underline-offset-4">Pending Assets</span>
             </button>
             <button 
+              onClick={() => document.getElementById('section-copy')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
+            >
+              <span className="font-medium text-slate-200">{draftingCopy.length}</span>
+              <span className="group-hover:underline decoration-slate-500 underline-offset-4">Pending Copy</span>
+            </button>
+            <button 
               onClick={() => document.getElementById('section-pending')?.scrollIntoView({ behavior: 'smooth' })}
               className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
             >
@@ -465,16 +516,40 @@ const DesignDashboardPage: React.FC = () => {
                               <span>Add Assets</span>
                             </button>
                             <button
-                              onClick={() => handleReadyForDesign(c.id)}
+                              onClick={() => handleReadyForCopy(c.id)}
                               disabled={!!uploadingById[c.id]}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 text-sm disabled:opacity-50"
                             >
                               {uploadingById[c.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
-                              <span>Ready for Design</span>
+                              <span>Ready for Copy</span>
                             </button>
                           </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section id="section-copy" className="scroll-mt-20">
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-100">Add Copy for New Cards</h2>
+                <span className="text-sm text-slate-400 font-medium">{draftingCopy.length}</span>
+              </div>
+              <div className="pl-4">
+                {draftingCopy.length === 0 ? (
+                  <div className="text-sm text-slate-400">No cards pending copy.</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {draftingCopy.map(c => (
+                      <CopyEditorCard
+                        key={c.id}
+                        contact={c}
+                        onUpdate={(updated) => setContacts(prev => prev.map(p => p.id === updated.id ? updated : p))}
+                        onReadyForDesign={handleReadyForDesign}
+                        isProcessing={!!uploadingById[c.id]}
+                      />
                     ))}
                   </div>
                 )}
