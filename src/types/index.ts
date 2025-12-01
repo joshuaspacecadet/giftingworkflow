@@ -83,6 +83,7 @@ export interface Contact {
   headline?: string;
   subheadline?: string;
   flavorText?: string;
+  copyStatus?: 'New copy needed' | 'New copy done';
 }
 
 export interface AirtableAttachment {

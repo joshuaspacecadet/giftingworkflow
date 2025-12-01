@@ -90,6 +90,7 @@ const transformAirtableContact = (record: any): Contact => {
     headline: fields["Headline Text"] || "",
     subheadline: fields["Subheadline Text"] || "",
     flavorText: fields["Flavor Text"] || "",
+    copyStatus: fields["Copy Status"] || undefined,
     round1Draft: fields["Round 1 Draft"] || [],
     round1DraftFeedback: fields["Round 1 Draft Feedback"] || "",
     rejectRound1: fields["Reject Round 1"] || false,
@@ -417,6 +418,8 @@ export class AirtableService {
         createFields["Subheadline Text"] = contactData.subheadline;
       if (contactData.flavorText)
         createFields["Flavor Text"] = contactData.flavorText;
+      if (contactData.copyStatus)
+        createFields["Copy Status"] = contactData.copyStatus;
       if (contactData.copyTitle3)
         createFields["Copy Title 3"] = contactData.copyTitle3;
       if (contactData.imageDirection)
@@ -539,6 +542,8 @@ export class AirtableService {
         updateFields["Subheadline Text"] = updates.subheadline;
       if (updates.flavorText !== undefined)
         updateFields["Flavor Text"] = updates.flavorText;
+      if (updates.copyStatus !== undefined)
+        updateFields["Copy Status"] = updates.copyStatus;
       if (updates.copyTitle3 !== undefined)
         updateFields["Copy Title 3"] = updates.copyTitle3;
       if (updates.imageDirection !== undefined)
