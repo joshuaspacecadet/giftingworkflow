@@ -145,98 +145,117 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
           )}
 
           {/* Copy Section */}
-          <div className="mt-4 border-t border-slate-800 pt-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-purple-400" />
-                <span className="font-semibold text-slate-200">Copy Revisions</span>
+          {(isCopyNeeded || contact.copyStatus === 'New copy done') && (
+            <div className="mt-4 border-t border-slate-800 pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  {contact.copyStatus === 'New copy done' ? (
+                    <>
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      <span className="font-semibold text-slate-200">Copy has been updated</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4 text-purple-400" />
+                      <span className="font-semibold text-slate-200">Please add updated copy below</span>
+                    </>
+                  )}
+                </div>
+                {!isCopyNeeded && contact.copyStatus !== 'New copy done' && (
+                  <button
+                    onClick={handleRequestNewCopy}
+                    className="text-xs flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                    Request Copy Changes
+                  </button>
+                )}
+                {contact.copyStatus === 'New copy done' && (
+                   <span className="text-xs text-emerald-400 flex items-center gap-1">
+                      <button 
+                          onClick={handleRequestNewCopy} 
+                          className="ml-2 text-slate-500 hover:text-slate-300 underline"
+                      >
+                          Edit
+                      </button>
+                   </span>
+                )}
               </div>
-              {!isCopyNeeded && contact.copyStatus !== 'New copy done' && (
-                <button
-                  onClick={handleRequestNewCopy}
-                  className="text-xs flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  <Edit3 className="h-3 w-3" />
-                  Request Copy Changes
-                </button>
-              )}
-              {contact.copyStatus === 'New copy done' && (
-                 <span className="text-xs text-emerald-400 flex items-center gap-1">
-                    <Check className="h-3 w-3" /> New Copy Done
-                    <button 
-                        onClick={handleRequestNewCopy} 
-                        className="ml-2 text-slate-500 hover:text-slate-300 underline"
+
+              {isCopyNeeded ? (
+                <div className="space-y-3 bg-slate-900/50 p-3 rounded-lg border border-purple-900/30">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Headline</label>
+                    <input
+                      type="text"
+                      value={copyFormData.headline}
+                      onChange={(e) => handleCopyChange('headline', e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                      placeholder="Headline text..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Subheadline</label>
+                    <input
+                      type="text"
+                      value={copyFormData.subheadline}
+                      onChange={(e) => handleCopyChange('subheadline', e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                       placeholder="Subheadline text..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Flavor Text</label>
+                    <textarea
+                      value={copyFormData.flavorText}
+                      onChange={(e) => handleCopyChange('flavorText', e.target.value)}
+                      rows={2}
+                      className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                       placeholder="Flavor text..."
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 mt-2">
+                    {copyHasChanges && (
+                      <button
+                          onClick={handleSaveCopy}
+                          disabled={isSavingCopy}
+                          className="text-xs px-3 py-1.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-600 flex items-center gap-1"
+                      >
+                          {isSavingCopy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                          <span>Save Draft</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={handleNewCopyDone}
+                      className="text-xs px-3 py-1.5 rounded bg-purple-600 text-white hover:bg-purple-500 flex items-center gap-1"
                     >
-                        Edit
+                      <Check className="h-3 w-3" />
+                      New Copy Done
                     </button>
-                 </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1 text-sm text-slate-400 pl-6 border-l-2 border-slate-800">
+                   {contact.headline && <div><span className="text-slate-500 text-xs uppercase mr-2">Headline:</span> <span className="text-slate-300">{contact.headline}</span></div>}
+                   {contact.subheadline && <div><span className="text-slate-500 text-xs uppercase mr-2">Subhead:</span> <span className="text-slate-300">{contact.subheadline}</span></div>}
+                   {contact.flavorText && <div><span className="text-slate-500 text-xs uppercase mr-2">Flavor:</span> <span className="text-slate-300">{contact.flavorText}</span></div>}
+                </div>
               )}
             </div>
+          )}
 
-            {isCopyNeeded ? (
-              <div className="space-y-3 bg-slate-900/50 p-3 rounded-lg border border-purple-900/30">
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Headline</label>
-                  <input
-                    type="text"
-                    value={copyFormData.headline}
-                    onChange={(e) => handleCopyChange('headline', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
-                    placeholder="Headline text..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Subheadline</label>
-                  <input
-                    type="text"
-                    value={copyFormData.subheadline}
-                    onChange={(e) => handleCopyChange('subheadline', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
-                     placeholder="Subheadline text..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Flavor Text</label>
-                  <textarea
-                    value={copyFormData.flavorText}
-                    onChange={(e) => handleCopyChange('flavorText', e.target.value)}
-                    rows={2}
-                    className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
-                     placeholder="Flavor text..."
-                  />
-                </div>
-                <div className="flex justify-end gap-2 mt-2">
-                  {copyHasChanges && (
-                    <button
-                        onClick={handleSaveCopy}
-                        disabled={isSavingCopy}
-                        className="text-xs px-3 py-1.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-600 flex items-center gap-1"
-                    >
-                        {isSavingCopy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                        <span>Save Draft</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={handleNewCopyDone}
-                    className="text-xs px-3 py-1.5 rounded bg-purple-600 text-white hover:bg-purple-500 flex items-center gap-1"
-                  >
-                    <Check className="h-3 w-3" />
-                    New Copy Done
-                  </button>
-                </div>
-              </div>
-            ) : contact.copyStatus === 'New copy done' ? (
-              <div className="space-y-1 text-sm text-slate-400 pl-6 border-l-2 border-slate-800">
-                 {contact.headline && <div><span className="text-slate-500 text-xs uppercase mr-2">Headline:</span> <span className="text-slate-300">{contact.headline}</span></div>}
-                 {contact.subheadline && <div><span className="text-slate-500 text-xs uppercase mr-2">Subhead:</span> <span className="text-slate-300">{contact.subheadline}</span></div>}
-                 {contact.flavorText && <div><span className="text-slate-500 text-xs uppercase mr-2">Flavor:</span> <span className="text-slate-300">{contact.flavorText}</span></div>}
-              </div>
-            ) : (
-               <div className="text-xs text-slate-500 italic">
-                  Copy hidden until requested.
-               </div>
-            )}
-          </div>
+          {/* Request Copy Changes Button when section is hidden */}
+          {!isCopyNeeded && contact.copyStatus !== 'New copy done' && (
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={handleRequestNewCopy}
+                className="text-xs flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                <Edit3 className="h-3 w-3" />
+                Request Copy Changes
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right: Actions */}
