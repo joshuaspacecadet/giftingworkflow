@@ -98,23 +98,16 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
 
   const handleReadyForReviewInternal = async () => {
     try {
-      // If copy was updated, we want to clear these fields upon submission for review
-      // so they don't persist if rejected again unless they are part of the "approved" state?
-      // The requirement says "clear the headline, subheadline, and flavor text, as well as the copy status"
-      
-      // We first update the contact to clear these fields
+       // Clear copy status before submitting for review
       await AirtableService.updateContact(contact.id, {
-        headline: '',
-        subheadline: '',
-        flavorText: '',
-        copyStatus: undefined // or null/empty string depending on Airtable
-      } as any);
+        copyStatus: '' as any // Clear the copy status
+      });
       
       // Then proceed with the parent's onReadyForReview which moves stage
       onReadyForReview(contact.id);
     } catch (e) {
-      console.error('Failed to clear copy fields before review', e);
-      // Attempt to proceed anyway? 
+      console.error('Failed to clear copy status before review', e);
+      // Attempt to proceed anyway
       onReadyForReview(contact.id);
     }
   };
