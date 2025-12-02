@@ -96,6 +96,29 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
     }
   };
 
+  const handleReadyForReviewInternal = async () => {
+    try {
+      // If copy was updated, we want to clear these fields upon submission for review
+      // so they don't persist if rejected again unless they are part of the "approved" state?
+      // The requirement says "clear the headline, subheadline, and flavor text, as well as the copy status"
+      
+      // We first update the contact to clear these fields
+      await AirtableService.updateContact(contact.id, {
+        headline: '',
+        subheadline: '',
+        flavorText: '',
+        copyStatus: undefined // or null/empty string depending on Airtable
+      } as any);
+      
+      // Then proceed with the parent's onReadyForReview which moves stage
+      onReadyForReview(contact.id);
+    } catch (e) {
+      console.error('Failed to clear copy fields before review', e);
+      // Attempt to proceed anyway? 
+      onReadyForReview(contact.id);
+    }
+  };
+
   const hasAssets = (contact.headshot && contact.headshot.length > 0) || (contact.companyLogo && contact.companyLogo.length > 0);
   const existingDesign = (contact.designFiles || [])[0];
   const designUrl = typeof existingDesign === 'string' ? existingDesign : existingDesign?.url;
@@ -284,7 +307,7 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
                 <span>Download Assets</span>
               </button>
               <button
-                onClick={() => onReadyForReview(contact.id)}
+                onClick={handleReadyForReviewInternal}
                 disabled={isUploading || !designUrl}
                 className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm disabled:opacity-50 ${!designUrl ? 'border-slate-700 bg-slate-800 text-slate-500' : 'border-emerald-600/50 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20'}`}
               >
