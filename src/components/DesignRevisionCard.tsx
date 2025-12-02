@@ -100,7 +100,7 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
     try {
        // Clear copy status before submitting for review
       await AirtableService.updateContact(contact.id, {
-        copyStatus: '' as any // Clear the copy status
+        copyStatus: null // Clear the copy status
       });
       
       // Then proceed with the parent's onReadyForReview which moves stage
