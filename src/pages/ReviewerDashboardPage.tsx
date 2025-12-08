@@ -159,8 +159,8 @@ const ReviewerDashboardPage: React.FC = () => {
     [contacts, creator]
   );
 
-  // Quick action datasets (respect show all toggle)
-  const quickSource = showAllGifts ? contacts : filtered;
+  // Quick action datasets (always filtered by creator)
+  const quickSource = filtered;
 
   const designsReady = quickSource.filter(c => {
     const items = (c as any).draftOrderItems as string[] | undefined;
