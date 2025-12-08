@@ -54,7 +54,8 @@ const PrintShipDashboardPage: React.FC = () => {
       // Only keep relevant contacts for this dashboard (Fulfillment or Shipped)
       const relevantContacts = allContacts.filter(contact => {
         const isRelevantStage = contact.specificStage === 'Fulfillment' || contact.specificStage === 'Shipped';
-        const hasAddress = contact.streetLine1 && contact.city && contact.state && contact.postCode && contact.countryCode;
+        // Removed strict requirement for State/Province, as requested
+        const hasAddress = contact.streetLine1 && contact.city && contact.postCode && contact.countryCode;
         return isRelevantStage && hasAddress;
       });
       setContacts(relevantContacts);
