@@ -198,14 +198,14 @@ const ReviewerDashboardPage: React.FC = () => {
     const src = pipelineSource;
     return {
       inDesign: src.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)),
-      fulfillment: src.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped'),
+      fulfillment: src.filter(c => c.specificStage === 'Fulfillment'), // Only show unfulfilled orders here
     };
   }, [pipelineSource]);
 
   // Total count for header: sum of In Design + Fulfillment
   const pipelineCount = useMemo(() => {
     const inDesignCount = pipelineSource.filter(c => !!c.specificStage && IN_DESIGN_STAGES.includes(c.specificStage)).length;
-    const fulfillCount = pipelineSource.filter(c => c.specificStage === 'Fulfillment' || c.specificStage === 'Shipped').length;
+    const fulfillCount = pipelineSource.filter(c => c.specificStage === 'Fulfillment').length;
     return inDesignCount + fulfillCount;
   }, [pipelineSource]);
 
