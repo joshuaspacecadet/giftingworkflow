@@ -572,6 +572,10 @@ export class AirtableService {
         updateFields["Contact Review"] = updates.contactReview;
       if (updates.contactReviewFeedback !== undefined)
         updateFields["Contact Review Feedback"] = updates.contactReviewFeedback;
+      if (updates.latestTrackingNumber !== undefined)
+        updateFields["Latest Tracking Number"] = updates.latestTrackingNumber;
+      if (updates.latestShipDate !== undefined)
+        updateFields["Latest Ship Date"] = updates.latestShipDate;
 
       const record = await base(airtableConfig.tables.contacts).update(
         id,
