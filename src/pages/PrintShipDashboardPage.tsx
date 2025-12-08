@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AirtableService } from '../services/airtable';
 import { Contact } from '../types';
-import { Loader2, Download, Package, Linkedin, PenSquare, Flag } from 'lucide-react';
+import { Loader2, Download, Package, Linkedin, PenSquare, Flag, Search } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import FulfillmentModal from '../components/FulfillmentModal';
 import FlagOrderModal from '../components/FlagOrderModal';
@@ -15,6 +15,7 @@ const PrintShipDashboardPage: React.FC = () => {
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [processing, setProcessing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('unfulfilled');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modal state
   const [fulfillmentModalOpen, setFulfillmentModalOpen] = useState(false);
@@ -29,7 +30,7 @@ const PrintShipDashboardPage: React.FC = () => {
 
   useEffect(() => {
     filterContacts();
-  }, [contacts, filterStatus]);
+  }, [contacts, filterStatus, searchQuery]);
 
   const fetchContacts = async () => {
     setLoading(true);
@@ -58,6 +59,19 @@ const PrintShipDashboardPage: React.FC = () => {
       filtered = contacts.filter(c => c.specificStage === 'Shipped');
     }
     // 'all' includes both, which is already the base set of contacts loaded
+
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(c => 
+            (c.name && c.name.toLowerCase().includes(query)) ||
+            (c.company && c.company.toLowerCase().includes(query)) ||
+            (c.city && c.city.toLowerCase().includes(query)) ||
+            (c.state && c.state.toLowerCase().includes(query)) ||
+            (c.postCode && c.postCode.toLowerCase().includes(query)) ||
+            (c.countryCode && c.countryCode.toLowerCase().includes(query)) ||
+            (c.latestTrackingNumber && c.latestTrackingNumber.toLowerCase().includes(query))
+        );
+    }
 
     setFilteredContacts(filtered);
     // Clear selection when filter changes to avoid confusion
@@ -193,71 +207,86 @@ const PrintShipDashboardPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Print & Ship Dashboard</h1>
 
-        {/* Section 1: New Orders Ready to Fulfill */}
         <div className="bg-white shadow rounded-lg mb-8 overflow-hidden">
           <div className="px-6 py-5 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-              <h2 className="text-lg font-medium text-gray-900">
-                {filterStatus === 'unfulfilled' ? 'New Orders Ready to Fulfill' : 
-                 filterStatus === 'fulfilled' ? 'Fulfilled Orders' : 'All Orders'}
-              </h2>
-              
-              <div className="flex items-center space-x-4">
-                {/* Status Toggle */}
-                <span className="relative z-0 inline-flex shadow-sm rounded-md">
-                  <button
-                    type="button"
-                    onClick={() => setFilterStatus('unfulfilled')}
-                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      filterStatus === 'unfulfilled'
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Unfulfilled
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterStatus('fulfilled')}
-                    className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      filterStatus === 'fulfilled'
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Fulfilled
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterStatus('all')}
-                    className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      filterStatus === 'all'
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    All
-                  </button>
-                </span>
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                <h2 className="text-lg font-medium text-gray-900">
+                  {filterStatus === 'unfulfilled' ? 'Orders' : 
+                   filterStatus === 'fulfilled' ? 'Fulfilled Orders' : 'All Orders'}
+                </h2>
+                
+                <div className="flex items-center space-x-4">
+                  {/* Status Toggle */}
+                  <span className="relative z-0 inline-flex shadow-sm rounded-md">
+                    <button
+                      type="button"
+                      onClick={() => setFilterStatus('unfulfilled')}
+                      className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        filterStatus === 'unfulfilled'
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Unfulfilled
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFilterStatus('fulfilled')}
+                      className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        filterStatus === 'fulfilled'
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Fulfilled
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFilterStatus('all')}
+                      className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        filterStatus === 'all'
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      All
+                    </button>
+                  </span>
 
-                <div className="h-6 w-px bg-gray-300 mx-2" />
+                  <div className="h-6 w-px bg-gray-300 mx-2" />
 
-                <button
-                  onClick={handleExportCSV}
-                  disabled={selectedContactIds.size === 0 || processing}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Export CSV
-                </button>
-                <button
-                  onClick={handleBeginFulfillment}
-                  disabled={selectedContactIds.size === 0 || processing}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                >
-                  <Package className="mr-2 h-4 w-4" />
-                  Begin Fulfillment
-                </button>
+                  <button
+                    onClick={handleExportCSV}
+                    disabled={selectedContactIds.size === 0 || processing}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={handleBeginFulfillment}
+                    disabled={selectedContactIds.size === 0 || processing}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                  >
+                    <Package className="mr-2 h-4 w-4" />
+                    Begin Fulfillment
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative rounded-md shadow-sm max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
+                <input
+                  type="text"
+                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 border"
+                  placeholder="Search orders..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -284,7 +313,7 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
@@ -293,7 +322,7 @@ const PrintShipDashboardPage: React.FC = () => {
                   </tr>
                 ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
                       No orders found.
                     </td>
                   </tr>
@@ -395,18 +424,6 @@ const PrintShipDashboardPage: React.FC = () => {
                 )}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Section 2: Add Fulfillment Details */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Section 2: Add Fulfillment Details</h2>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-10 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                <p>Functionality to add fulfillment details coming soon.</p>
-            </div>
           </div>
         </div>
       </div>
