@@ -99,7 +99,24 @@ const BulkFulfillmentModal: React.FC<BulkFulfillmentModalProps> = ({
         const trackingKey = findKey(row, ['Tracking Number', 'Tracking']);
         const shipDateKey = findKey(row, ['Ship Date', 'Date', 'Shipped Date']);
 
-        const trackingNumber = trackingKey ? row[trackingKey]?.toString().trim() : '';
+        let trackingNumber = trackingKey ? row[trackingKey]?.toString().trim() : '';
+        
+        // Handle scientific notation for tracking numbers (e.g. "9.434E+21")
+        if (trackingNumber.includes('e+') || trackingNumber.includes('E+')) {
+            // Attempt to grab original value if available, otherwise try to parse
+            // Since we converted to string, we might have lost precision if it was a number type.
+            // However, if it came from sheet_to_json default, large numbers become scientific notation strings.
+            // We should try to format it back if possible, or better yet, tell XLSX to read as text.
+            // But since we already read it, we can try BigInt conversion if it looks like a number
+            try {
+                const rawVal = row[trackingKey as string];
+                if (typeof rawVal === 'number') {
+                    trackingNumber = rawVal.toLocaleString('fullwide', { useGrouping: false });
+                }
+            } catch {
+                // Keep as is if conversion fails
+            }
+        }
         
         // Handle Excel dates or string dates
         let shipDate = '';
@@ -107,14 +124,40 @@ const BulkFulfillmentModal: React.FC<BulkFulfillmentModalProps> = ({
             const rawDate = row[shipDateKey];
             // If Excel numeric date
             if (typeof rawDate === 'number') {
-                const dateObj = new Date((rawDate - (25567 + 2)) * 86400 * 1000); // Approximate conversion
-                shipDate = dateObj.toISOString().split('T')[0];
+                // Excel dates are days since 1900-01-01. 
+                // Adjusting for timezone offset to ensure we get the correct calendar date
+                const utcDays = Math.floor(rawDate - 25569);
+                const utcValue = utcDays * 86400;
+                const dateObj = new Date(utcValue * 1000);
+                
+                // Fix for off-by-one due to timezone: use UTC methods to extract YYYY-MM-DD
+                const year = dateObj.getUTCFullYear();
+                const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(dateObj.getUTCDate()).padStart(2, '0');
+                shipDate = `${year}-${month}-${day}`;
             } else {
                 // Try parsing string
                 try {
                     const dateObj = new Date(rawDate);
                     if (!isNaN(dateObj.getTime())) {
-                        shipDate = dateObj.toISOString().split('T')[0];
+                        // Use UTC to avoid local timezone shifts for pure dates
+                        // But if the string was "2023-10-25", parsing it as UTC depends on format
+                        // If it's ISO "2023-10-25", it parses as UTC.
+                        // If it's "10/25/2023", it parses as local.
+                        // Safer to just format as YYYY-MM-DD using local time if the string didn't specify timezone
+                        // Actually, for "Ship Date", it's usually just a date. 
+                        // Let's stick to simple ISO string split if possible, or correct for timezone offset.
+                        // A robust way for simple dates is to take the date part only.
+                        
+                        // If the input was just "YYYY-MM-DD", it is parsed as UTC midnight.
+                        // Getting .toISOString().split('T')[0] works perfect.
+                        // If input was "MM/DD/YYYY", it is parsed as local midnight.
+                        // .toISOString() converts to UTC, which might be previous day.
+                        // So we should use local components for string inputs unless it's clearly ISO.
+                        
+                        const userTimezoneOffset = dateObj.getTimezoneOffset() * 60000;
+                        const adjustedDate = new Date(dateObj.getTime() - userTimezoneOffset);
+                        shipDate = adjustedDate.toISOString().split('T')[0];
                     } else {
                         shipDate = rawDate; // fallback
                     }
