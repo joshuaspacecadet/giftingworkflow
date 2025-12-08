@@ -87,6 +87,7 @@ export interface Contact {
   // Fulfillment details
   latestTrackingNumber?: string;
   latestShipDate?: string;
+  fulfillFlag?: string;
 }
 
 export interface AirtableAttachment {

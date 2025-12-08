@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { AirtableService } from '../services/airtable';
 import { Contact } from '../types';
-import { Loader2, Download, Package, Linkedin, PenSquare } from 'lucide-react';
+import { Loader2, Download, Package, Linkedin, PenSquare, Flag } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import FulfillmentModal from '../components/FulfillmentModal';
+import FlagOrderModal from '../components/FlagOrderModal';
 
 type FilterStatus = 'unfulfilled' | 'fulfilled' | 'all';
 
@@ -18,6 +19,9 @@ const PrintShipDashboardPage: React.FC = () => {
   // Modal state
   const [fulfillmentModalOpen, setFulfillmentModalOpen] = useState(false);
   const [selectedContactForFulfillment, setSelectedContactForFulfillment] = useState<Contact | null>(null);
+  
+  const [flagModalOpen, setFlagModalOpen] = useState(false);
+  const [selectedContactForFlag, setSelectedContactForFlag] = useState<Contact | null>(null);
 
   useEffect(() => {
     fetchContacts();
@@ -95,7 +99,8 @@ const PrintShipDashboardPage: React.FC = () => {
       'Order Items',
       'Design File URL',
       'Tracking Number',
-      'Ship Date'
+      'Ship Date',
+      'Fulfill Flag'
     ].join(',');
 
     const csvRows = selected.map(c => {
@@ -115,7 +120,8 @@ const PrintShipDashboardPage: React.FC = () => {
         `"${orderItems}"`,
         `"${designFileUrl}"`,
         `"${c.latestTrackingNumber || ''}"`,
-        `"${c.latestShipDate || ''}"`
+        `"${c.latestShipDate || ''}"`,
+        `"${c.fulfillFlag || ''}"`
       ].join(',');
     });
 
@@ -158,6 +164,26 @@ const PrintShipDashboardPage: React.FC = () => {
       }
     } catch (error) {
       console.error("Error saving fulfillment:", error);
+      throw error;
+    }
+  };
+
+  const openFlagModal = (contact: Contact) => {
+    setSelectedContactForFlag(contact);
+    setFlagModalOpen(true);
+  };
+
+  const handleSaveFlag = async (contactId: string, flagNote: string) => {
+    try {
+      const updatedContact = await AirtableService.updateContact(contactId, {
+        fulfillFlag: flagNote
+      } as any);
+
+      if (updatedContact) {
+        setContacts(prev => prev.map(c => c.id === contactId ? updatedContact : c));
+      }
+    } catch (error) {
+      console.error("Error saving flag:", error);
       throw error;
     }
   };
@@ -293,6 +319,12 @@ const PrintShipDashboardPage: React.FC = () => {
                                 )}
                             </div>
                             <span className="text-sm text-gray-500">{contact.company}</span>
+                            {contact.fulfillFlag && (
+                              <div className="mt-1 flex items-center text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-md w-fit">
+                                <Flag className="h-3 w-3 mr-1 fill-red-600" />
+                                <span className="truncate max-w-[150px]" title={contact.fulfillFlag}>{contact.fulfillFlag}</span>
+                              </div>
+                            )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
@@ -341,13 +373,22 @@ const PrintShipDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => openFulfillmentModal(contact)}
-                          className="text-indigo-600 hover:text-indigo-900 flex items-center"
-                        >
-                          <PenSquare className="h-4 w-4 mr-1" />
-                          Fulfill
-                        </button>
+                        <div className="flex flex-col space-y-2 items-end">
+                          <button
+                            onClick={() => openFulfillmentModal(contact)}
+                            className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                          >
+                            <PenSquare className="h-4 w-4 mr-1" />
+                            Fulfill
+                          </button>
+                          <button
+                            onClick={() => openFlagModal(contact)}
+                            className={`${contact.fulfillFlag ? 'text-red-600' : 'text-gray-400 hover:text-gray-600'} flex items-center`}
+                          >
+                            <Flag className={`h-4 w-4 mr-1 ${contact.fulfillFlag ? 'fill-red-600' : ''}`} />
+                            Flag
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -379,6 +420,18 @@ const PrintShipDashboardPage: React.FC = () => {
           }}
           contact={selectedContactForFulfillment}
           onSave={handleSaveFulfillment}
+        />
+      )}
+
+      {selectedContactForFlag && (
+        <FlagOrderModal
+          isOpen={flagModalOpen}
+          onClose={() => {
+            setFlagModalOpen(false);
+            setSelectedContactForFlag(null);
+          }}
+          contact={selectedContactForFlag}
+          onSave={handleSaveFlag}
         />
       )}
     </div>

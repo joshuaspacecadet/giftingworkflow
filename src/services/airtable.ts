@@ -102,6 +102,7 @@ const transformAirtableContact = (record: any): Contact => {
     contactReviewFeedback: fields["Contact Review Feedback"] || "",
     latestTrackingNumber: fields["Latest Tracking Number"] || "",
     latestShipDate: fields["Latest Ship Date"] || "",
+    fulfillFlag: fields["Fulfill Flag"] || "",
     createdAt: fields["Created At"],
     updatedAt: fields["Updated At"],
   };
@@ -576,6 +577,8 @@ export class AirtableService {
         updateFields["Latest Tracking Number"] = updates.latestTrackingNumber;
       if (updates.latestShipDate !== undefined)
         updateFields["Latest Ship Date"] = updates.latestShipDate;
+      if (updates.fulfillFlag !== undefined)
+        updateFields["Fulfill Flag"] = updates.fulfillFlag;
 
       const record = await base(airtableConfig.tables.contacts).update(
         id,
