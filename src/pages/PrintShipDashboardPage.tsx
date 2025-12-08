@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AirtableService } from '../services/airtable';
 import { Contact } from '../types';
-import { Loader2, Download, Upload, Linkedin, PenSquare, Flag, Search } from 'lucide-react';
+import { Loader2, Download, Upload, Linkedin, Box, Flag, Search } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import FulfillmentModal from '../components/FulfillmentModal';
 import FlagOrderModal from '../components/FlagOrderModal';
@@ -26,6 +26,18 @@ const PrintShipDashboardPage: React.FC = () => {
   const [selectedContactForFlag, setSelectedContactForFlag] = useState<Contact | null>(null);
 
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
+
+  // Calculate counts for tabs
+  const counts = useMemo(() => {
+    const unfulfilled = contacts.filter(c => c.specificStage === 'Fulfillment').length;
+    const fulfilled = contacts.filter(c => c.specificStage === 'Shipped').length;
+    // 'All' is just the sum of these two since we pre-filter contacts in fetchContacts
+    return {
+      unfulfilled,
+      fulfilled,
+      all: unfulfilled + fulfilled
+    };
+  }, [contacts]);
 
   useEffect(() => {
     fetchContacts();
@@ -144,7 +156,8 @@ const PrintShipDashboardPage: React.FC = () => {
 
     const csvContent = [csvHeader, ...csvRows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, `fulfillment_orders_${filterStatus}_${new Date().toISOString().split('T')[0]}.csv`);
+    // Changed filename format as requested
+    saveAs(blob, `spacecadet_${filterStatus}_orders_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handleBeginFulfillment = async () => {
@@ -291,7 +304,7 @@ const PrintShipDashboardPage: React.FC = () => {
                         : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    Unfulfilled
+                    Unfulfilled ({counts.unfulfilled})
                   </button>
                   <button
                     type="button"
@@ -302,7 +315,7 @@ const PrintShipDashboardPage: React.FC = () => {
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    Fulfilled
+                    Fulfilled ({counts.fulfilled})
                   </button>
                   <button
                     type="button"
@@ -313,7 +326,7 @@ const PrintShipDashboardPage: React.FC = () => {
                         : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    All
+                    All ({counts.all})
                   </button>
                 </span>
               </div>
@@ -378,8 +391,8 @@ const PrintShipDashboardPage: React.FC = () => {
                             </div>
                             <span className="text-sm text-gray-500">{contact.company}</span>
                             {contact.fulfillFlag && (
-                              <div className="mt-1 flex items-center text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-md w-fit">
-                                <Flag className="h-3 w-3 mr-1 fill-red-600" />
+                              <div className="mt-1 flex items-center text-xs text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-md w-fit">
+                                <Flag className="h-3 w-3 mr-1 fill-yellow-500 text-yellow-600" />
                                 <span className="truncate max-w-[150px]" title={contact.fulfillFlag}>{contact.fulfillFlag}</span>
                               </div>
                             )}
@@ -431,19 +444,19 @@ const PrintShipDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex flex-col space-y-2 items-end">
+                        <div className="flex flex-col space-y-3 items-end">
                           <button
                             onClick={() => openFulfillmentModal(contact)}
                             className="text-indigo-600 hover:text-indigo-900 flex items-center"
                           >
-                            <PenSquare className="h-4 w-4 mr-1" />
+                            <Box className="h-4 w-4 mr-1" />
                             Fulfill
                           </button>
                           <button
                             onClick={() => openFlagModal(contact)}
-                            className={`${contact.fulfillFlag ? 'text-red-600' : 'text-gray-400 hover:text-gray-600'} flex items-center`}
+                            className={`${contact.fulfillFlag ? 'text-yellow-600' : 'text-gray-400 hover:text-yellow-600'} flex items-center`}
                           >
-                            <Flag className={`h-4 w-4 mr-1 ${contact.fulfillFlag ? 'fill-red-600' : ''}`} />
+                            <Flag className={`h-4 w-4 mr-1 ${contact.fulfillFlag ? 'fill-yellow-500 text-yellow-600' : ''}`} />
                             Flag
                           </button>
                         </div>
