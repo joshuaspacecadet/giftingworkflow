@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AirtableService } from '../services/airtable';
 import { Contact } from '../types';
-import { Loader2, Download, Package, Linkedin, PenSquare, Flag, Search } from 'lucide-react';
+import { Loader2, Download, Upload, Linkedin, PenSquare, Flag, Search } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import FulfillmentModal from '../components/FulfillmentModal';
 import FlagOrderModal from '../components/FlagOrderModal';
+import BulkFulfillmentModal, { MatchedOrder } from '../components/BulkFulfillmentModal';
 
 type FilterStatus = 'unfulfilled' | 'fulfilled' | 'all';
 
@@ -23,6 +24,8 @@ const PrintShipDashboardPage: React.FC = () => {
   
   const [flagModalOpen, setFlagModalOpen] = useState(false);
   const [selectedContactForFlag, setSelectedContactForFlag] = useState<Contact | null>(null);
+
+  const [bulkModalOpen, setBulkModalOpen] = useState(false);
 
   useEffect(() => {
     fetchContacts();
@@ -144,21 +147,6 @@ const PrintShipDashboardPage: React.FC = () => {
     saveAs(blob, `fulfillment_orders_${filterStatus}_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
-  const handleBeginFulfillment = async () => {
-    if (selectedContactIds.size === 0) return;
-    
-    setProcessing(true);
-    try {
-        handleExportCSV();
-        alert(`Started fulfillment for ${selectedContactIds.size} orders.`);
-    } catch (error) {
-        console.error('Error beginning fulfillment:', error);
-        alert('Failed to begin fulfillment.');
-    } finally {
-        setProcessing(false);
-    }
-  };
-
   const openFulfillmentModal = (contact: Contact) => {
     setSelectedContactForFulfillment(contact);
     setFulfillmentModalOpen(true);
@@ -199,6 +187,30 @@ const PrintShipDashboardPage: React.FC = () => {
     } catch (error) {
       console.error("Error saving flag:", error);
       throw error;
+    }
+  };
+
+  const handleBulkFulfillment = async (matches: MatchedOrder[]) => {
+    setProcessing(true);
+    try {
+      // Process sequentially to avoid rate limits, or use Promise.all with small batches if needed
+      // Airtable rate limit is 5 requests per second
+      for (const match of matches) {
+        await AirtableService.updateContact(match.contact.id, {
+          latestTrackingNumber: match.trackingNumber,
+          latestShipDate: match.shipDate,
+          specificStage: 'Shipped'
+        } as any);
+      }
+      
+      // Refresh all contacts to reflect changes
+      await fetchContacts();
+      alert(`Successfully fulfilled ${matches.length} orders.`);
+    } catch (error) {
+      console.error("Error in bulk fulfillment:", error);
+      alert("Some orders failed to update. Please check the list.");
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -265,12 +277,12 @@ const PrintShipDashboardPage: React.FC = () => {
                     Export CSV
                   </button>
                   <button
-                    onClick={handleBeginFulfillment}
-                    disabled={selectedContactIds.size === 0 || processing}
+                    onClick={() => setBulkModalOpen(true)}
+                    disabled={processing}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                   >
-                    <Package className="mr-2 h-4 w-4" />
-                    Begin Fulfillment
+                    <Upload className="mr-2 h-4 w-4" />
+                    Bulk Fulfill
                   </button>
                 </div>
               </div>
@@ -451,6 +463,13 @@ const PrintShipDashboardPage: React.FC = () => {
           onSave={handleSaveFlag}
         />
       )}
+
+      <BulkFulfillmentModal 
+        isOpen={bulkModalOpen}
+        onClose={() => setBulkModalOpen(false)}
+        contacts={contacts} // Pass all loaded contacts
+        onConfirm={handleBulkFulfillment}
+      />
     </div>
   );
 };
