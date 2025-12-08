@@ -147,6 +147,21 @@ const PrintShipDashboardPage: React.FC = () => {
     saveAs(blob, `fulfillment_orders_${filterStatus}_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
+  const handleBeginFulfillment = async () => {
+    if (selectedContactIds.size === 0) return;
+    
+    setProcessing(true);
+    try {
+        handleExportCSV();
+        alert(`Started fulfillment for ${selectedContactIds.size} orders.`);
+    } catch (error) {
+        console.error('Error beginning fulfillment:', error);
+        alert('Failed to begin fulfillment.');
+    } finally {
+        setProcessing(false);
+    }
+  };
+
   const openFulfillmentModal = (contact: Contact) => {
     setSelectedContactForFulfillment(contact);
     setFulfillmentModalOpen(true);
@@ -220,85 +235,87 @@ const PrintShipDashboardPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Print & Ship Dashboard</h1>
 
         <div className="bg-white shadow rounded-lg mb-8 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200">
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-                <h2 className="text-lg font-medium text-gray-900">
-                  {filterStatus === 'unfulfilled' ? 'Orders' : 
-                   filterStatus === 'fulfilled' ? 'Fulfilled Orders' : 'All Orders'}
-                </h2>
-                
-                <div className="flex items-center space-x-4">
-                  {/* Status Toggle */}
-                  <span className="relative z-0 inline-flex shadow-sm rounded-md">
-                    <button
-                      type="button"
-                      onClick={() => setFilterStatus('unfulfilled')}
-                      className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        filterStatus === 'unfulfilled'
-                          ? 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      Unfulfilled
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFilterStatus('fulfilled')}
-                      className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        filterStatus === 'fulfilled'
-                          ? 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      Fulfilled
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFilterStatus('all')}
-                      className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                        filterStatus === 'all'
-                          ? 'bg-indigo-600 border-indigo-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      All
-                    </button>
-                  </span>
-
-                  <div className="h-6 w-px bg-gray-300 mx-2" />
-
-                  <button
-                    onClick={handleExportCSV}
-                    disabled={selectedContactIds.size === 0 || processing}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Export CSV
-                  </button>
-                  <button
-                    onClick={() => setBulkModalOpen(true)}
-                    disabled={processing}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Bulk Fulfill
-                  </button>
-                </div>
+          <div className="px-6 py-5 border-b border-gray-200 space-y-4">
+            {/* Header Row: Title and Actions */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                Orders
+              </h2>
+              
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleExportCSV}
+                  disabled={selectedContactIds.size === 0 || processing}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export CSV
+                </button>
+                <button
+                  onClick={() => setBulkModalOpen(true)}
+                  disabled={processing}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Bulk Fulfill
+                </button>
               </div>
+            </div>
 
+            {/* Filter Row: Search and Toggles */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               {/* Search Bar */}
-              <div className="relative rounded-md shadow-sm max-w-md">
+              <div className="relative rounded-md shadow-sm max-w-md w-full">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
                   type="text"
-                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 border"
+                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2"
                   placeholder="Search orders..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+              </div>
+
+              {/* Status Toggle */}
+              <div className="flex items-center">
+                <span className="mr-3 text-sm text-gray-500 hidden sm:inline">Show:</span>
+                <span className="relative z-0 inline-flex shadow-sm rounded-md">
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('unfulfilled')}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'unfulfilled'
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Unfulfilled
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('fulfilled')}
+                    className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'fulfilled'
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Fulfilled
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('all')}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'all'
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    All
+                  </button>
+                </span>
               </div>
             </div>
           </div>
