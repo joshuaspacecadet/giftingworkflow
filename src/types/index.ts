@@ -84,6 +84,9 @@ export interface Contact {
   subheadline?: string;
   flavorText?: string;
   copyStatus?: 'New copy needed' | 'New copy done' | null;
+  // Fulfillment details
+  latestTrackingNumber?: string;
+  latestShipDate?: string;
 }
 
 export interface AirtableAttachment {

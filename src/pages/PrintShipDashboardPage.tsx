@@ -4,27 +4,35 @@ import { Contact } from '../types';
 import { Loader2, Download, Package } from 'lucide-react';
 import { saveAs } from 'file-saver';
 
+type FilterStatus = 'unfulfilled' | 'fulfilled' | 'all';
+
 const PrintShipDashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [processing, setProcessing] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('unfulfilled');
 
   useEffect(() => {
     fetchContacts();
   }, []);
 
+  useEffect(() => {
+    filterContacts();
+  }, [contacts, filterStatus]);
+
   const fetchContacts = async () => {
     setLoading(true);
     try {
       const allContacts = await AirtableService.getContacts();
-      // Filter for contacts in 'Fulfillment' stage and not missing address
-      const readyContacts = allContacts.filter(contact => {
-        const isFulfillment = contact.specificStage === 'Fulfillment';
+      // Only keep relevant contacts for this dashboard (Fulfillment or Shipped)
+      const relevantContacts = allContacts.filter(contact => {
+        const isRelevantStage = contact.specificStage === 'Fulfillment' || contact.specificStage === 'Shipped';
         const hasAddress = contact.streetLine1 && contact.city && contact.state && contact.postCode && contact.countryCode;
-        return isFulfillment && hasAddress;
+        return isRelevantStage && hasAddress;
       });
-      setContacts(readyContacts);
+      setContacts(relevantContacts);
     } catch (error) {
       console.error('Error fetching contacts:', error);
     } finally {
@@ -32,9 +40,24 @@ const PrintShipDashboardPage: React.FC = () => {
     }
   };
 
+  const filterContacts = () => {
+    let filtered = contacts;
+
+    if (filterStatus === 'unfulfilled') {
+      filtered = contacts.filter(c => c.specificStage === 'Fulfillment');
+    } else if (filterStatus === 'fulfilled') {
+      filtered = contacts.filter(c => c.specificStage === 'Shipped');
+    }
+    // 'all' includes both, which is already the base set of contacts loaded
+
+    setFilteredContacts(filtered);
+    // Clear selection when filter changes to avoid confusion
+    setSelectedContactIds(new Set());
+  };
+
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedContactIds(new Set(contacts.map(c => c.id)));
+      setSelectedContactIds(new Set(filteredContacts.map(c => c.id)));
     } else {
       setSelectedContactIds(new Set());
     }
@@ -51,7 +74,7 @@ const PrintShipDashboardPage: React.FC = () => {
   };
 
   const handleExportCSV = () => {
-    const selected = contacts.filter(c => selectedContactIds.has(c.id));
+    const selected = filteredContacts.filter(c => selectedContactIds.has(c.id));
     if (selected.length === 0) return;
 
     const csvHeader = [
@@ -65,7 +88,9 @@ const PrintShipDashboardPage: React.FC = () => {
       'Postal Code',
       'Country',
       'Order Items',
-      'Design File URL'
+      'Design File URL',
+      'Tracking Number',
+      'Ship Date'
     ].join(',');
 
     const csvRows = selected.map(c => {
@@ -83,29 +108,22 @@ const PrintShipDashboardPage: React.FC = () => {
         `"${c.postCode || ''}"`,
         `"${c.countryCode || ''}"`,
         `"${orderItems}"`,
-        `"${designFileUrl}"`
+        `"${designFileUrl}"`,
+        `"${c.latestTrackingNumber || ''}"`,
+        `"${c.latestShipDate || ''}"`
       ].join(',');
     });
 
     const csvContent = [csvHeader, ...csvRows].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, `fulfillment_orders_${new Date().toISOString().split('T')[0]}.csv`);
+    saveAs(blob, `fulfillment_orders_${filterStatus}_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handleBeginFulfillment = async () => {
-    // For now, this effectively just exports the CSV and maybe we can add logic to update status later
-    // The prompt says "ability to take the bulk action of beginning fulfillment AND exporting selected orders as a CSV"
-    // I will combine them or treat them as related.
-    // Assuming "Begin Fulfillment" implies acknowledgement.
-    // For this pass, I will just trigger the export and maybe show a success toast/alert.
-    
     if (selectedContactIds.size === 0) return;
     
     setProcessing(true);
     try {
-        // Here we would potentially update the status in Airtable if required.
-        // For example: await Promise.all(Array.from(selectedContactIds).map(id => AirtableService.updateContact(id, { specificStage: 'some_processing_stage' })));
-        
         handleExportCSV();
         alert(`Started fulfillment for ${selectedContactIds.size} orders.`);
     } catch (error) {
@@ -123,25 +141,70 @@ const PrintShipDashboardPage: React.FC = () => {
 
         {/* Section 1: New Orders Ready to Fulfill */}
         <div className="bg-white shadow rounded-lg mb-8 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-lg font-medium text-gray-900">Section 1: New Orders Ready to Fulfill</h2>
-            <div className="space-x-4">
-               <button
-                onClick={handleExportCSV}
-                disabled={selectedContactIds.size === 0 || processing}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export CSV
-              </button>
-              <button
-                onClick={handleBeginFulfillment}
-                disabled={selectedContactIds.size === 0 || processing}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                <Package className="mr-2 h-4 w-4" />
-                Begin Fulfillment
-              </button>
+          <div className="px-6 py-5 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+              <h2 className="text-lg font-medium text-gray-900">
+                {filterStatus === 'unfulfilled' ? 'New Orders Ready to Fulfill' : 
+                 filterStatus === 'fulfilled' ? 'Fulfilled Orders' : 'All Orders'}
+              </h2>
+              
+              <div className="flex items-center space-x-4">
+                {/* Status Toggle */}
+                <span className="relative z-0 inline-flex shadow-sm rounded-md">
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('unfulfilled')}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'unfulfilled'
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Unfulfilled
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('fulfilled')}
+                    className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'fulfilled'
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Fulfilled
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('all')}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'all'
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    All
+                  </button>
+                </span>
+
+                <div className="h-6 w-px bg-gray-300 mx-2" />
+
+                <button
+                  onClick={handleExportCSV}
+                  disabled={selectedContactIds.size === 0 || processing}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export CSV
+                </button>
+                <button
+                  onClick={handleBeginFulfillment}
+                  disabled={selectedContactIds.size === 0 || processing}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  Begin Fulfillment
+                </button>
+              </div>
             </div>
           </div>
           
@@ -153,11 +216,11 @@ const PrintShipDashboardPage: React.FC = () => {
                     <input
                       type="checkbox"
                       className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      checked={contacts.length > 0 && selectedContactIds.size === contacts.length}
+                      checked={filteredContacts.length > 0 && selectedContactIds.size === filteredContacts.length}
                       onChange={handleSelectAll}
                     />
                   </th>
-                  {['Full Name', 'Company', 'LinkedIn URL', 'Address', 'Order Items', 'Design File'].map((header) => (
+                  {['Full Name', 'Company', 'LinkedIn URL', 'Address', 'Order Items', 'Design File', 'Tracking Details'].map((header) => (
                     <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {header}
                     </th>
@@ -167,21 +230,21 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
                       </div>
                     </td>
                   </tr>
-                ) : contacts.length === 0 ? (
+                ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
-                      No new orders ready to fulfill.
+                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                      No orders found.
                     </td>
                   </tr>
                 ) : (
-                  contacts.map((contact) => (
+                  filteredContacts.map((contact) => (
                     <tr key={contact.id} className={selectedContactIds.has(contact.id) ? 'bg-indigo-50' : 'hover:bg-gray-50'}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
@@ -221,6 +284,29 @@ const PrintShipDashboardPage: React.FC = () => {
                                  Download Design
                              </a>
                          )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        <div className="flex flex-col space-y-1">
+                          {contact.latestTrackingNumber ? (
+                            <span className="font-medium text-gray-900">
+                              {contact.latestTrackingNumber}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 italic">No tracking #</span>
+                          )}
+                          
+                          {contact.latestShipDate ? (
+                            <span className="text-xs">
+                              Shipped: {new Date(contact.latestShipDate).toLocaleDateString()}
+                            </span>
+                          ) : null}
+
+                          {contact.specificStage === 'Shipped' && !contact.latestTrackingNumber && (
+                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                               Fulfilled
+                             </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))

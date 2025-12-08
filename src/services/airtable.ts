@@ -100,6 +100,8 @@ const transformAirtableContact = (record: any): Contact => {
     round3Draft: fields["Round 3 Draft"] || [],
     contactReview: fields["Contact Review"] || undefined,
     contactReviewFeedback: fields["Contact Review Feedback"] || "",
+    latestTrackingNumber: fields["Latest Tracking Number"] || "",
+    latestShipDate: fields["Latest Ship Date"] || "",
     createdAt: fields["Created At"],
     updatedAt: fields["Updated At"],
   };
