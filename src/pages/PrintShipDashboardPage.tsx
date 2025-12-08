@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AirtableService } from '../services/airtable';
 import { Contact } from '../types';
-import { Loader2, Download, Package } from 'lucide-react';
+import { Loader2, Download, Package, Linkedin, PenSquare } from 'lucide-react';
 import { saveAs } from 'file-saver';
+import FulfillmentModal from '../components/FulfillmentModal';
 
 type FilterStatus = 'unfulfilled' | 'fulfilled' | 'all';
 
@@ -13,6 +14,10 @@ const PrintShipDashboardPage: React.FC = () => {
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [processing, setProcessing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('unfulfilled');
+  
+  // Modal state
+  const [fulfillmentModalOpen, setFulfillmentModalOpen] = useState(false);
+  const [selectedContactForFulfillment, setSelectedContactForFulfillment] = useState<Contact | null>(null);
 
   useEffect(() => {
     fetchContacts();
@@ -134,6 +139,29 @@ const PrintShipDashboardPage: React.FC = () => {
     }
   };
 
+  const openFulfillmentModal = (contact: Contact) => {
+    setSelectedContactForFulfillment(contact);
+    setFulfillmentModalOpen(true);
+  };
+
+  const handleSaveFulfillment = async (contactId: string, trackingNumber: string, shipDate: string) => {
+    try {
+      const updatedContact = await AirtableService.updateContact(contactId, {
+        latestTrackingNumber: trackingNumber,
+        latestShipDate: shipDate,
+        specificStage: 'Shipped' // Automatically move to Shipped stage
+      } as any);
+
+      if (updatedContact) {
+        // Update local state
+        setContacts(prev => prev.map(c => c.id === contactId ? updatedContact : c));
+      }
+    } catch (error) {
+      console.error("Error saving fulfillment:", error);
+      throw error;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -220,7 +248,7 @@ const PrintShipDashboardPage: React.FC = () => {
                       onChange={handleSelectAll}
                     />
                   </th>
-                  {['Full Name', 'Company', 'LinkedIn URL', 'Address', 'Order Items', 'Design File', 'Tracking Details'].map((header) => (
+                  {['Recipient', 'Address', 'Order Items', 'Design File', 'Tracking Details', 'Action'].map((header) => (
                     <th key={header} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {header}
                     </th>
@@ -230,7 +258,7 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
@@ -239,7 +267,7 @@ const PrintShipDashboardPage: React.FC = () => {
                   </tr>
                 ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
                       No orders found.
                     </td>
                   </tr>
@@ -254,14 +282,18 @@ const PrintShipDashboardPage: React.FC = () => {
                           onChange={() => handleSelectContact(contact.id)}
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{contact.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{contact.company}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800">
-                        {contact.linkedinUrl && (
-                          <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer">
-                            LinkedIn Profile
-                          </a>
-                        )}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                            <div className="flex items-center">
+                                <span className="text-sm font-medium text-gray-900 mr-2">{contact.name}</span>
+                                {contact.linkedinUrl && (
+                                    <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
+                                        <Linkedin className="h-4 w-4" />
+                                    </a>
+                                )}
+                            </div>
+                            <span className="text-sm text-gray-500">{contact.company}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
                         <div className="flex flex-col">
@@ -308,6 +340,15 @@ const PrintShipDashboardPage: React.FC = () => {
                           )}
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => openFulfillmentModal(contact)}
+                          className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                        >
+                          <PenSquare className="h-4 w-4 mr-1" />
+                          Fulfill
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -328,6 +369,18 @@ const PrintShipDashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {selectedContactForFulfillment && (
+        <FulfillmentModal
+          isOpen={fulfillmentModalOpen}
+          onClose={() => {
+            setFulfillmentModalOpen(false);
+            setSelectedContactForFulfillment(null);
+          }}
+          contact={selectedContactForFulfillment}
+          onSave={handleSaveFulfillment}
+        />
+      )}
     </div>
   );
 };
