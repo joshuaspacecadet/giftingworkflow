@@ -330,7 +330,7 @@ const PrintShipDashboardPage: React.FC = () => {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 table-fixed">
+            <table className="w-full min-w-[1200px] divide-y divide-gray-200 table-fixed">
               <colgroup>
                 <col className="w-16" />
                 <col className="w-[226px]" />
