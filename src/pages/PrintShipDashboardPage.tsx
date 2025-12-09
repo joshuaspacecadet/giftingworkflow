@@ -340,10 +340,10 @@ const PrintShipDashboardPage: React.FC = () => {
                 <col className="w-16" />
                 <col className="w-[226px]" />
                 <col className="w-[299px]" />
-                <col className="w-[15%]" />
-                <col className="w-[10%]" />
-                <col className="w-[15%]" />
-                <col className="w-[10%]" />
+                <col className="w-[160px]" />
+                <col className="w-[110px]" />
+                <col className="w-[160px]" />
+                <col className="w-[110px]" />
               </colgroup>
               <thead className="bg-gray-50">
                 <tr>
