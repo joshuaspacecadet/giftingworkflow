@@ -476,7 +476,7 @@ const PrintShipDashboardPage: React.FC = () => {
                             className="text-indigo-600 hover:text-indigo-900 flex items-center"
                           >
                             <Box className="h-4 w-4 mr-1" />
-                            Fulfill
+                            {contact.specificStage === 'Shipped' ? 'Update' : 'Fulfill'}
                           </button>
                           <button
                             onClick={() => openFlagModal(contact)}
