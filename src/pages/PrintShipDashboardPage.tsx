@@ -338,8 +338,8 @@ const PrintShipDashboardPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200 table-fixed">
               <colgroup>
                 <col className="w-16" />
-                <col className="w-[18%]" />
-                <col className="w-[32%]" />
+                <col className="w-[226px]" />
+                <col className="w-[299px]" />
                 <col className="w-[15%]" />
                 <col className="w-[10%]" />
                 <col className="w-[15%]" />
@@ -368,7 +368,7 @@ const PrintShipDashboardPage: React.FC = () => {
                     Design File
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tracking Details
+                    Tracking
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
@@ -445,7 +445,7 @@ const PrintShipDashboardPage: React.FC = () => {
                       <td className="px-6 py-3 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 align-top">
                          {contact.designFiles && contact.designFiles.length > 0 && (
                              <a href={contact.designFiles[0].url} target="_blank" rel="noopener noreferrer">
-                                 Download Design
+                                 Design File
                              </a>
                          )}
                       </td>
