@@ -223,6 +223,12 @@ const BulkFulfillmentModal: React.FC<BulkFulfillmentModalProps> = ({
     setParseResult({ matched: [], unmatched: [], errors: [] });
   };
 
+  React.useEffect(() => {
+    if (isOpen) {
+      reset();
+    }
+  }, [isOpen]);
+
   const modalContent = (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000]"
