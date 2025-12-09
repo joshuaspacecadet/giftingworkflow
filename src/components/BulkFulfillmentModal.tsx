@@ -34,8 +34,6 @@ const BulkFulfillmentModal: React.FC<BulkFulfillmentModalProps> = ({
   const [parseResult, setParseResult] = useState<ParseResult>({ matched: [], unmatched: [], errors: [] });
   const [dragActive, setDragActive] = useState(false);
 
-  if (!isOpen) return null;
-
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -228,6 +226,8 @@ const BulkFulfillmentModal: React.FC<BulkFulfillmentModalProps> = ({
       reset();
     }
   }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const modalContent = (
     <div
