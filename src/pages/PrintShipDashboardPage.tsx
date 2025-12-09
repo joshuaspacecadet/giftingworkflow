@@ -336,6 +336,15 @@ const PrintShipDashboardPage: React.FC = () => {
           
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 table-fixed">
+              <colgroup>
+                <col className="w-16" />
+                <col className="w-[22%]" />
+                <col className="w-[28%]" />
+                <col className="w-[15%]" />
+                <col className="w-[10%]" />
+                <col className="w-[15%]" />
+                <col className="w-[10%]" />
+              </colgroup>
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
@@ -346,22 +355,22 @@ const PrintShipDashboardPage: React.FC = () => {
                       onChange={handleSelectAll}
                     />
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[22%]">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Recipient
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[28%]">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Address
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Order Items
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Design File
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tracking Details
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
                   </th>
                 </tr>
@@ -413,7 +422,7 @@ const PrintShipDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col break-words">
                           <span>{contact.streetLine1}</span>
                           {contact.streetLine2 && <span>{contact.streetLine2}</span>}
                           <span>{contact.city}, {contact.state} {contact.postCode}</span>
@@ -421,11 +430,13 @@ const PrintShipDashboardPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                         {contact.draftOrderItems?.map((item, idx) => (
-                             <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mr-1">
-                                 {item}
-                             </span>
-                         ))}
+                         <div className="flex flex-wrap gap-1">
+                           {contact.draftOrderItems?.map((item, idx) => (
+                               <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                   {item}
+                               </span>
+                           ))}
+                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800">
                          {contact.designFiles && contact.designFiles.length > 0 && (
