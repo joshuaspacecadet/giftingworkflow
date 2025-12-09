@@ -338,8 +338,8 @@ const PrintShipDashboardPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200 table-fixed">
               <colgroup>
                 <col className="w-16" />
-                <col className="w-[22%]" />
-                <col className="w-[28%]" />
+                <col className="w-[18%]" />
+                <col className="w-[32%]" />
                 <col className="w-[15%]" />
                 <col className="w-[10%]" />
                 <col className="w-[15%]" />
