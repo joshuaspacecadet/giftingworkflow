@@ -347,7 +347,7 @@ const PrintShipDashboardPage: React.FC = () => {
               </colgroup>
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                     <input
                       type="checkbox"
                       className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
@@ -355,22 +355,22 @@ const PrintShipDashboardPage: React.FC = () => {
                       onChange={handleSelectAll}
                     />
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Recipient
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Address
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Order Items
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Design File
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tracking Details
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
                   </th>
                 </tr>
@@ -394,7 +394,7 @@ const PrintShipDashboardPage: React.FC = () => {
                 ) : (
                   filteredContacts.map((contact) => (
                     <tr key={contact.id} className={selectedContactIds.has(contact.id) ? 'bg-indigo-50' : 'hover:bg-gray-50'}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-3 whitespace-nowrap align-top">
                         <input
                           type="checkbox"
                           className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
@@ -402,51 +402,55 @@ const PrintShipDashboardPage: React.FC = () => {
                           onChange={() => handleSelectContact(contact.id)}
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col">
-                            <div className="flex items-center">
-                                <span className="text-sm font-medium text-gray-900 mr-2">{contact.name}</span>
-                                {contact.linkedinUrl && (
-                                    <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
-                                        <Linkedin className="h-4 w-4" />
-                                    </a>
-                                )}
-                            </div>
-                            <span className="text-sm text-gray-500">{contact.company}</span>
-                            {contact.fulfillFlag && (
-                              <div className="mt-1 flex items-center text-xs text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-md w-fit">
-                                <Flag className="h-3 w-3 mr-1 fill-yellow-500 text-yellow-600" />
-                                <span className="truncate max-w-[150px]" title={contact.fulfillFlag}>{contact.fulfillFlag}</span>
-                              </div>
+                      <td className="px-6 py-3 whitespace-nowrap align-top">
+                        <div className="flex flex-col gap-1 leading-tight">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-900 mr-2 truncate max-w-[160px]">{contact.name}</span>
+                            {contact.linkedinUrl && (
+                              <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 flex-shrink-0">
+                                <Linkedin className="h-4 w-4" />
+                              </a>
                             )}
+                          </div>
+                          {contact.company && (
+                            <span className="text-xs text-gray-500 truncate max-w-[160px]">{contact.company}</span>
+                          )}
+                          {contact.fulfillFlag && (
+                            <div className="flex items-center text-[11px] text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-md w-fit">
+                              <Flag className="h-3 w-3 mr-1 fill-yellow-500 text-yellow-600" />
+                              <span className="truncate max-w-[150px]" title={contact.fulfillFlag}>{contact.fulfillFlag}</span>
+                            </div>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        <div className="flex flex-col break-words">
-                          <span>{contact.streetLine1}</span>
-                          {contact.streetLine2 && <span>{contact.streetLine2}</span>}
-                          <span>{contact.city}, {contact.state} {contact.postCode}</span>
-                          <span>{contact.countryCode}</span>
+                      <td className="px-6 py-3 text-sm text-gray-500 align-top leading-tight">
+                        <div className="flex flex-col break-words space-y-0.5">
+                          <span className="truncate max-w-[260px]" title={contact.streetLine1}>{contact.streetLine1}</span>
+                          {contact.streetLine2 && <span className="truncate max-w-[260px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
+                          <span className="truncate max-w-[260px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
+                            {contact.city}, {contact.state} {contact.postCode}
+                          </span>
+                          <span className="truncate max-w-[260px]" title={contact.countryCode}>{contact.countryCode}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                         <div className="flex flex-wrap gap-1">
+                      <td className="px-6 py-3 text-sm text-gray-500 align-top">
+                         <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
                            {contact.draftOrderItems?.map((item, idx) => (
-                               <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                               <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-800">
                                    {item}
                                </span>
                            ))}
                          </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 align-top">
                          {contact.designFiles && contact.designFiles.length > 0 && (
                              <a href={contact.designFiles[0].url} target="_blank" rel="noopener noreferrer">
                                  Download Design
                              </a>
                          )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        <div className="flex flex-col space-y-1">
+                      <td className="px-6 py-3 text-sm text-gray-500 align-top">
+                        <div className="flex flex-col space-y-1 leading-tight">
                           {contact.latestTrackingNumber ? (
                             <span className="font-medium text-gray-900">
                               {contact.latestTrackingNumber}
@@ -468,8 +472,8 @@ const PrintShipDashboardPage: React.FC = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex flex-col space-y-3 items-end">
+                      <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium align-top">
+                        <div className="flex flex-col space-y-2 items-end">
                           <button
                             onClick={() => openFulfillmentModal(contact)}
                             className="text-indigo-600 hover:text-indigo-900 flex items-center"
