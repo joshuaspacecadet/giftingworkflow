@@ -246,17 +246,69 @@ const PrintShipDashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Print & Ship Dashboard</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Print & Ship Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-500">Spacecadet Gifting</p>
+        </div>
 
         <div className="bg-white shadow rounded-lg mb-8 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200 space-y-4">
-            {/* Header Row: Title and Actions */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-lg font-medium text-gray-900">
-                Orders
-              </h2>
-              
-              <div className="flex items-center space-x-3">
+          <div className="px-6 py-5 border-b border-gray-200">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Search Bar */}
+              <div className="relative rounded-md shadow-sm max-w-md w-full">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
+                <input
+                  type="text"
+                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2"
+                  placeholder="Search orders..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              {/* Status Toggle */}
+              <div className="flex items-center justify-center">
+                <span className="relative z-0 inline-flex shadow-sm rounded-md">
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('unfulfilled')}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'unfulfilled'
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Needs shipped ({counts.unfulfilled})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('fulfilled')}
+                    className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'fulfilled'
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Shipped ({counts.fulfilled})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterStatus('all')}
+                    className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                      filterStatus === 'all'
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    All ({counts.all})
+                  </button>
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end space-x-3">
                 <button
                   onClick={handleExportCSV}
                   disabled={selectedContactIds.size === 0 || processing}
@@ -273,63 +325,6 @@ const PrintShipDashboardPage: React.FC = () => {
                   <Upload className="mr-2 h-4 w-4" />
                   Bulk Fulfill
                 </button>
-              </div>
-            </div>
-
-            {/* Filter Row: Search and Toggles */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              {/* Search Bar */}
-              <div className="relative rounded-md shadow-sm max-w-md w-full">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                </div>
-                <input
-                  type="text"
-                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2"
-                  placeholder="Search orders..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              {/* Status Toggle */}
-              <div className="flex items-center">
-                <span className="mr-3 text-sm text-gray-500 hidden sm:inline">Show:</span>
-                <span className="relative z-0 inline-flex shadow-sm rounded-md">
-                  <button
-                    type="button"
-                    onClick={() => setFilterStatus('unfulfilled')}
-                    className={`relative inline-flex items-center px-4 py-2 rounded-l-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      filterStatus === 'unfulfilled'
-                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Unfulfilled ({counts.unfulfilled})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterStatus('fulfilled')}
-                    className={`relative inline-flex items-center px-4 py-2 border-t border-b border-gray-300 text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      filterStatus === 'fulfilled'
-                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Fulfilled ({counts.fulfilled})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterStatus('all')}
-                    className={`relative inline-flex items-center px-4 py-2 rounded-r-md border text-sm font-medium focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
-                      filterStatus === 'all'
-                        ? 'bg-indigo-50 border-indigo-500 text-indigo-600 z-20'
-                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    All ({counts.all})
-                  </button>
-                </span>
               </div>
             </div>
           </div>
