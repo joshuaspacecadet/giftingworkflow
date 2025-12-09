@@ -458,9 +458,11 @@ const PrintShipDashboardPage: React.FC = () => {
                             <span className="text-xs">
                               Shipped: {new Date(contact.latestShipDate).toLocaleDateString()}
                             </span>
-                          ) : null}
+                          ) : (
+                            <span className="text-xs text-gray-400">No ship date</span>
+                          )}
 
-                          {contact.specificStage === 'Shipped' && !contact.latestTrackingNumber && (
+                          {contact.specificStage === 'Shipped' && !contact.latestTrackingNumber && filterStatus !== 'fulfilled' && (
                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                Fulfilled
                              </span>
