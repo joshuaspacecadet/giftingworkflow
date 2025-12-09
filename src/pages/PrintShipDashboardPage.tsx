@@ -334,11 +334,11 @@ const PrintShipDashboardPage: React.FC = () => {
               <colgroup>
                 <col className="w-16" />
                 <col className="w-[226px]" />
-                <col className="w-[299px]" />
-                <col className="w-[160px]" />
-                <col className="w-[110px]" />
-                <col className="w-[160px]" />
-                <col className="w-[110px]" />
+                <col className="w-[209px]" />
+                <col className="w-[190px]" />
+                <col className="w-[140px]" />
+                <col className="w-[170px]" />
+                <col className="w-[130px]" />
               </colgroup>
               <thead className="bg-gray-50">
                 <tr>
@@ -357,16 +357,16 @@ const PrintShipDashboardPage: React.FC = () => {
                     Address
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order Items
+                    Items
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Design File
+                    File
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tracking
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -420,12 +420,12 @@ const PrintShipDashboardPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-500 align-top leading-tight">
                         <div className="flex flex-col break-words space-y-0.5">
-                          <span className="truncate max-w-[260px]" title={contact.streetLine1}>{contact.streetLine1}</span>
-                          {contact.streetLine2 && <span className="truncate max-w-[260px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
-                          <span className="truncate max-w-[260px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
+                          <span className="truncate max-w-[220px]" title={contact.streetLine1}>{contact.streetLine1}</span>
+                          {contact.streetLine2 && <span className="truncate max-w-[220px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
+                          <span className="truncate max-w-[220px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
                             {contact.city}, {contact.state} {contact.postCode}
                           </span>
-                          <span className="truncate max-w-[260px]" title={contact.countryCode}>{contact.countryCode}</span>
+                          <span className="truncate max-w-[220px]" title={contact.countryCode}>{contact.countryCode}</span>
                         </div>
                       </td>
                       <td className="px-6 py-3 text-sm text-gray-500 align-top">
