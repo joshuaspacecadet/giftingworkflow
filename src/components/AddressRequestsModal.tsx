@@ -237,8 +237,8 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
 We’re known for our awesome (${awesomeUrl}) surprises (${surprisesUrl}), would love to include you in the next one — what’s the best physical mailing address for you? Add it here, if easier: ${addressLink}
 
 Thanks!
-Wiz`;
-  const emailBodyHtml = `Hey ${firstName},<br><br>We&rsquo;re known for our <a href="${awesomeUrl}" target="_blank" rel="noopener noreferrer">awesome</a> <a href="${surprisesUrl}" target="_blank" rel="noopener noreferrer">surprises</a>, would love to include you in the next one &mdash; what&rsquo;s the best physical mailing address for you? Add it here, if easier: <a href="${addressLink}" target="_blank" rel="noopener noreferrer">${addressLink}</a><br><br>Thanks!<br>Wiz`;
+${signerName}`;
+  const emailBodyHtml = `Hey ${firstName},<br><br>We&rsquo;re known for our <a href="${awesomeUrl}" target="_blank" rel="noopener noreferrer">awesome</a> <a href="${surprisesUrl}" target="_blank" rel="noopener noreferrer">surprises</a>, would love to include you in the next one &mdash; what&rsquo;s the best physical mailing address for you? Add it here, if easier: <a href="${addressLink}" target="_blank" rel="noopener noreferrer">${addressLink}</a><br><br>Thanks!<br>${signerName}`;
   const mailto = `mailto:?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
 
   const copyEmail = async () => {
@@ -407,7 +407,7 @@ Wiz`;
                 {'\n\n'}
                 <span>Thanks!</span>
                 {'\n'}
-                <span>Wiz</span>
+                <span>{signerName}</span>
               </div>
               <div className="mt-2 flex items-center gap-1.5 flex-wrap">
                 <button onClick={copyEmail} className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] rounded border border-slate-300 hover:bg-slate-50">
