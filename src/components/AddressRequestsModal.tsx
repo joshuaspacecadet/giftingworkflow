@@ -230,17 +230,31 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
 
   const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
   const addressLink = current.confirmAddressUrl || '';
+  const awesomeUrl = 'https://twitter.com/Rick_Zullo/status/1702424377697206640';
+  const surprisesUrl = 'https://x.com/WizLikeWizard/status/1788225886463868939';
   const emailBody = `Hey ${firstName},
 
-We’re known for our awesome surprises, would love to include you in the next one — what’s the best physical mailing address for you? Add it here, if easier: ${addressLink}
+We’re known for our awesome (${awesomeUrl}) surprises (${surprisesUrl}), would love to include you in the next one — what’s the best physical mailing address for you? Add it here, if easier: ${addressLink}
 
 Thanks!
 Wiz`;
+  const emailBodyHtml = `Hey ${firstName},<br><br>We&rsquo;re known for our <a href="${awesomeUrl}" target="_blank" rel="noopener noreferrer">awesome</a> <a href="${surprisesUrl}" target="_blank" rel="noopener noreferrer">surprises</a>, would love to include you in the next one &mdash; what&rsquo;s the best physical mailing address for you? Add it here, if easier: <a href="${addressLink}" target="_blank" rel="noopener noreferrer">${addressLink}</a><br><br>Thanks!<br>Wiz`;
   const mailto = `mailto:?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(emailBody);
+      if (navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+        const htmlBlob = new Blob([emailBodyHtml], { type: 'text/html' });
+        const textBlob = new Blob([emailBody], { type: 'text/plain' });
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': htmlBlob,
+            'text/plain': textBlob,
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(emailBody);
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -381,7 +395,19 @@ Wiz`;
             <div>
               <div className="text-sm font-medium mb-2">Pre-drafted email</div>
               <div className="text-sm border border-slate-300 bg-white rounded-md p-3 whitespace-pre-wrap">
-{emailBody}
+                <span>{`Hey ${firstName},`}</span>
+                {'\n\n'}
+                <span>
+                  We’re known for our{' '}
+                  <a href={awesomeUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">awesome</a>{' '}
+                  <a href={surprisesUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">surprises</a>
+                  , would love to include you in the next one — what’s the best physical mailing address for you? Add it here, if easier:{' '}
+                  <a href={addressLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline break-all">{addressLink}</a>
+                </span>
+                {'\n\n'}
+                <span>Thanks!</span>
+                {'\n'}
+                <span>Wiz</span>
               </div>
               <div className="mt-2 flex items-center gap-1.5 flex-wrap">
                 <button onClick={copyEmail} className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] rounded border border-slate-300 hover:bg-slate-50">
