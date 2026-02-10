@@ -230,11 +230,12 @@ const AddressRequestsModal: React.FC<AddressRequestsModalProps> = ({
 
   const firstName = (current.name || '').trim().split(/\s+/)[0] || '';
   const addressLink = current.confirmAddressUrl || '';
-  const emailBody = `Hey ${firstName}, hope you're well. Real quick - I have a little something ready to ship to you. When you get a chance, can you fill out your address here: ${addressLink}
+  const emailBody = `Hey ${firstName},
 
-Excited for you to receive!
+We’re known for our awesome surprises, would love to include you in the next one — what’s the best physical mailing address for you? Add it here, if easier: ${addressLink}
 
-- ${signerName}`;
+Thanks!
+Wiz`;
   const mailto = `mailto:?subject=${encodeURIComponent('Address for Spacecadet gift')}&body=${encodeURIComponent(emailBody)}`;
 
   const copyEmail = async () => {
