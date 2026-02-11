@@ -426,10 +426,10 @@ const PrintShipDashboardPage: React.FC = () => {
                           onChange={() => handleSelectContact(contact.id)}
                         />
                       </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap align-top">
+                      <td className="px-3 py-2.5 align-top">
                         <div className="flex flex-col gap-1 leading-tight">
                           <div className="flex items-center">
-                            <span className="text-sm font-medium text-gray-900 mr-2 truncate max-w-[125px]">{contact.name}</span>
+                            <span className="text-sm font-medium text-gray-900 mr-2 whitespace-normal break-words">{contact.name}</span>
                             {contact.linkedinUrl && (
                               <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 flex-shrink-0">
                                 <Linkedin className="h-4 w-4" />
