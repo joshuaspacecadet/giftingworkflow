@@ -270,7 +270,7 @@ const PrintShipDashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1760px] mx-auto px-3 sm:px-4 lg:px-5 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Print & Ship Dashboard</h1>
           <p className="mt-1 text-sm text-gray-500">Spacecadet Gifting</p>
@@ -355,20 +355,20 @@ const PrintShipDashboardPage: React.FC = () => {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1320px] divide-y divide-gray-200 table-fixed">
+            <table className="w-full min-w-0 divide-y divide-gray-200 table-fixed">
               <colgroup>
-                <col className="w-16" />
-                <col className="w-[226px]" />
-                <col className="w-[180px]" />
-                <col className="w-[180px]" />
-                <col className="w-[120px]" />
-                <col className="w-[170px]" />
-                <col className="w-[130px]" />
-                <col className="w-[130px]" />
+                <col className="w-12" />
+                <col className="w-[200px]" />
+                <col className="w-[160px]" />
+                <col className="w-[160px]" />
+                <col className="w-[100px]" />
+                <col className="w-[155px]" />
+                <col className="w-[95px]" />
+                <col className="w-[110px]" />
               </colgroup>
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
                     <input
                       type="checkbox"
                       className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
@@ -376,25 +376,25 @@ const PrintShipDashboardPage: React.FC = () => {
                       onChange={handleSelectAll}
                     />
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Recipient
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Address
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Items
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     File
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tracking
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Added
                   </th>
-                  <th scope="col" className="px-6 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -402,7 +402,7 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-3 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
@@ -411,14 +411,14 @@ const PrintShipDashboardPage: React.FC = () => {
                   </tr>
                 ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-3 py-10 text-center text-sm text-gray-500">
                       No orders found.
                     </td>
                   </tr>
                 ) : (
                   filteredContacts.map((contact) => (
                     <tr key={contact.id} className={selectedContactIds.has(contact.id) ? 'bg-indigo-50' : 'hover:bg-gray-50'}>
-                      <td className="px-6 py-3 whitespace-nowrap align-top">
+                      <td className="px-3 py-2.5 whitespace-nowrap align-top">
                         <input
                           type="checkbox"
                           className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
@@ -426,10 +426,10 @@ const PrintShipDashboardPage: React.FC = () => {
                           onChange={() => handleSelectContact(contact.id)}
                         />
                       </td>
-                      <td className="px-6 py-3 whitespace-nowrap align-top">
+                      <td className="px-3 py-2.5 whitespace-nowrap align-top">
                         <div className="flex flex-col gap-1 leading-tight">
                           <div className="flex items-center">
-                            <span className="text-sm font-medium text-gray-900 mr-2 truncate max-w-[160px]">{contact.name}</span>
+                            <span className="text-sm font-medium text-gray-900 mr-2 truncate max-w-[140px]">{contact.name}</span>
                             {contact.linkedinUrl && (
                               <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 flex-shrink-0">
                                 <Linkedin className="h-4 w-4" />
@@ -437,7 +437,7 @@ const PrintShipDashboardPage: React.FC = () => {
                             )}
                           </div>
                           {contact.company && (
-                            <span className="text-xs text-gray-500 truncate max-w-[160px]">{contact.company}</span>
+                            <span className="text-xs text-gray-500 truncate max-w-[140px]">{contact.company}</span>
                           )}
                           {contact.fulfillFlag && (
                             <div className="flex items-center text-[11px] text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-md w-fit">
@@ -447,17 +447,17 @@ const PrintShipDashboardPage: React.FC = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-500 align-top leading-tight">
+                      <td className="px-3 py-2.5 text-sm text-gray-500 align-top leading-tight">
                         <div className="flex flex-col break-words space-y-0.5">
-                          <span className="truncate max-w-[220px]" title={contact.streetLine1}>{contact.streetLine1}</span>
-                          {contact.streetLine2 && <span className="truncate max-w-[220px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
-                          <span className="truncate max-w-[220px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
+                          <span className="truncate max-w-[160px]" title={contact.streetLine1}>{contact.streetLine1}</span>
+                          {contact.streetLine2 && <span className="truncate max-w-[160px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
+                          <span className="truncate max-w-[160px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
                             {contact.city}, {contact.state} {contact.postCode}
                           </span>
-                          <span className="truncate max-w-[220px]" title={contact.countryCode}>{contact.countryCode}</span>
+                          <span className="truncate max-w-[160px]" title={contact.countryCode}>{contact.countryCode}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-500 align-top">
+                      <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
                          <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
                            {contact.draftOrderItems?.map((item, idx) => (
                                <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-800">
@@ -466,14 +466,14 @@ const PrintShipDashboardPage: React.FC = () => {
                            ))}
                          </div>
                       </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 align-top">
+                      <td className="px-3 py-2.5 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 align-top">
                          {contact.designFiles && contact.designFiles.length > 0 && (
                              <a href={contact.designFiles[0].url} target="_blank" rel="noopener noreferrer">
                                  Design File
                              </a>
                          )}
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-500 align-top">
+                      <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
                         <div className="flex flex-col space-y-1 leading-tight">
                           {contact.latestTrackingNumber ? (
                             <span className="font-medium text-gray-900">
@@ -498,7 +498,7 @@ const PrintShipDashboardPage: React.FC = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-500 align-top">
+                      <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
                         {contact.enteredFulfillmentAt ? (
                           <div className="flex flex-col space-y-0.5 leading-tight">
                             <span className="text-xs text-gray-500">
@@ -520,7 +520,7 @@ const PrintShipDashboardPage: React.FC = () => {
                           <span className="text-xs text-gray-400">No start date</span>
                         )}
                       </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium align-top">
+                      <td className="px-3 py-2.5 whitespace-nowrap text-right text-sm font-medium align-top">
                         <div className="flex flex-col space-y-2 items-end">
                           <button
                             onClick={() => openFulfillmentModal(contact)}
