@@ -94,6 +94,31 @@ const PrintShipDashboardPage: React.FC = () => {
     setSelectedContactIds(new Set());
   };
 
+  const parseDashboardDate = (value?: string) => {
+    if (!value) return null;
+    // Preserve date-only values as local dates to avoid timezone drift.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return new Date(`${value}T00:00:00`);
+    }
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
+  const getDaysInFulfillment = (enteredFulfillmentAt?: string, shipDate?: string) => {
+    const start = parseDashboardDate(enteredFulfillmentAt);
+    if (!start) return null;
+
+    const end = parseDashboardDate(shipDate) || new Date();
+    const startDay = new Date(start);
+    const endDay = new Date(end);
+    startDay.setHours(0, 0, 0, 0);
+    endDay.setHours(0, 0, 0, 0);
+
+    const diffMs = endDay.getTime() - startDay.getTime();
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return Math.max(0, days);
+  };
+
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedContactIds(new Set(filteredContacts.map(c => c.id)));
@@ -330,14 +355,15 @@ const PrintShipDashboardPage: React.FC = () => {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1200px] divide-y divide-gray-200 table-fixed">
+            <table className="w-full min-w-[1320px] divide-y divide-gray-200 table-fixed">
               <colgroup>
                 <col className="w-16" />
                 <col className="w-[226px]" />
-                <col className="w-[209px]" />
-                <col className="w-[190px]" />
-                <col className="w-[140px]" />
+                <col className="w-[180px]" />
+                <col className="w-[180px]" />
+                <col className="w-[120px]" />
                 <col className="w-[170px]" />
+                <col className="w-[130px]" />
                 <col className="w-[130px]" />
               </colgroup>
               <thead className="bg-gray-50">
@@ -365,6 +391,9 @@ const PrintShipDashboardPage: React.FC = () => {
                   <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tracking
                   </th>
+                  <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    In P&S
+                  </th>
                   <th scope="col" className="px-6 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
@@ -373,7 +402,7 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
@@ -382,7 +411,7 @@ const PrintShipDashboardPage: React.FC = () => {
                   </tr>
                 ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
                       No orders found.
                     </td>
                   </tr>
@@ -468,6 +497,20 @@ const PrintShipDashboardPage: React.FC = () => {
                              </span>
                           )}
                         </div>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-500 align-top">
+                        {contact.enteredFulfillmentAt ? (
+                          <div className="flex flex-col space-y-0.5 leading-tight">
+                            <span className="text-xs text-gray-500">
+                              {parseDashboardDate(contact.enteredFulfillmentAt)?.toLocaleDateString() || contact.enteredFulfillmentAt}
+                            </span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {getDaysInFulfillment(contact.enteredFulfillmentAt, contact.latestShipDate)}d
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">No start date</span>
+                        )}
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium align-top">
                         <div className="flex flex-col space-y-2 items-end">

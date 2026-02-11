@@ -103,6 +103,7 @@ const transformAirtableContact = (record: any): Contact => {
     latestTrackingNumber: fields["Latest Tracking Number"] || "",
     latestShipDate: fields["Latest Ship Date"] || "",
     fulfillFlag: fields["Fulfill Flag"] || "",
+    enteredFulfillmentAt: fields["Entered Fulfillment At"] || "",
     createdAt: fields["Created At"],
     updatedAt: fields["Updated At"],
   };
