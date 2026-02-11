@@ -268,6 +268,9 @@ const PrintShipDashboardPage: React.FC = () => {
     }
   };
 
+  const showTrackingColumn = filterStatus !== 'unfulfilled';
+  const totalColumns = showTrackingColumn ? 8 : 7;
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       <div className="max-w-[1760px] mx-auto px-3 sm:px-4 lg:px-5 py-8">
@@ -362,7 +365,7 @@ const PrintShipDashboardPage: React.FC = () => {
                 <col className="w-[170px]" />
                 <col className="w-[120px]" />
                 <col className="w-[90px]" />
-                <col className="w-[220px]" />
+                {showTrackingColumn && <col className="w-[220px]" />}
                 <col className="w-[65px]" />
                 <col className="w-[110px]" />
               </colgroup>
@@ -388,9 +391,11 @@ const PrintShipDashboardPage: React.FC = () => {
                   <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     File
                   </th>
-                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tracking
-                  </th>
+                  {showTrackingColumn && (
+                    <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tracking
+                    </th>
+                  )}
                   <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Added
                   </th>
@@ -402,7 +407,7 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-2 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={totalColumns} className="px-2 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
@@ -411,7 +416,7 @@ const PrintShipDashboardPage: React.FC = () => {
                   </tr>
                 ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-2 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={totalColumns} className="px-2 py-10 text-center text-sm text-gray-500">
                       No orders found.
                     </td>
                   </tr>
@@ -473,31 +478,33 @@ const PrintShipDashboardPage: React.FC = () => {
                              </a>
                          )}
                       </td>
-                      <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
-                        <div className="flex flex-col space-y-1 leading-tight">
-                          {contact.latestTrackingNumber ? (
-                            <span className="font-medium text-gray-900">
-                              {contact.latestTrackingNumber}
-                            </span>
-                          ) : (
-                            <span className="text-gray-400 italic">No tracking #</span>
-                          )}
-                          
-                          {contact.latestShipDate ? (
-                            <span className="text-xs">
-                              Shipped: {new Date(contact.latestShipDate).toLocaleDateString()}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-400">No ship date</span>
-                          )}
+                      {showTrackingColumn && (
+                        <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
+                          <div className="flex flex-col space-y-1 leading-tight">
+                            {contact.latestTrackingNumber ? (
+                              <span className="font-medium text-gray-900">
+                                {contact.latestTrackingNumber}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 italic">No tracking #</span>
+                            )}
+                            
+                            {contact.latestShipDate ? (
+                              <span className="text-xs">
+                                Shipped: {new Date(contact.latestShipDate).toLocaleDateString()}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">No ship date</span>
+                            )}
 
-                          {contact.specificStage === 'Shipped' && !contact.latestTrackingNumber && filterStatus !== 'fulfilled' && (
-                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                               Fulfilled
-                             </span>
-                          )}
-                        </div>
-                      </td>
+                            {contact.specificStage === 'Shipped' && !contact.latestTrackingNumber && filterStatus !== 'fulfilled' && (
+                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                 Fulfilled
+                               </span>
+                            )}
+                          </div>
+                        </td>
+                      )}
                       <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
                         {contact.enteredFulfillmentAt ? (
                           <div className="flex flex-col space-y-0.5 leading-tight">
