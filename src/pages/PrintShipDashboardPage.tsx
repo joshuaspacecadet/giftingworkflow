@@ -357,18 +357,18 @@ const PrintShipDashboardPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full min-w-0 divide-y divide-gray-200 table-fixed">
               <colgroup>
-                <col className="w-12" />
-                <col className="w-[200px]" />
-                <col className="w-[160px]" />
-                <col className="w-[160px]" />
-                <col className="w-[100px]" />
-                <col className="w-[155px]" />
-                <col className="w-[95px]" />
+                <col className="w-10" />
+                <col className="w-[190px]" />
+                <col className="w-[210px]" />
+                <col className="w-[120px]" />
+                <col className="w-[90px]" />
+                <col className="w-[180px]" />
+                <col className="w-[80px]" />
                 <col className="w-[110px]" />
               </colgroup>
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                  <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
                     <input
                       type="checkbox"
                       className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
@@ -402,7 +402,7 @@ const PrintShipDashboardPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-3 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-2 py-10 text-center text-sm text-gray-500">
                       <div className="flex justify-center items-center">
                         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                         <span className="ml-2">Loading orders...</span>
@@ -411,14 +411,14 @@ const PrintShipDashboardPage: React.FC = () => {
                   </tr>
                 ) : filteredContacts.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-3 py-10 text-center text-sm text-gray-500">
+                    <td colSpan={8} className="px-2 py-10 text-center text-sm text-gray-500">
                       No orders found.
                     </td>
                   </tr>
                 ) : (
                   filteredContacts.map((contact) => (
                     <tr key={contact.id} className={selectedContactIds.has(contact.id) ? 'bg-indigo-50' : 'hover:bg-gray-50'}>
-                      <td className="px-3 py-2.5 whitespace-nowrap align-top">
+                      <td className="px-2 py-2.5 whitespace-nowrap align-top">
                         <input
                           type="checkbox"
                           className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
@@ -429,7 +429,7 @@ const PrintShipDashboardPage: React.FC = () => {
                       <td className="px-3 py-2.5 whitespace-nowrap align-top">
                         <div className="flex flex-col gap-1 leading-tight">
                           <div className="flex items-center">
-                            <span className="text-sm font-medium text-gray-900 mr-2 truncate max-w-[140px]">{contact.name}</span>
+                            <span className="text-sm font-medium text-gray-900 mr-2 truncate max-w-[150px]">{contact.name}</span>
                             {contact.linkedinUrl && (
                               <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 flex-shrink-0">
                                 <Linkedin className="h-4 w-4" />
@@ -437,7 +437,7 @@ const PrintShipDashboardPage: React.FC = () => {
                             )}
                           </div>
                           {contact.company && (
-                            <span className="text-xs text-gray-500 truncate max-w-[140px]">{contact.company}</span>
+                            <span className="text-xs text-gray-500 truncate max-w-[150px]">{contact.company}</span>
                           )}
                           {contact.fulfillFlag && (
                             <div className="flex items-center text-[11px] text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-md w-fit">
@@ -449,12 +449,12 @@ const PrintShipDashboardPage: React.FC = () => {
                       </td>
                       <td className="px-3 py-2.5 text-sm text-gray-500 align-top leading-tight">
                         <div className="flex flex-col break-words space-y-0.5">
-                          <span className="truncate max-w-[160px]" title={contact.streetLine1}>{contact.streetLine1}</span>
-                          {contact.streetLine2 && <span className="truncate max-w-[160px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
-                          <span className="truncate max-w-[160px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
+                          <span className="truncate max-w-[200px]" title={contact.streetLine1}>{contact.streetLine1}</span>
+                          {contact.streetLine2 && <span className="truncate max-w-[200px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
+                          <span className="truncate max-w-[200px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
                             {contact.city}, {contact.state} {contact.postCode}
                           </span>
-                          <span className="truncate max-w-[160px]" title={contact.countryCode}>{contact.countryCode}</span>
+                          <span className="truncate max-w-[200px]" title={contact.countryCode}>{contact.countryCode}</span>
                         </div>
                       </td>
                       <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
