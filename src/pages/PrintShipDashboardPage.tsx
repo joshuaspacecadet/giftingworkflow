@@ -359,10 +359,10 @@ const PrintShipDashboardPage: React.FC = () => {
               <colgroup>
                 <col className="w-10" />
                 <col className="w-[190px]" />
-                <col className="w-[210px]" />
+                <col className="w-[170px]" />
                 <col className="w-[120px]" />
                 <col className="w-[90px]" />
-                <col className="w-[180px]" />
+                <col className="w-[200px]" />
                 <col className="w-[80px]" />
                 <col className="w-[110px]" />
               </colgroup>
@@ -449,12 +449,12 @@ const PrintShipDashboardPage: React.FC = () => {
                       </td>
                       <td className="px-3 py-2.5 text-sm text-gray-500 align-top leading-tight">
                         <div className="flex flex-col break-words space-y-0.5">
-                          <span className="truncate max-w-[200px]" title={contact.streetLine1}>{contact.streetLine1}</span>
-                          {contact.streetLine2 && <span className="truncate max-w-[200px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
-                          <span className="truncate max-w-[200px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
+                          <span className="truncate max-w-[160px]" title={contact.streetLine1}>{contact.streetLine1}</span>
+                          {contact.streetLine2 && <span className="truncate max-w-[160px]" title={contact.streetLine2}>{contact.streetLine2}</span>}
+                          <span className="truncate max-w-[160px]" title={`${contact.city}, ${contact.state} ${contact.postCode}`}>
                             {contact.city}, {contact.state} {contact.postCode}
                           </span>
-                          <span className="truncate max-w-[200px]" title={contact.countryCode}>{contact.countryCode}</span>
+                          <span className="truncate max-w-[160px]" title={contact.countryCode}>{contact.countryCode}</span>
                         </div>
                       </td>
                       <td className="px-3 py-2.5 text-sm text-gray-500 align-top">
