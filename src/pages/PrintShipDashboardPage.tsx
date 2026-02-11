@@ -392,7 +392,7 @@ const PrintShipDashboardPage: React.FC = () => {
                     Tracking
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    In P&S
+                    Added
                   </th>
                   <th scope="col" className="px-6 py-2.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -504,9 +504,17 @@ const PrintShipDashboardPage: React.FC = () => {
                             <span className="text-xs text-gray-500">
                               {parseDashboardDate(contact.enteredFulfillmentAt)?.toLocaleDateString() || contact.enteredFulfillmentAt}
                             </span>
-                            <span className="text-sm font-medium text-gray-900">
-                              {getDaysInFulfillment(contact.enteredFulfillmentAt, contact.latestShipDate)}d
-                            </span>
+                            {(() => {
+                              const days = getDaysInFulfillment(contact.enteredFulfillmentAt, contact.latestShipDate);
+                              if (days === null) {
+                                return <span className="text-sm font-medium text-gray-500">-</span>;
+                              }
+                              return (
+                                <span className={`text-sm font-medium ${days > 5 ? 'text-red-600' : 'text-gray-900'}`}>
+                                  {days}d
+                                </span>
+                              );
+                            })()}
                           </div>
                         ) : (
                           <span className="text-xs text-gray-400">No start date</span>
