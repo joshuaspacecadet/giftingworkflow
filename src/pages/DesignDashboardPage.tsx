@@ -281,8 +281,14 @@ const DesignDashboardPage: React.FC = () => {
               </div>
             )}
 
-            {(c.headline || c.subheadline || c.flavorText) && (
+            {(c.character || c.headline || c.subheadline || c.flavorText || c.artDirection) && (
               <div className="mt-3 border-t border-slate-800 pt-3 space-y-2">
+                 {c.character && (
+                   <div>
+                     <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Character</div>
+                     <div className="text-sm text-slate-200">{c.character}</div>
+                   </div>
+                 )}
                  {c.headline && (
                    <div>
                      <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Headline</div>
@@ -299,6 +305,12 @@ const DesignDashboardPage: React.FC = () => {
                    <div>
                      <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Flavor Text</div>
                      <div className="text-sm text-slate-400 italic">{c.flavorText}</div>
+                   </div>
+                 )}
+                 {c.artDirection && (
+                   <div>
+                     <div className="text-[10px] uppercase tracking-wide text-slate-500 font-semibold">Art Direction</div>
+                     <div className="text-sm text-slate-300 whitespace-pre-wrap">{c.artDirection}</div>
                    </div>
                  )}
               </div>

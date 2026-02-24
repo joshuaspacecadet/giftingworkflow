@@ -87,9 +87,11 @@ const transformAirtableContact = (record: any): Contact => {
     copyTitle3: fields["Copy Title 3"] || "",
     copyMainText: fields["Copy Main Text"] || "",
     imageDirection: fields["Image Direction"] || "",
+    character: fields["Character"] || "",
     headline: fields["Headline Text"] || "",
     subheadline: fields["Subheadline Text"] || "",
     flavorText: fields["Flavor Text"] || "",
+    artDirection: fields["Art Direction"] || "",
     copyStatus: fields["Copy Status"] || undefined,
     round1Draft: fields["Round 1 Draft"] || [],
     round1DraftFeedback: fields["Round 1 Draft Feedback"] || "",
@@ -416,6 +418,8 @@ export class AirtableService {
         createFields["Copy Title 2"] = contactData.copyTitle2;
       if (contactData.copyMainText)
         createFields["Copy Main Text"] = contactData.copyMainText;
+      if (contactData.character)
+        createFields["Character"] = contactData.character;
       if (contactData.headline)
         createFields["Headline Text"] = contactData.headline;
       if (contactData.subheadline)
@@ -428,6 +432,8 @@ export class AirtableService {
         createFields["Copy Title 3"] = contactData.copyTitle3;
       if (contactData.imageDirection)
         createFields["Image Direction"] = contactData.imageDirection;
+      if (contactData.artDirection)
+        createFields["Art Direction"] = contactData.artDirection;
       if (contactData.round1DraftFeedback)
         createFields["Round 1 Draft Feedback"] =
           contactData.round1DraftFeedback;
@@ -540,6 +546,8 @@ export class AirtableService {
         updateFields["Copy Title 2"] = updates.copyTitle2;
       if (updates.copyMainText !== undefined)
         updateFields["Copy Main Text"] = updates.copyMainText;
+      if (updates.character !== undefined)
+        updateFields["Character"] = updates.character;
       if (updates.headline !== undefined)
         updateFields["Headline Text"] = updates.headline;
       if (updates.subheadline !== undefined)
@@ -552,6 +560,8 @@ export class AirtableService {
         updateFields["Copy Title 3"] = updates.copyTitle3;
       if (updates.imageDirection !== undefined)
         updateFields["Image Direction"] = updates.imageDirection;
+      if (updates.artDirection !== undefined)
+        updateFields["Art Direction"] = updates.artDirection;
       if (updates.round1Draft !== undefined)
         updateFields["Round 1 Draft"] = updates.round1Draft;
       if (updates.round1DraftFeedback !== undefined)

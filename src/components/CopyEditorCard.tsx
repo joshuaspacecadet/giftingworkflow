@@ -12,18 +12,22 @@ interface CopyEditorCardProps {
 
 const CopyEditorCard: React.FC<CopyEditorCardProps> = ({ contact, onUpdate, onReadyForDesign, isProcessing }) => {
   const [formData, setFormData] = useState({
+    character: contact.character || '',
     headline: contact.headline || '',
     subheadline: contact.subheadline || '',
-    flavorText: contact.flavorText || ''
+    flavorText: contact.flavorText || '',
+    artDirection: contact.artDirection || ''
   });
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     setFormData({
+      character: contact.character || '',
       headline: contact.headline || '',
       subheadline: contact.subheadline || '',
-      flavorText: contact.flavorText || ''
+      flavorText: contact.flavorText || '',
+      artDirection: contact.artDirection || ''
     });
     setHasChanges(false);
   }, [contact]);
@@ -80,6 +84,16 @@ const CopyEditorCard: React.FC<CopyEditorCardProps> = ({ contact, onUpdate, onRe
         {/* Editor Inputs */}
         <div className="space-y-3 mt-2">
           <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Character</label>
+            <input
+              type="text"
+              value={formData.character}
+              onChange={(e) => handleChange('character', e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:outline-none"
+              placeholder="Enter character..."
+            />
+          </div>
+          <div>
             <label className="block text-xs font-medium text-slate-500 mb-1">Headline Text</label>
             <input
               type="text"
@@ -107,6 +121,16 @@ const CopyEditorCard: React.FC<CopyEditorCardProps> = ({ contact, onUpdate, onRe
               rows={2}
               className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:outline-none"
               placeholder="Enter flavor text..."
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Art Direction</label>
+            <textarea
+              value={formData.artDirection}
+              onChange={(e) => handleChange('artDirection', e.target.value)}
+              rows={3}
+              className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:outline-none"
+              placeholder="Enter art direction..."
             />
           </div>
         </div>

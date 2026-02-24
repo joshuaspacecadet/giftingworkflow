@@ -33,18 +33,22 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
 }) => {
   const [dragging, setDragging] = useState(false);
   const [copyFormData, setCopyFormData] = useState({
+    character: contact.character || '',
     headline: contact.headline || '',
     subheadline: contact.subheadline || '',
-    flavorText: contact.flavorText || ''
+    flavorText: contact.flavorText || '',
+    artDirection: contact.artDirection || ''
   });
   const [isSavingCopy, setIsSavingCopy] = useState(false);
   const [copyHasChanges, setCopyHasChanges] = useState(false);
 
   useEffect(() => {
     setCopyFormData({
+      character: contact.character || '',
       headline: contact.headline || '',
       subheadline: contact.subheadline || '',
-      flavorText: contact.flavorText || ''
+      flavorText: contact.flavorText || '',
+      artDirection: contact.artDirection || ''
     });
     setCopyHasChanges(false);
   }, [contact]);
@@ -201,6 +205,16 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
               {isCopyNeeded ? (
                 <div className="space-y-3 bg-slate-900/50 p-3 rounded-lg border border-purple-900/30">
                   <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Character</label>
+                    <input
+                      type="text"
+                      value={copyFormData.character}
+                      onChange={(e) => handleCopyChange('character', e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                      placeholder="Character..."
+                    />
+                  </div>
+                  <div>
                     <label className="block text-xs font-medium text-slate-500 mb-1">Headline</label>
                     <input
                       type="text"
@@ -230,6 +244,16 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
                        placeholder="Flavor text..."
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Art Direction</label>
+                    <textarea
+                      value={copyFormData.artDirection}
+                      onChange={(e) => handleCopyChange('artDirection', e.target.value)}
+                      rows={3}
+                      className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                      placeholder="Art direction..."
+                    />
+                  </div>
                   <div className="flex justify-end gap-2 mt-2">
                     {copyHasChanges && (
                       <button
@@ -252,9 +276,11 @@ const DesignRevisionCard: React.FC<DesignRevisionCardProps> = ({
                 </div>
               ) : (
                 <div className="space-y-1 text-sm text-slate-400 pl-6 border-l-2 border-slate-800">
+                   {contact.character && <div><span className="text-slate-500 text-xs uppercase mr-2">Character:</span> <span className="text-slate-300">{contact.character}</span></div>}
                    {contact.headline && <div><span className="text-slate-500 text-xs uppercase mr-2">Headline:</span> <span className="text-slate-300">{contact.headline}</span></div>}
                    {contact.subheadline && <div><span className="text-slate-500 text-xs uppercase mr-2">Subhead:</span> <span className="text-slate-300">{contact.subheadline}</span></div>}
                    {contact.flavorText && <div><span className="text-slate-500 text-xs uppercase mr-2">Flavor:</span> <span className="text-slate-300">{contact.flavorText}</span></div>}
+                   {contact.artDirection && <div><span className="text-slate-500 text-xs uppercase mr-2">Art Direction:</span> <span className="text-slate-300">{contact.artDirection}</span></div>}
                 </div>
               )}
             </div>

@@ -80,9 +80,11 @@ export interface Contact {
   latestDesignDate?: string;
   latestDesignFeedback?: string;
   // New copy fields
+  character?: string;
   headline?: string;
   subheadline?: string;
   flavorText?: string;
+  artDirection?: string;
   copyStatus?: 'New copy needed' | 'New copy done' | null;
   // Fulfillment details
   latestTrackingNumber?: string;
