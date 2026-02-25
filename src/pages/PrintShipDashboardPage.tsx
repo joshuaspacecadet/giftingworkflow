@@ -3,6 +3,7 @@ import { AirtableService } from '../services/airtable';
 import { Contact } from '../types';
 import { Loader2, Download, Upload, Linkedin, Box, Flag, Search } from 'lucide-react';
 import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 import FulfillmentModal from '../components/FulfillmentModal';
 import FlagOrderModal from '../components/FlagOrderModal';
 import BulkFulfillmentModal, { MatchedOrder } from '../components/BulkFulfillmentModal';
@@ -137,10 +138,11 @@ const PrintShipDashboardPage: React.FC = () => {
     setSelectedContactIds(newSelected);
   };
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     const selected = filteredContacts.filter(c => selectedContactIds.has(c.id));
     if (selected.length === 0) return;
 
+    setProcessing(true);
     const csvHeader = [
       'Full Name',
       'Company',
@@ -181,9 +183,67 @@ const PrintShipDashboardPage: React.FC = () => {
     });
 
     const csvContent = [csvHeader, ...csvRows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    // Changed filename format as requested
-    saveAs(blob, `spacecadet_${filterStatus}_orders_${new Date().toISOString().split('T')[0]}.csv`);
+    const datePart = new Date().toISOString().split('T')[0];
+    const csvFilename = `spacecadet_${filterStatus}_orders_${datePart}.csv`;
+    const zipFilename = `spacecadet_${filterStatus}_orders_${datePart}.zip`;
+
+    try {
+      const zip = new JSZip();
+      zip.file(csvFilename, csvContent);
+      const designFilesFolder = zip.folder('design_files');
+
+      let failedDesignDownloads = 0;
+
+      const sanitizePathPart = (value?: string) =>
+        (value || 'order')
+          .toString()
+          .trim()
+          .replace(/[^a-zA-Z0-9\-_. ]/g, '')
+          .replace(/\s+/g, '_')
+          .slice(0, 60) || 'order';
+
+      for (const contact of selected) {
+        const files = contact.designFiles || [];
+        if (!files.length || !designFilesFolder) continue;
+
+        const contactFolder = designFilesFolder.folder(`${sanitizePathPart(contact.name)}_${contact.id.slice(-6)}`);
+        if (!contactFolder) continue;
+
+        for (let i = 0; i < files.length; i += 1) {
+          const file = files[i] as any;
+          const fileUrl = typeof file === 'string' ? file : file?.url;
+          if (!fileUrl) continue;
+
+          const explicitName = typeof file === 'string' ? '' : (file?.filename || '');
+          const inferredName = explicitName || `design_file_${i + 1}`;
+          const finalName = sanitizePathPart(inferredName).replace(/_+$/, '') || `design_file_${i + 1}`;
+
+          try {
+            const response = await fetch(fileUrl, { mode: 'cors', cache: 'no-cache' });
+            if (!response.ok) {
+              failedDesignDownloads += 1;
+              continue;
+            }
+            const blob = await response.blob();
+            contactFolder.file(finalName, blob);
+          } catch {
+            failedDesignDownloads += 1;
+          }
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      saveAs(zipBlob, zipFilename);
+
+      if (failedDesignDownloads > 0) {
+        alert(`Export complete. ${failedDesignDownloads} design file(s) could not be downloaded and were skipped.`);
+      }
+    } catch (error) {
+      console.error('Error exporting zipped CSV + design files:', error);
+      alert('Failed to export ZIP. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleBeginFulfillment = async () => {
