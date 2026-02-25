@@ -206,17 +206,27 @@ const PrintShipDashboardPage: React.FC = () => {
         const files = contact.designFiles || [];
         if (!files.length || !designFilesFolder) continue;
 
-        const contactFolder = designFilesFolder.folder(`${sanitizePathPart(contact.name)}_${contact.id.slice(-6)}`);
-        if (!contactFolder) continue;
-
         for (let i = 0; i < files.length; i += 1) {
           const file = files[i] as any;
           const fileUrl = typeof file === 'string' ? file : file?.url;
           if (!fileUrl) continue;
 
           const explicitName = typeof file === 'string' ? '' : (file?.filename || '');
-          const inferredName = explicitName || `design_file_${i + 1}`;
-          const finalName = sanitizePathPart(inferredName).replace(/_+$/, '') || `design_file_${i + 1}`;
+          const explicitExt = explicitName.includes('.') ? explicitName.split('.').pop() : '';
+          const urlPath = (() => {
+            try {
+              return new URL(fileUrl).pathname;
+            } catch {
+              return fileUrl;
+            }
+          })();
+          const urlLeaf = urlPath.split('/').pop() || '';
+          const urlExt = urlLeaf.includes('.') ? urlLeaf.split('.').pop() : '';
+          const ext = sanitizePathPart(explicitExt || urlExt).replace(/\.+/g, '');
+
+          const baseName = sanitizePathPart(contact.name || 'recipient') || 'recipient';
+          const indexedBaseName = i === 0 ? baseName : `${baseName}_${i + 1}`;
+          const finalName = ext ? `${indexedBaseName}.${ext}` : indexedBaseName;
 
           try {
             const response = await fetch(fileUrl, { mode: 'cors', cache: 'no-cache' });
@@ -225,7 +235,7 @@ const PrintShipDashboardPage: React.FC = () => {
               continue;
             }
             const blob = await response.blob();
-            contactFolder.file(finalName, blob);
+            designFilesFolder.file(finalName, blob);
           } catch {
             failedDesignDownloads += 1;
           }
